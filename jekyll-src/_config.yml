@@ -7,4 +7,8 @@ url: "https://JohnMichaelMiller.github.io/AI-Practitioner"
 theme: minima
 markdown: kramdown
 plugins: []
+
+sass:
+  quiet_deps: true
+  style: compressed
 ---
