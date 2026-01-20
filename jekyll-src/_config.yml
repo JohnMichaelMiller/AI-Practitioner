@@ -1,0 +1,10 @@
+---
+title: "AI Practitioner"
+email: ""
+description: "jMM's AI Practitioner Blog"
+baseurl: ""
+url: "https://JohnMichaelMiller.github.io/AI-Practitioner"
+theme: minima
+markdown: kramdown
+plugins: []
+---
