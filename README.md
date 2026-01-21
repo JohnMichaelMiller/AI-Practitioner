@@ -86,3 +86,4 @@ After making changes, rebuild the site and commit both source and generated file
 - Always edit source files in `jekyll-src/`, never directly in `docs/`
 - Test locally before pushing to ensure everything looks correct
 - Keep the Jekyll version and dependencies up to date with `bundle update`
+
