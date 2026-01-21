@@ -4,7 +4,7 @@ email: "AIPractitioner@pdata.com"
 description: "jMM's AI Practitioner Blog"
 permalink: /:title/
 lang: "en"
-excerpt_separator: "\n\n\n"
+excerpt_separator: "\n\n"
 date_format: "%B %d, %Y"
 baseurl: ""
 url: "https://blog.pdata.com"
