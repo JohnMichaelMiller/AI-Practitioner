@@ -11,29 +11,31 @@ url: "https://blog.pdata.com"
 theme: minima
 markdown: kramdown
 plugins:
- - jekyll-feed
+  - jekyll-feed
 
 sass:
   quiet_deps: true
   style: compressed
+  silence_deprecations:
+    - import
 
 # Layout
 
-show_excerpts: true             # show article excerpts instead of archive list on the home page
-show_frame: true                # display a grey frame on large screens
-show_sidebar: false             # show a sidebar instead of the usual header
-show_minimal: false             # remove all clutter
+show_excerpts: true # show article excerpts instead of archive list on the home page
+show_frame: true # display a grey frame on large screens
+show_sidebar: false # show a sidebar instead of the usual header
+show_minimal: false # remove all clutter
 
 # Menu                          # for available icons see https://fontawesome.com/v5/icons/
 
-navigation:                     # accepts {file, title, url, icon, sidebaricon}
-  - {file: "archive.html", sidebaricon: home}
-  - {file: "README.md", sidebaricon: address-card}
+navigation: # accepts {file, title, url, icon, sidebaricon}
+  - { file: "archive.html", sidebaricon: home }
+  - { file: "README.md", sidebaricon: address-card }
 
-external:                       # accepts {file, title, url, icon, sidebaricon}
-  - {title: Mail, icon: envelope, url: "mailto:AIP@pdata.com"}
-  - {title: Github, icon: github, url: "https://github.com/"}
-  - {title: Subscribe, icon: rss, url: "/feed.xml"}
+external: # accepts {file, title, url, icon, sidebaricon}
+  - { title: Mail, icon: envelope, url: "mailto:AIP@pdata.com" }
+  - { title: Github, icon: github, url: "https://github.com/" }
+  - { title: Subscribe, icon: rss, url: "/feed.xml" }
 
 comments:
 #  disqus_shortname: ""         # see https://disqus.com

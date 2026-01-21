@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Developing User Interfaces with GitHub Copilot, Part 1 | AI Practitioner</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Developing User Interfaces with GitHub Copilot, Part 1" />
+<meta name="author" content="John Michael Miller" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="In the next few posts I will explore techniques for creating and maintaining user interfaces leveraging GitHub Copilot. Using real-world examples, I’ll show how AI handles making UI modifications. Including: Adding new controls to an existing page Creating components that can be shared with multiple pages Creating data visualizations Adding client-side sorting to data tables. In this post I will take on adding a new control to an existing page. While my demo application will show a Vue.js Typescript implementation, you can apply the techniques I’ll demonstrate to many UI frameworks. The app I’ll modify in this series is a lead management app written in Vue.js. In this post, I’ll show you the changes Copilot suggests that we make to the Active Leads by Owner vue to show the number of active leads for individual owners. The vue currently reports the total for all owners and it needs to report the total for individual owners. Our first modification is to add a new control to a page and wire the control to parameterize the request for data from the back end. Before we begin to make modifications let’s review the existing app. What is Vue.js and Why The app is implemented using the Vue.js UI framework. Vue.js written in typescript as is the front-end that leverages the framework. The front-end technology is not particularly relevant and the ideas presented here should be applicable to most UI frameworks and implementation. This app happens to be written in Vue.js, which has some advantages that may simplify the implementation, such as: Feature Description Reactive Data Binding: A reactive data binding system that automatically updates the DOM when the underlying data changes, making it easier to manage and synchronize the UI with the application state. Component-Based Architecture: A component-based architecture, allowing developers to build reusable, encapsulated components. This modular approach improves code maintainability and re-usability. Single-File Components: Single-file components, which encapsulate the HTML, CSS and JavaScript of a component in a single file. This approach promotes better organization and easier maintenance of code. TypeScript Support: Robust support for TypeScript, allowing developers to leverage static typing and other TypeScript features to improve code quality and maintainability. In Vue.js, a “vue” typically refers to a Vue component. A Vue component is a reusable, self-contained unit of code that encapsulates the HTML, CSS, and JavaScript needed to render a part of the user interface. Components are the building blocks of a Vue.js application and allow developers to create modular and maintainable code. Overall, Vue.js provides a powerful and flexible framework for interactive web applications. Adding a Drop-down Component to a Vue.js View I’ll review the current implementation and then walk through the steps to add the drop-down to the page and integrate it with the existing code. Active Leads by Owner Figure 1 shows the Active Leads by Owner page before any modifications. The objective is to add a drop-down component to the page that when selected will return the count of leads for that owner. Figure 1: The Active Leads report before adding the drop-down control. Listing 1: The vActiveLeadsByOwner vue before modification &lt;template&gt; &lt;div&gt; &lt;h1&gt;Active Leads By Owner&lt;/h1&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;div v-if=&quot;activeleads.success&quot;&gt; &lt;p&gt;Total Count: {{ activeleads.totalCount }}&lt;/p&gt; &lt;/div&gt; &lt;div v-else&gt; &lt;p&gt; Error: {{ activeleads ? activeleads.failureInformation : &#39;No data available&#39; }} &lt;/p&gt; &lt;/div&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, watch } from &quot;vue&quot;; import { getActiveLeadsByOwner } from &quot;@/services/leadService&quot;; export default { props: { ownerId: { type: String, required: true, }, }, name: &quot;ActiveLeadsByOwner&quot;, setup(props) { const activeleads = ref(null); const loading = ref(true); const error = ref(null); const fetchActiveLeadsByOwner = async () =&gt; { try { const response = await getActiveLeadsByOwner(props.ownerId); if (response.success) { activeleads.value = response; } else { error.value = response.failureInformation || &quot;Failed to fetch active leads by owner&quot;; } } catch (err) { error.value = &quot;Failed to fetch active leads by owner&quot;; } finally { loading.value = false; } }; onMounted(() =&gt; { fetchActiveLeadsByOwner(props.ownerId); }); watch( () =&gt; props.ownerId, (newOwnerId) =&gt; { fetchActiveLeadsByOwner(newOwnerId); }, ); return { activeleads, loading, error, }; }, }; &lt;/script&gt; &lt;style scoped&gt; h1 { font-size: 24px; margin-bottom: 20px; } &lt;/style&gt; Key points in this code: The page displays whatever is stored in activeleads.totalCount as the total count. The code calls getActiveLeadsByOwner which returns the active leads. The function getActiveLeadsByOwner is passed the ownerId. There is a function, getAllLeadOwners that returns all of the lead owners. To address the new requirement to display the lead count for individual owners, The new component needs to display the list of lead owners, pass the selected ownerId to the getActiveLeadsByOwner function, and update the page with the new activeleads.totalCount. ChatGPT Let’s write some code! First let’s prompt Copilot to add the control to the vue and wire it up to the rest of the app. Then we’ll review the changes the Copilot suggest that we make to me the requirements for displaying total leads for individual owners. Prompt: @workspace Add a drop-down component for ownerId. Populate the drop-down with the lead owners from the getAllLeadOwners function. When the user selects a lead owner, fetch the active leads for that owner. Response To add a drop-down component for ownerId and populate it with the lead owners from the getAllLeadOwners function, you can modify the vActiveLeadsByOwner.vue file as follows: Add a drop-down component in the template. Fetch the lead owners and populate the drop-down. Update the ownerId when a user selects a lead owner from the drop-down. Here is the code with the changes: &lt;!-- Add the drop-down component to the page --&gt; &lt;div&gt; &lt;label for=&quot;owner-select&quot;&gt;Select Owner:&lt;/label&gt; &lt;select id=&quot;owner-select&quot; v-model=&quot;selectedOwnerId&quot; @change=&quot;fetchActiveLeadsByOwner&quot; &gt; &lt;option v-for=&quot;owner in leadOwners&quot; :key=&quot;owner.nameId&quot; :value=&quot;owner.nameId&quot; &gt; &lt;/option&gt; &lt;/select&gt; &lt;/div&gt; Add the getLeadOwners function that retrieves the lead owners to the import which makes the function available to call: import { getActiveLeadsByOwner, getAllLeadOwners, } from &quot;@/services/leadService&quot;; Drop the OwnerId custom property as it no longer needs to be passed into the vue. props: { ownerId: { type: String, required: true, }, }, Remove the custom property from the setup call. setup() { Define an array to contain the fetched list of lead owners. const leadOwners = ref([]); const selectedOwnerId = ref(props.ownerId); If there is no selected owner, don’t attempt to retrieve active leads for the owner. if (!selectedOwnerId.value) return; Setting the loading value to true activateS the spinning loading image. loading.value = true; Change the call to the getActiveLeadsByOwner function passing the selected owner instead of the ownerId. const response = await getActiveLeadsByOwner(selectedOwnerId.value); Fetch the lead owners. const fetchLeadOwners = async () =&gt; { try { const response = await getAllLeadOwners(); if (response.success) { leadOwners.value = response.people; if (leadOwners.value.length &gt; 0) { selectedOwnerId.value = leadOwners.value[0].nameId; fetchActiveLeadsByOwner(); } } else { error.value = response.failureInformation || &quot;Failed to fetch lead owners&quot;; } } catch (err) { error.value = &quot;Failed to fetch lead owners&quot;; } }; When loading the page call fetchLeadOwners rather than fetchActiveLeadsbyOwner. fetchLeadOwners(); When an owner is selected from the drop-down, call the fetchActiveLeadsByOwner function passing in the new owner id to fetch the active leads. watch(selectedOwnerId, (newOwnerId) =&gt; { fetchActiveLeadsByOwner(newOwnerId); }); Make leadOwners, selectedOwnerId, and fetchActiveLeadsByOwner available for use in the template. leadOwners, selectedOwnerId, fetchActiveLeadsByOwner, Listing 2: Below is the modified vActiveLeadsByOwner vue with all of the Copilot modifications &lt;template&gt; &lt;div&gt; &lt;h1&gt;Active Leads By Owner&lt;/h1&gt; &lt;div&gt; &lt;label for=&quot;owner-select&quot;&gt;Select Owner:&lt;/label&gt; &lt;select id=&quot;owner-select&quot; v-model=&quot;selectedOwnerId&quot; @change=&quot;fetchActiveLeadsByOwner&quot; &gt; &lt;option v-for=&quot;owner in leadOwners&quot; :key=&quot;owner.nameId&quot; :value=&quot;owner.nameId&quot; &gt; {{ owner.name }} &lt;/option&gt; &lt;/select&gt; &lt;/div&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;div v-if=&quot;activeleads.success&quot;&gt; &lt;p&gt;Total Count: {{ activeleads.totalCount }}&lt;/p&gt; &lt;/div&gt; &lt;div v-else&gt; &lt;p&gt; Error: {{ activeleads ? activeleads.failureInformation : &quot;No data available&quot; }} &lt;/p&gt; &lt;/div&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, watch } from &quot;vue&quot;; import { getActiveLeadsByOwner, getAllLeadOwners, } from &quot;@/services/leadService&quot;; export default { name: &quot;ActiveLeadsByOwner&quot;, setup() { const activeleads = ref(null); const loading = ref(true); const error = ref(null); const leadOwners = ref([]); const selectedOwnerId = ref(&quot;&quot;); const fetchActiveLeadsByOwner = async () =&gt; { if (!selectedOwnerId.value) return; try { loading.value = true; const response = await getActiveLeadsByOwner(selectedOwnerId.value); if (response.success) { activeleads.value = response; } else { error.value = response.failureInformation || &quot;Failed to fetch active leads by owner&quot;; } } catch (err) { error.value = &quot;Failed to fetch active leads by owner&quot;; } finally { loading.value = false; } }; const fetchLeadOwners = async () =&gt; { try { const response = await getAllLeadOwners(); if (response.success) { leadOwners.value = response.people; if (leadOwners.value.length &gt; 0) { selectedOwnerId.value = leadOwners.value[0].nameId; fetchActiveLeadsByOwner(); } } else { error.value = response.failureInformation || &quot;Failed to fetch lead owners&quot;; } } catch (err) { error.value = &quot;Failed to fetch lead owners&quot;; } }; onMounted(() =&gt; { fetchLeadOwners(); }); watch(selectedOwnerId, (newOwnerId) =&gt; { fetchActiveLeadsByOwner(newOwnerId); }); return { activeleads, loading, error, leadOwners, selectedOwnerId, fetchActiveLeadsByOwner, }; }, }; &lt;/script&gt; &lt;style scoped&gt; h1 { font-size: 24px; margin-bottom: 20px; } &lt;/style&gt; Figure 2 shows the rendered page. Figure 2: The Active Leads report after the Copilot modifications. The app has been correctly updated to include a new component and all of the code necessary to wire up the component into the existing app is implemented and working. Revisiting the Prompt Let’s take another look at the prompt that caused Copilot to correctly implement the new feature. Here is the prompt again: @workspace Add a drop-down component for ownerId. Populate the drop-down with the lead owners from the getAllLeadOwners function. When the user selects a lead owner, fetch the active leads for that owner. It’s key to provide Copilot with the information it needs to complete a task successfully. Here is a breakdown of the prompt: Prompt Requirement Add a drop-down component for ownerId. Bind the drop-down to the OwnerId value. Populate the drop-down with the lead owners from the getAllLeadOwners function. Without the getAllLeadOwners specification, Copilot will try to infer the data source, often incorrectly. When the user selects a lead owner, fetch the active leads for that owner. Defines the expected behavior when an owner is selected. This is where we developers add value. We provide direction, context and review. By providing clear direction, we communicate our expectations for what should be produced. When providing context we include specific details to point Copilot in the right direction. In this case, providing the name of the function that provides the data allows Copilot to correctly bind the control to the data. We always need to review the generated code for completeness and accuracy. Leveraging test automation can help here. When prompts are not specific enough, we can find ourselves in debugging cycles that may, or may not, result in a working fix. When Copilot is producing code that doesn’t run, or run properly, we have two options: Revise the prompt to provide better direction and more context. Provide feedback to Copilot (as additional prompts) that describes the errant behavior and give Copilot a chance to address the issue. I’ve seen both work acceptably. With the second option, if Copilot can’t determine the root cause it will add debugging code to expose the internals of the code. This information can be given back to Copilot which can help in determining what changes are needed. This information is additional context including error messages, logs and any other output pertinent to the problem at hand. Conclusion As you can see, Copilot made a number of non-trivial changes to the app in order to implement the new feature. We provided Copilot clear direction on what we expected and the context needed for Copilot to understand the current implementation and Copilot determined what changes needed to be made and the changes it made worked without further modification. In the next installment in this series, we’ll use Copilot to turn this new control into a reuseable component, update this page to use the new component and add the component to another page that could take advantage of this functionality. Feedback Loop Feedback is always welcome. Please direct it to AIP@pdata.com Disclaimer AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it, and gave it soul. Prompts: What are the pros of using Vue.js for front-end development? In vue.js, what is a vue? Original post" />
+<meta property="og:description" content="In the next few posts I will explore techniques for creating and maintaining user interfaces leveraging GitHub Copilot. Using real-world examples, I’ll show how AI handles making UI modifications. Including: Adding new controls to an existing page Creating components that can be shared with multiple pages Creating data visualizations Adding client-side sorting to data tables. In this post I will take on adding a new control to an existing page. While my demo application will show a Vue.js Typescript implementation, you can apply the techniques I’ll demonstrate to many UI frameworks. The app I’ll modify in this series is a lead management app written in Vue.js. In this post, I’ll show you the changes Copilot suggests that we make to the Active Leads by Owner vue to show the number of active leads for individual owners. The vue currently reports the total for all owners and it needs to report the total for individual owners. Our first modification is to add a new control to a page and wire the control to parameterize the request for data from the back end. Before we begin to make modifications let’s review the existing app. What is Vue.js and Why The app is implemented using the Vue.js UI framework. Vue.js written in typescript as is the front-end that leverages the framework. The front-end technology is not particularly relevant and the ideas presented here should be applicable to most UI frameworks and implementation. This app happens to be written in Vue.js, which has some advantages that may simplify the implementation, such as: Feature Description Reactive Data Binding: A reactive data binding system that automatically updates the DOM when the underlying data changes, making it easier to manage and synchronize the UI with the application state. Component-Based Architecture: A component-based architecture, allowing developers to build reusable, encapsulated components. This modular approach improves code maintainability and re-usability. Single-File Components: Single-file components, which encapsulate the HTML, CSS and JavaScript of a component in a single file. This approach promotes better organization and easier maintenance of code. TypeScript Support: Robust support for TypeScript, allowing developers to leverage static typing and other TypeScript features to improve code quality and maintainability. In Vue.js, a “vue” typically refers to a Vue component. A Vue component is a reusable, self-contained unit of code that encapsulates the HTML, CSS, and JavaScript needed to render a part of the user interface. Components are the building blocks of a Vue.js application and allow developers to create modular and maintainable code. Overall, Vue.js provides a powerful and flexible framework for interactive web applications. Adding a Drop-down Component to a Vue.js View I’ll review the current implementation and then walk through the steps to add the drop-down to the page and integrate it with the existing code. Active Leads by Owner Figure 1 shows the Active Leads by Owner page before any modifications. The objective is to add a drop-down component to the page that when selected will return the count of leads for that owner. Figure 1: The Active Leads report before adding the drop-down control. Listing 1: The vActiveLeadsByOwner vue before modification &lt;template&gt; &lt;div&gt; &lt;h1&gt;Active Leads By Owner&lt;/h1&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;div v-if=&quot;activeleads.success&quot;&gt; &lt;p&gt;Total Count: {{ activeleads.totalCount }}&lt;/p&gt; &lt;/div&gt; &lt;div v-else&gt; &lt;p&gt; Error: {{ activeleads ? activeleads.failureInformation : &#39;No data available&#39; }} &lt;/p&gt; &lt;/div&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, watch } from &quot;vue&quot;; import { getActiveLeadsByOwner } from &quot;@/services/leadService&quot;; export default { props: { ownerId: { type: String, required: true, }, }, name: &quot;ActiveLeadsByOwner&quot;, setup(props) { const activeleads = ref(null); const loading = ref(true); const error = ref(null); const fetchActiveLeadsByOwner = async () =&gt; { try { const response = await getActiveLeadsByOwner(props.ownerId); if (response.success) { activeleads.value = response; } else { error.value = response.failureInformation || &quot;Failed to fetch active leads by owner&quot;; } } catch (err) { error.value = &quot;Failed to fetch active leads by owner&quot;; } finally { loading.value = false; } }; onMounted(() =&gt; { fetchActiveLeadsByOwner(props.ownerId); }); watch( () =&gt; props.ownerId, (newOwnerId) =&gt; { fetchActiveLeadsByOwner(newOwnerId); }, ); return { activeleads, loading, error, }; }, }; &lt;/script&gt; &lt;style scoped&gt; h1 { font-size: 24px; margin-bottom: 20px; } &lt;/style&gt; Key points in this code: The page displays whatever is stored in activeleads.totalCount as the total count. The code calls getActiveLeadsByOwner which returns the active leads. The function getActiveLeadsByOwner is passed the ownerId. There is a function, getAllLeadOwners that returns all of the lead owners. To address the new requirement to display the lead count for individual owners, The new component needs to display the list of lead owners, pass the selected ownerId to the getActiveLeadsByOwner function, and update the page with the new activeleads.totalCount. ChatGPT Let’s write some code! First let’s prompt Copilot to add the control to the vue and wire it up to the rest of the app. Then we’ll review the changes the Copilot suggest that we make to me the requirements for displaying total leads for individual owners. Prompt: @workspace Add a drop-down component for ownerId. Populate the drop-down with the lead owners from the getAllLeadOwners function. When the user selects a lead owner, fetch the active leads for that owner. Response To add a drop-down component for ownerId and populate it with the lead owners from the getAllLeadOwners function, you can modify the vActiveLeadsByOwner.vue file as follows: Add a drop-down component in the template. Fetch the lead owners and populate the drop-down. Update the ownerId when a user selects a lead owner from the drop-down. Here is the code with the changes: &lt;!-- Add the drop-down component to the page --&gt; &lt;div&gt; &lt;label for=&quot;owner-select&quot;&gt;Select Owner:&lt;/label&gt; &lt;select id=&quot;owner-select&quot; v-model=&quot;selectedOwnerId&quot; @change=&quot;fetchActiveLeadsByOwner&quot; &gt; &lt;option v-for=&quot;owner in leadOwners&quot; :key=&quot;owner.nameId&quot; :value=&quot;owner.nameId&quot; &gt; &lt;/option&gt; &lt;/select&gt; &lt;/div&gt; Add the getLeadOwners function that retrieves the lead owners to the import which makes the function available to call: import { getActiveLeadsByOwner, getAllLeadOwners, } from &quot;@/services/leadService&quot;; Drop the OwnerId custom property as it no longer needs to be passed into the vue. props: { ownerId: { type: String, required: true, }, }, Remove the custom property from the setup call. setup() { Define an array to contain the fetched list of lead owners. const leadOwners = ref([]); const selectedOwnerId = ref(props.ownerId); If there is no selected owner, don’t attempt to retrieve active leads for the owner. if (!selectedOwnerId.value) return; Setting the loading value to true activateS the spinning loading image. loading.value = true; Change the call to the getActiveLeadsByOwner function passing the selected owner instead of the ownerId. const response = await getActiveLeadsByOwner(selectedOwnerId.value); Fetch the lead owners. const fetchLeadOwners = async () =&gt; { try { const response = await getAllLeadOwners(); if (response.success) { leadOwners.value = response.people; if (leadOwners.value.length &gt; 0) { selectedOwnerId.value = leadOwners.value[0].nameId; fetchActiveLeadsByOwner(); } } else { error.value = response.failureInformation || &quot;Failed to fetch lead owners&quot;; } } catch (err) { error.value = &quot;Failed to fetch lead owners&quot;; } }; When loading the page call fetchLeadOwners rather than fetchActiveLeadsbyOwner. fetchLeadOwners(); When an owner is selected from the drop-down, call the fetchActiveLeadsByOwner function passing in the new owner id to fetch the active leads. watch(selectedOwnerId, (newOwnerId) =&gt; { fetchActiveLeadsByOwner(newOwnerId); }); Make leadOwners, selectedOwnerId, and fetchActiveLeadsByOwner available for use in the template. leadOwners, selectedOwnerId, fetchActiveLeadsByOwner, Listing 2: Below is the modified vActiveLeadsByOwner vue with all of the Copilot modifications &lt;template&gt; &lt;div&gt; &lt;h1&gt;Active Leads By Owner&lt;/h1&gt; &lt;div&gt; &lt;label for=&quot;owner-select&quot;&gt;Select Owner:&lt;/label&gt; &lt;select id=&quot;owner-select&quot; v-model=&quot;selectedOwnerId&quot; @change=&quot;fetchActiveLeadsByOwner&quot; &gt; &lt;option v-for=&quot;owner in leadOwners&quot; :key=&quot;owner.nameId&quot; :value=&quot;owner.nameId&quot; &gt; {{ owner.name }} &lt;/option&gt; &lt;/select&gt; &lt;/div&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;div v-if=&quot;activeleads.success&quot;&gt; &lt;p&gt;Total Count: {{ activeleads.totalCount }}&lt;/p&gt; &lt;/div&gt; &lt;div v-else&gt; &lt;p&gt; Error: {{ activeleads ? activeleads.failureInformation : &quot;No data available&quot; }} &lt;/p&gt; &lt;/div&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, watch } from &quot;vue&quot;; import { getActiveLeadsByOwner, getAllLeadOwners, } from &quot;@/services/leadService&quot;; export default { name: &quot;ActiveLeadsByOwner&quot;, setup() { const activeleads = ref(null); const loading = ref(true); const error = ref(null); const leadOwners = ref([]); const selectedOwnerId = ref(&quot;&quot;); const fetchActiveLeadsByOwner = async () =&gt; { if (!selectedOwnerId.value) return; try { loading.value = true; const response = await getActiveLeadsByOwner(selectedOwnerId.value); if (response.success) { activeleads.value = response; } else { error.value = response.failureInformation || &quot;Failed to fetch active leads by owner&quot;; } } catch (err) { error.value = &quot;Failed to fetch active leads by owner&quot;; } finally { loading.value = false; } }; const fetchLeadOwners = async () =&gt; { try { const response = await getAllLeadOwners(); if (response.success) { leadOwners.value = response.people; if (leadOwners.value.length &gt; 0) { selectedOwnerId.value = leadOwners.value[0].nameId; fetchActiveLeadsByOwner(); } } else { error.value = response.failureInformation || &quot;Failed to fetch lead owners&quot;; } } catch (err) { error.value = &quot;Failed to fetch lead owners&quot;; } }; onMounted(() =&gt; { fetchLeadOwners(); }); watch(selectedOwnerId, (newOwnerId) =&gt; { fetchActiveLeadsByOwner(newOwnerId); }); return { activeleads, loading, error, leadOwners, selectedOwnerId, fetchActiveLeadsByOwner, }; }, }; &lt;/script&gt; &lt;style scoped&gt; h1 { font-size: 24px; margin-bottom: 20px; } &lt;/style&gt; Figure 2 shows the rendered page. Figure 2: The Active Leads report after the Copilot modifications. The app has been correctly updated to include a new component and all of the code necessary to wire up the component into the existing app is implemented and working. Revisiting the Prompt Let’s take another look at the prompt that caused Copilot to correctly implement the new feature. Here is the prompt again: @workspace Add a drop-down component for ownerId. Populate the drop-down with the lead owners from the getAllLeadOwners function. When the user selects a lead owner, fetch the active leads for that owner. It’s key to provide Copilot with the information it needs to complete a task successfully. Here is a breakdown of the prompt: Prompt Requirement Add a drop-down component for ownerId. Bind the drop-down to the OwnerId value. Populate the drop-down with the lead owners from the getAllLeadOwners function. Without the getAllLeadOwners specification, Copilot will try to infer the data source, often incorrectly. When the user selects a lead owner, fetch the active leads for that owner. Defines the expected behavior when an owner is selected. This is where we developers add value. We provide direction, context and review. By providing clear direction, we communicate our expectations for what should be produced. When providing context we include specific details to point Copilot in the right direction. In this case, providing the name of the function that provides the data allows Copilot to correctly bind the control to the data. We always need to review the generated code for completeness and accuracy. Leveraging test automation can help here. When prompts are not specific enough, we can find ourselves in debugging cycles that may, or may not, result in a working fix. When Copilot is producing code that doesn’t run, or run properly, we have two options: Revise the prompt to provide better direction and more context. Provide feedback to Copilot (as additional prompts) that describes the errant behavior and give Copilot a chance to address the issue. I’ve seen both work acceptably. With the second option, if Copilot can’t determine the root cause it will add debugging code to expose the internals of the code. This information can be given back to Copilot which can help in determining what changes are needed. This information is additional context including error messages, logs and any other output pertinent to the problem at hand. Conclusion As you can see, Copilot made a number of non-trivial changes to the app in order to implement the new feature. We provided Copilot clear direction on what we expected and the context needed for Copilot to understand the current implementation and Copilot determined what changes needed to be made and the changes it made worked without further modification. In the next installment in this series, we’ll use Copilot to turn this new control into a reuseable component, update this page to use the new component and add the component to another page that could take advantage of this functionality. Feedback Loop Feedback is always welcome. Please direct it to AIP@pdata.com Disclaimer AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it, and gave it soul. Prompts: What are the pros of using Vue.js for front-end development? In vue.js, what is a vue? Original post" />
+<link rel="canonical" href="https://blog.pdata.com/UIAI1/" />
+<meta property="og:url" content="https://blog.pdata.com/UIAI1/" />
+<meta property="og:site_name" content="AI Practitioner" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-02-24T00:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Developing User Interfaces with GitHub Copilot, Part 1" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-02-24T00:00:00-08:00","datePublished":"2025-02-24T00:00:00-08:00","description":"In the next few posts I will explore techniques for creating and maintaining user interfaces leveraging GitHub Copilot. Using real-world examples, I’ll show how AI handles making UI modifications. Including: Adding new controls to an existing page Creating components that can be shared with multiple pages Creating data visualizations Adding client-side sorting to data tables. In this post I will take on adding a new control to an existing page. While my demo application will show a Vue.js Typescript implementation, you can apply the techniques I’ll demonstrate to many UI frameworks. The app I’ll modify in this series is a lead management app written in Vue.js. In this post, I’ll show you the changes Copilot suggests that we make to the Active Leads by Owner vue to show the number of active leads for individual owners. The vue currently reports the total for all owners and it needs to report the total for individual owners. Our first modification is to add a new control to a page and wire the control to parameterize the request for data from the back end. Before we begin to make modifications let’s review the existing app. What is Vue.js and Why The app is implemented using the Vue.js UI framework. Vue.js written in typescript as is the front-end that leverages the framework. The front-end technology is not particularly relevant and the ideas presented here should be applicable to most UI frameworks and implementation. This app happens to be written in Vue.js, which has some advantages that may simplify the implementation, such as: Feature Description Reactive Data Binding: A reactive data binding system that automatically updates the DOM when the underlying data changes, making it easier to manage and synchronize the UI with the application state. Component-Based Architecture: A component-based architecture, allowing developers to build reusable, encapsulated components. This modular approach improves code maintainability and re-usability. Single-File Components: Single-file components, which encapsulate the HTML, CSS and JavaScript of a component in a single file. This approach promotes better organization and easier maintenance of code. TypeScript Support: Robust support for TypeScript, allowing developers to leverage static typing and other TypeScript features to improve code quality and maintainability. In Vue.js, a “vue” typically refers to a Vue component. A Vue component is a reusable, self-contained unit of code that encapsulates the HTML, CSS, and JavaScript needed to render a part of the user interface. Components are the building blocks of a Vue.js application and allow developers to create modular and maintainable code. Overall, Vue.js provides a powerful and flexible framework for interactive web applications. Adding a Drop-down Component to a Vue.js View I’ll review the current implementation and then walk through the steps to add the drop-down to the page and integrate it with the existing code. Active Leads by Owner Figure 1 shows the Active Leads by Owner page before any modifications. The objective is to add a drop-down component to the page that when selected will return the count of leads for that owner. Figure 1: The Active Leads report before adding the drop-down control. Listing 1: The vActiveLeadsByOwner vue before modification &lt;template&gt; &lt;div&gt; &lt;h1&gt;Active Leads By Owner&lt;/h1&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;div v-if=&quot;activeleads.success&quot;&gt; &lt;p&gt;Total Count: {{ activeleads.totalCount }}&lt;/p&gt; &lt;/div&gt; &lt;div v-else&gt; &lt;p&gt; Error: {{ activeleads ? activeleads.failureInformation : &#39;No data available&#39; }} &lt;/p&gt; &lt;/div&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, watch } from &quot;vue&quot;; import { getActiveLeadsByOwner } from &quot;@/services/leadService&quot;; export default { props: { ownerId: { type: String, required: true, }, }, name: &quot;ActiveLeadsByOwner&quot;, setup(props) { const activeleads = ref(null); const loading = ref(true); const error = ref(null); const fetchActiveLeadsByOwner = async () =&gt; { try { const response = await getActiveLeadsByOwner(props.ownerId); if (response.success) { activeleads.value = response; } else { error.value = response.failureInformation || &quot;Failed to fetch active leads by owner&quot;; } } catch (err) { error.value = &quot;Failed to fetch active leads by owner&quot;; } finally { loading.value = false; } }; onMounted(() =&gt; { fetchActiveLeadsByOwner(props.ownerId); }); watch( () =&gt; props.ownerId, (newOwnerId) =&gt; { fetchActiveLeadsByOwner(newOwnerId); }, ); return { activeleads, loading, error, }; }, }; &lt;/script&gt; &lt;style scoped&gt; h1 { font-size: 24px; margin-bottom: 20px; } &lt;/style&gt; Key points in this code: The page displays whatever is stored in activeleads.totalCount as the total count. The code calls getActiveLeadsByOwner which returns the active leads. The function getActiveLeadsByOwner is passed the ownerId. There is a function, getAllLeadOwners that returns all of the lead owners. To address the new requirement to display the lead count for individual owners, The new component needs to display the list of lead owners, pass the selected ownerId to the getActiveLeadsByOwner function, and update the page with the new activeleads.totalCount. ChatGPT Let’s write some code! First let’s prompt Copilot to add the control to the vue and wire it up to the rest of the app. Then we’ll review the changes the Copilot suggest that we make to me the requirements for displaying total leads for individual owners. Prompt: @workspace Add a drop-down component for ownerId. Populate the drop-down with the lead owners from the getAllLeadOwners function. When the user selects a lead owner, fetch the active leads for that owner. Response To add a drop-down component for ownerId and populate it with the lead owners from the getAllLeadOwners function, you can modify the vActiveLeadsByOwner.vue file as follows: Add a drop-down component in the template. Fetch the lead owners and populate the drop-down. Update the ownerId when a user selects a lead owner from the drop-down. Here is the code with the changes: &lt;!-- Add the drop-down component to the page --&gt; &lt;div&gt; &lt;label for=&quot;owner-select&quot;&gt;Select Owner:&lt;/label&gt; &lt;select id=&quot;owner-select&quot; v-model=&quot;selectedOwnerId&quot; @change=&quot;fetchActiveLeadsByOwner&quot; &gt; &lt;option v-for=&quot;owner in leadOwners&quot; :key=&quot;owner.nameId&quot; :value=&quot;owner.nameId&quot; &gt; &lt;/option&gt; &lt;/select&gt; &lt;/div&gt; Add the getLeadOwners function that retrieves the lead owners to the import which makes the function available to call: import { getActiveLeadsByOwner, getAllLeadOwners, } from &quot;@/services/leadService&quot;; Drop the OwnerId custom property as it no longer needs to be passed into the vue. props: { ownerId: { type: String, required: true, }, }, Remove the custom property from the setup call. setup() { Define an array to contain the fetched list of lead owners. const leadOwners = ref([]); const selectedOwnerId = ref(props.ownerId); If there is no selected owner, don’t attempt to retrieve active leads for the owner. if (!selectedOwnerId.value) return; Setting the loading value to true activateS the spinning loading image. loading.value = true; Change the call to the getActiveLeadsByOwner function passing the selected owner instead of the ownerId. const response = await getActiveLeadsByOwner(selectedOwnerId.value); Fetch the lead owners. const fetchLeadOwners = async () =&gt; { try { const response = await getAllLeadOwners(); if (response.success) { leadOwners.value = response.people; if (leadOwners.value.length &gt; 0) { selectedOwnerId.value = leadOwners.value[0].nameId; fetchActiveLeadsByOwner(); } } else { error.value = response.failureInformation || &quot;Failed to fetch lead owners&quot;; } } catch (err) { error.value = &quot;Failed to fetch lead owners&quot;; } }; When loading the page call fetchLeadOwners rather than fetchActiveLeadsbyOwner. fetchLeadOwners(); When an owner is selected from the drop-down, call the fetchActiveLeadsByOwner function passing in the new owner id to fetch the active leads. watch(selectedOwnerId, (newOwnerId) =&gt; { fetchActiveLeadsByOwner(newOwnerId); }); Make leadOwners, selectedOwnerId, and fetchActiveLeadsByOwner available for use in the template. leadOwners, selectedOwnerId, fetchActiveLeadsByOwner, Listing 2: Below is the modified vActiveLeadsByOwner vue with all of the Copilot modifications &lt;template&gt; &lt;div&gt; &lt;h1&gt;Active Leads By Owner&lt;/h1&gt; &lt;div&gt; &lt;label for=&quot;owner-select&quot;&gt;Select Owner:&lt;/label&gt; &lt;select id=&quot;owner-select&quot; v-model=&quot;selectedOwnerId&quot; @change=&quot;fetchActiveLeadsByOwner&quot; &gt; &lt;option v-for=&quot;owner in leadOwners&quot; :key=&quot;owner.nameId&quot; :value=&quot;owner.nameId&quot; &gt; {{ owner.name }} &lt;/option&gt; &lt;/select&gt; &lt;/div&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;div v-if=&quot;activeleads.success&quot;&gt; &lt;p&gt;Total Count: {{ activeleads.totalCount }}&lt;/p&gt; &lt;/div&gt; &lt;div v-else&gt; &lt;p&gt; Error: {{ activeleads ? activeleads.failureInformation : &quot;No data available&quot; }} &lt;/p&gt; &lt;/div&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, watch } from &quot;vue&quot;; import { getActiveLeadsByOwner, getAllLeadOwners, } from &quot;@/services/leadService&quot;; export default { name: &quot;ActiveLeadsByOwner&quot;, setup() { const activeleads = ref(null); const loading = ref(true); const error = ref(null); const leadOwners = ref([]); const selectedOwnerId = ref(&quot;&quot;); const fetchActiveLeadsByOwner = async () =&gt; { if (!selectedOwnerId.value) return; try { loading.value = true; const response = await getActiveLeadsByOwner(selectedOwnerId.value); if (response.success) { activeleads.value = response; } else { error.value = response.failureInformation || &quot;Failed to fetch active leads by owner&quot;; } } catch (err) { error.value = &quot;Failed to fetch active leads by owner&quot;; } finally { loading.value = false; } }; const fetchLeadOwners = async () =&gt; { try { const response = await getAllLeadOwners(); if (response.success) { leadOwners.value = response.people; if (leadOwners.value.length &gt; 0) { selectedOwnerId.value = leadOwners.value[0].nameId; fetchActiveLeadsByOwner(); } } else { error.value = response.failureInformation || &quot;Failed to fetch lead owners&quot;; } } catch (err) { error.value = &quot;Failed to fetch lead owners&quot;; } }; onMounted(() =&gt; { fetchLeadOwners(); }); watch(selectedOwnerId, (newOwnerId) =&gt; { fetchActiveLeadsByOwner(newOwnerId); }); return { activeleads, loading, error, leadOwners, selectedOwnerId, fetchActiveLeadsByOwner, }; }, }; &lt;/script&gt; &lt;style scoped&gt; h1 { font-size: 24px; margin-bottom: 20px; } &lt;/style&gt; Figure 2 shows the rendered page. Figure 2: The Active Leads report after the Copilot modifications. The app has been correctly updated to include a new component and all of the code necessary to wire up the component into the existing app is implemented and working. Revisiting the Prompt Let’s take another look at the prompt that caused Copilot to correctly implement the new feature. Here is the prompt again: @workspace Add a drop-down component for ownerId. Populate the drop-down with the lead owners from the getAllLeadOwners function. When the user selects a lead owner, fetch the active leads for that owner. It’s key to provide Copilot with the information it needs to complete a task successfully. Here is a breakdown of the prompt: Prompt Requirement Add a drop-down component for ownerId. Bind the drop-down to the OwnerId value. Populate the drop-down with the lead owners from the getAllLeadOwners function. Without the getAllLeadOwners specification, Copilot will try to infer the data source, often incorrectly. When the user selects a lead owner, fetch the active leads for that owner. Defines the expected behavior when an owner is selected. This is where we developers add value. We provide direction, context and review. By providing clear direction, we communicate our expectations for what should be produced. When providing context we include specific details to point Copilot in the right direction. In this case, providing the name of the function that provides the data allows Copilot to correctly bind the control to the data. We always need to review the generated code for completeness and accuracy. Leveraging test automation can help here. When prompts are not specific enough, we can find ourselves in debugging cycles that may, or may not, result in a working fix. When Copilot is producing code that doesn’t run, or run properly, we have two options: Revise the prompt to provide better direction and more context. Provide feedback to Copilot (as additional prompts) that describes the errant behavior and give Copilot a chance to address the issue. I’ve seen both work acceptably. With the second option, if Copilot can’t determine the root cause it will add debugging code to expose the internals of the code. This information can be given back to Copilot which can help in determining what changes are needed. This information is additional context including error messages, logs and any other output pertinent to the problem at hand. Conclusion As you can see, Copilot made a number of non-trivial changes to the app in order to implement the new feature. We provided Copilot clear direction on what we expected and the context needed for Copilot to understand the current implementation and Copilot determined what changes needed to be made and the changes it made worked without further modification. In the next installment in this series, we’ll use Copilot to turn this new control into a reuseable component, update this page to use the new component and add the component to another page that could take advantage of this functionality. Feedback Loop Feedback is always welcome. Please direct it to AIP@pdata.com Disclaimer AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it, and gave it soul. Prompts: What are the pros of using Vue.js for front-end development? In vue.js, what is a vue? Original post","headline":"Developing User Interfaces with GitHub Copilot, Part 1","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/UIAI1/"},"url":"https://blog.pdata.com/UIAI1/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">AI Practitioner</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/">Home</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Developing User Interfaces with GitHub Copilot, Part 1</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2025-02-24T00:00:00-08:00" itemprop="datePublished">Feb 24, 2025
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>In the next few posts I will explore techniques for creating and maintaining user interfaces leveraging GitHub Copilot. Using real-world examples, I’ll show how AI handles making UI modifications. Including:</p>
+
+<ul>
+  <li>Adding new controls to an existing page</li>
+  <li>Creating components that can be shared with multiple pages</li>
+  <li>Creating data visualizations</li>
+  <li>Adding client-side sorting to data tables.</li>
+</ul>
+
+<p>In this post I will take on adding a new control to an existing page. While my demo application will show a <code class="language-plaintext highlighter-rouge">Vue.js</code> <code class="language-plaintext highlighter-rouge">Typescript</code> implementation, you can apply the techniques I’ll demonstrate to many UI frameworks.</p>
+
+<p>The app I’ll modify in this series is a lead management app written in <code class="language-plaintext highlighter-rouge">Vue.js</code>. In this post, I’ll show you the changes Copilot suggests that we make to the <strong>Active Leads by Owner</strong> <code class="language-plaintext highlighter-rouge">vue</code> to show the number of active leads for individual owners. The vue currently reports the total for all owners and it needs to report the total for individual owners. Our first modification is to add a new control to a page and wire the control to parameterize the request for data from the back end. Before we begin to make modifications let’s review the existing app.</p>
+
+<h2 id="what-is-vuejs-and-why">What is <code class="language-plaintext highlighter-rouge">Vue.js</code> and Why</h2>
+
+<p>The app is implemented using the <code class="language-plaintext highlighter-rouge">Vue.js</code> UI framework. <code class="language-plaintext highlighter-rouge">Vue.js</code> written in typescript as is the front-end that leverages the framework. The front-end technology is not particularly relevant and the ideas presented here should be applicable to most UI frameworks and implementation. This app happens to be written in <code class="language-plaintext highlighter-rouge">Vue.js</code>, which has some advantages that may simplify the implementation, such as:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Reactive Data Binding:</strong></td>
+      <td>A reactive data binding system that automatically updates the DOM when the underlying data changes, making it easier to manage and synchronize the UI with the application state.</td>
+    </tr>
+    <tr>
+      <td><strong>Component-Based Architecture:</strong></td>
+      <td>A component-based architecture, allowing developers to build reusable, encapsulated components. This modular approach improves code maintainability and re-usability.</td>
+    </tr>
+    <tr>
+      <td><strong>Single-File Components:</strong></td>
+      <td>Single-file components, which encapsulate the HTML, CSS and JavaScript of a component in a single file. This approach promotes better organization and easier maintenance of code.</td>
+    </tr>
+    <tr>
+      <td><strong>TypeScript Support:</strong></td>
+      <td>Robust support for TypeScript, allowing developers to leverage static typing and other TypeScript features to improve code quality and maintainability.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><br /></p>
+
+<p>In <code class="language-plaintext highlighter-rouge">Vue.js</code>, a “<code class="language-plaintext highlighter-rouge">vue</code>” typically refers to a <code class="language-plaintext highlighter-rouge">Vue</code> component. A <code class="language-plaintext highlighter-rouge">Vue</code> component is a reusable, self-contained unit of code that encapsulates the HTML, CSS, and JavaScript needed to render a part of the user interface. Components are the building blocks of a <code class="language-plaintext highlighter-rouge">Vue.js</code> application and allow developers to create modular and maintainable code.</p>
+
+<p>Overall, <code class="language-plaintext highlighter-rouge">Vue.js</code> provides a powerful and flexible framework for interactive web applications.</p>
+
+<h2 id="adding-a-drop-down-component-to-a-vuejs-view">Adding a Drop-down Component to a <code class="language-plaintext highlighter-rouge">Vue.js</code> View</h2>
+
+<p>I’ll review the current implementation and then walk through the steps to add the drop-down to the page and integrate it with the existing code.</p>
+
+<h3 id="active-leads-by-owner">Active Leads by Owner</h3>
+
+<p><strong>Figure 1</strong> shows the Active Leads by Owner page before any modifications. The objective is to add a drop-down component to the page that when selected will return the count of leads for that owner.</p>
+
+<p><img src="../assets/images/2025-02-24/Active-Leads-By-Owner-1.png" alt="The Active Leads report before adding the drop-down control" /></p>
+
+<p><strong>Figure 1:</strong> The Active Leads report before adding the drop-down control.</p>
+
+<h4 id="listing-1-the-vactiveleadsbyowner-vue-before-modification">Listing 1: The vActiveLeadsByOwner vue before modification</h4>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;template&gt;</span>
+  <span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Active Leads By Owner<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"loading"</span><span class="nt">&gt;</span>Loading...<span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-else-if=</span><span class="s">"error"</span><span class="nt">&gt;</span>{{ error }}<span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-else</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"activeleads.success"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;p&gt;</span>Total Count: {{ activeleads.totalCount }}<span class="nt">&lt;/p&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">v-else</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;p&gt;</span>
+          Error: {{ activeleads ? activeleads.failureInformation : 'No data
+          available' }}
+        <span class="nt">&lt;/p&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/template&gt;</span>
+
+<span class="nt">&lt;script&gt;</span>
+  <span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span><span class="p">,</span> <span class="nx">onMounted</span><span class="p">,</span> <span class="nx">watch</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
+  <span class="k">import</span> <span class="p">{</span> <span class="nx">getActiveLeadsByOwner</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
+
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">props</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">ownerId</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>
+        <span class="na">required</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ActiveLeadsByOwner</span><span class="dl">"</span><span class="p">,</span>
+    <span class="nf">setup</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">activeleads</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+      <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+      <span class="kd">const</span> <span class="nx">error</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+
+      <span class="kd">const</span> <span class="nx">fetchActiveLeadsByOwner</span> <span class="o">=</span> <span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+          <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getActiveLeadsByOwner</span><span class="p">(</span><span class="nx">props</span><span class="p">.</span><span class="nx">ownerId</span><span class="p">);</span>
+          <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">activeleads</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">response</span><span class="p">;</span>
+          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span>
+              <span class="nx">response</span><span class="p">.</span><span class="nx">failureInformation</span> <span class="o">||</span>
+              <span class="dl">"</span><span class="s2">Failed to fetch active leads by owner</span><span class="dl">"</span><span class="p">;</span>
+          <span class="p">}</span>
+        <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Failed to fetch active leads by owner</span><span class="dl">"</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+          <span class="nx">loading</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">};</span>
+
+      <span class="nf">onMounted</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nf">fetchActiveLeadsByOwner</span><span class="p">(</span><span class="nx">props</span><span class="p">.</span><span class="nx">ownerId</span><span class="p">);</span>
+      <span class="p">});</span>
+
+      <span class="nf">watch</span><span class="p">(</span>
+        <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">props</span><span class="p">.</span><span class="nx">ownerId</span><span class="p">,</span>
+        <span class="p">(</span><span class="nx">newOwnerId</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+          <span class="nf">fetchActiveLeadsByOwner</span><span class="p">(</span><span class="nx">newOwnerId</span><span class="p">);</span>
+        <span class="p">},</span>
+      <span class="p">);</span>
+
+      <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">activeleads</span><span class="p">,</span>
+        <span class="nx">loading</span><span class="p">,</span>
+        <span class="nx">error</span><span class="p">,</span>
+      <span class="p">};</span>
+    <span class="p">},</span>
+  <span class="p">};</span>
+<span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;style </span><span class="na">scoped</span><span class="nt">&gt;</span>
+  <span class="nt">h1</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">24px</span><span class="p">;</span>
+    <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">20px</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="nt">&lt;/style&gt;</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<p>Key points in this code:</p>
+
+<ol>
+  <li>The page displays whatever is stored in <code class="language-plaintext highlighter-rouge">activeleads.totalCount</code> as the total count.</li>
+  <li>The code calls <code class="language-plaintext highlighter-rouge">getActiveLeadsByOwner</code> which returns the active leads.</li>
+  <li>The function <code class="language-plaintext highlighter-rouge">getActiveLeadsByOwner</code> is passed the <code class="language-plaintext highlighter-rouge">ownerId</code>.</li>
+  <li>There is a function, <code class="language-plaintext highlighter-rouge">getAllLeadOwners</code> that returns all of the lead owners.</li>
+</ol>
+
+<p>To address the new requirement to display the lead count for individual owners, The new component needs to display the list of lead owners, pass the selected <code class="language-plaintext highlighter-rouge">ownerId</code> to the <code class="language-plaintext highlighter-rouge">getActiveLeadsByOwner</code> function, and update the page with the new <code class="language-plaintext highlighter-rouge">activeleads.totalCount</code>.</p>
+
+<h3 id="chatgpt">ChatGPT</h3>
+
+<p>Let’s write some code! First let’s prompt Copilot to add the control to the vue and wire it up to the rest of the app. Then we’ll review the changes the Copilot suggest that we make to me the requirements for displaying total leads for individual owners.</p>
+
+<blockquote>
+  <p>Prompt: @workspace Add a drop-down component for ownerId. Populate the drop-down with the lead owners from the getAllLeadOwners function. When the user selects a lead owner, fetch the active leads for that owner.</p>
+</blockquote>
+
+<h3 id="response">Response</h3>
+
+<p>To add a drop-down component for <code class="language-plaintext highlighter-rouge">ownerId</code> and populate it with the lead owners from the <code class="language-plaintext highlighter-rouge">getAllLeadOwners</code> function, you can modify the <code class="language-plaintext highlighter-rouge">vActiveLeadsByOwner.vue</code> file as follows:</p>
+
+<ol>
+  <li>Add a drop-down component in the template.</li>
+  <li>Fetch the lead owners and populate the drop-down.</li>
+  <li>Update the <code class="language-plaintext highlighter-rouge">ownerId</code> when a user selects a lead owner from the drop-down.</li>
+</ol>
+
+<p>Here is the code with the changes:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- Add the drop-down component to the page --&gt;</span>
+<span class="nt">&lt;div&gt;</span>
+  <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"owner-select"</span><span class="nt">&gt;</span>Select Owner:<span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;select</span>
+    <span class="na">id=</span><span class="s">"owner-select"</span>
+    <span class="na">v-model=</span><span class="s">"selectedOwnerId"</span>
+    <span class="err">@</span><span class="na">change=</span><span class="s">"fetchActiveLeadsByOwner"</span>
+  <span class="nt">&gt;</span>
+    <span class="nt">&lt;option</span>
+      <span class="na">v-for=</span><span class="s">"owner in leadOwners"</span>
+      <span class="na">:key=</span><span class="s">"owner.nameId"</span>
+      <span class="na">:value=</span><span class="s">"owner.nameId"</span>
+    <span class="nt">&gt;</span>
+      
+    <span class="nt">&lt;/option&gt;</span>
+  <span class="nt">&lt;/select&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>
+  <p>Add the <code class="language-plaintext highlighter-rouge">getLeadOwners</code> function that retrieves the lead owners to the import which makes the function available to call:</p>
+</blockquote>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span>
+  <span class="nx">getActiveLeadsByOwner</span><span class="p">,</span>
+  <span class="nx">getAllLeadOwners</span><span class="p">,</span>
+<span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>
+  <p>Drop the <code class="language-plaintext highlighter-rouge">OwnerId</code> custom property as it no longer needs to be passed into the vue.</p>
+</blockquote>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nx">props</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nl">ownerId</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">type</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>
+      <span class="na">required</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="p">},</span>
+  <span class="p">},</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>
+  <p>Remove the custom property from the setup call.</p>
+</blockquote>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>
+  <p>Define an array to contain the fetched list of lead owners.</p>
+</blockquote>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">leadOwners</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">([]);</span>
+<span class="kd">const</span> <span class="nx">selectedOwnerId</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="nx">props</span><span class="p">.</span><span class="nx">ownerId</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>
+  <p>If there is no selected owner, don’t attempt to retrieve active leads for the owner.</p>
+</blockquote>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>
+  <p>Setting the loading value to <code class="language-plaintext highlighter-rouge">true</code> activateS the spinning loading image.</p>
+</blockquote>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">loading</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>
+  <p>Change the call to the <code class="language-plaintext highlighter-rouge">getActiveLeadsByOwner</code> function passing the selected owner instead of the <code class="language-plaintext highlighter-rouge">ownerId</code>.</p>
+</blockquote>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getActiveLeadsByOwner</span><span class="p">(</span><span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>
+  <p>Fetch the lead owners.</p>
+</blockquote>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">fetchLeadOwners</span> <span class="o">=</span> <span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getAllLeadOwners</span><span class="p">();</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">leadOwners</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">people</span><span class="p">;</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">leadOwners</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">leadOwners</span><span class="p">.</span><span class="nx">value</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">nameId</span><span class="p">;</span>
+        <span class="nf">fetchActiveLeadsByOwner</span><span class="p">();</span>
+      <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span>
+        <span class="nx">response</span><span class="p">.</span><span class="nx">failureInformation</span> <span class="o">||</span> <span class="dl">"</span><span class="s2">Failed to fetch lead owners</span><span class="dl">"</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Failed to fetch lead owners</span><span class="dl">"</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>
+  <p>When loading the page call <code class="language-plaintext highlighter-rouge">fetchLeadOwners</code> rather than <code class="language-plaintext highlighter-rouge">fetchActiveLeadsbyOwner</code>.</p>
+</blockquote>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">fetchLeadOwners</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>
+  <p>When an owner is selected from the drop-down, call the <code class="language-plaintext highlighter-rouge">fetchActiveLeadsByOwner</code> function passing in the new owner id to fetch the active leads.</p>
+</blockquote>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">watch</span><span class="p">(</span><span class="nx">selectedOwnerId</span><span class="p">,</span> <span class="p">(</span><span class="nx">newOwnerId</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nf">fetchActiveLeadsByOwner</span><span class="p">(</span><span class="nx">newOwnerId</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>
+  <p>Make leadOwners, selectedOwnerId, and fetchActiveLeadsByOwner available for use in the template.</p>
+</blockquote>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="nx">leadOwners</span><span class="p">,</span>
+      <span class="nx">selectedOwnerId</span><span class="p">,</span>
+      <span class="nx">fetchActiveLeadsByOwner</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<h4 id="listing-2-below-is-the-modified-vactiveleadsbyowner-vue-with-all-of-the-copilot-modifications">Listing 2: Below is the modified <code class="language-plaintext highlighter-rouge">vActiveLeadsByOwner</code> vue with all of the Copilot modifications</h4>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;template&gt;</span>
+  <span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Active Leads By Owner<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;div&gt;</span>
+      <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"owner-select"</span><span class="nt">&gt;</span>Select Owner:<span class="nt">&lt;/label&gt;</span>
+      <span class="nt">&lt;select</span>
+        <span class="na">id=</span><span class="s">"owner-select"</span>
+        <span class="na">v-model=</span><span class="s">"selectedOwnerId"</span>
+        <span class="err">@</span><span class="na">change=</span><span class="s">"fetchActiveLeadsByOwner"</span>
+      <span class="nt">&gt;</span>
+        <span class="nt">&lt;option</span>
+          <span class="na">v-for=</span><span class="s">"owner in leadOwners"</span>
+          <span class="na">:key=</span><span class="s">"owner.nameId"</span>
+          <span class="na">:value=</span><span class="s">"owner.nameId"</span>
+        <span class="nt">&gt;</span>
+          {{ owner.name }}
+        <span class="nt">&lt;/option&gt;</span>
+      <span class="nt">&lt;/select&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"loading"</span><span class="nt">&gt;</span>Loading...<span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-else-if=</span><span class="s">"error"</span><span class="nt">&gt;</span>{{ error }}<span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-else</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"activeleads.success"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;p&gt;</span>Total Count: {{ activeleads.totalCount }}<span class="nt">&lt;/p&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">v-else</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;p&gt;</span>
+          Error: {{ activeleads ? activeleads.failureInformation : "No data
+          available" }}
+        <span class="nt">&lt;/p&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/template&gt;</span>
+
+<span class="nt">&lt;script&gt;</span>
+  <span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span><span class="p">,</span> <span class="nx">onMounted</span><span class="p">,</span> <span class="nx">watch</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
+  <span class="k">import</span> <span class="p">{</span>
+    <span class="nx">getActiveLeadsByOwner</span><span class="p">,</span>
+    <span class="nx">getAllLeadOwners</span><span class="p">,</span>
+  <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
+
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ActiveLeadsByOwner</span><span class="dl">"</span><span class="p">,</span>
+    <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">activeleads</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+      <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+      <span class="kd">const</span> <span class="nx">error</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+      <span class="kd">const</span> <span class="nx">leadOwners</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">([]);</span>
+      <span class="kd">const</span> <span class="nx">selectedOwnerId</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="dl">""</span><span class="p">);</span>
+
+      <span class="kd">const</span> <span class="nx">fetchActiveLeadsByOwner</span> <span class="o">=</span> <span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+        <span class="k">try</span> <span class="p">{</span>
+          <span class="nx">loading</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+          <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getActiveLeadsByOwner</span><span class="p">(</span><span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+          <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">activeleads</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">response</span><span class="p">;</span>
+          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span>
+              <span class="nx">response</span><span class="p">.</span><span class="nx">failureInformation</span> <span class="o">||</span>
+              <span class="dl">"</span><span class="s2">Failed to fetch active leads by owner</span><span class="dl">"</span><span class="p">;</span>
+          <span class="p">}</span>
+        <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Failed to fetch active leads by owner</span><span class="dl">"</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+          <span class="nx">loading</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">};</span>
+
+      <span class="kd">const</span> <span class="nx">fetchLeadOwners</span> <span class="o">=</span> <span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+          <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getAllLeadOwners</span><span class="p">();</span>
+          <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">leadOwners</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">people</span><span class="p">;</span>
+            <span class="k">if </span><span class="p">(</span><span class="nx">leadOwners</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+              <span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">leadOwners</span><span class="p">.</span><span class="nx">value</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">nameId</span><span class="p">;</span>
+              <span class="nf">fetchActiveLeadsByOwner</span><span class="p">();</span>
+            <span class="p">}</span>
+          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span>
+              <span class="nx">response</span><span class="p">.</span><span class="nx">failureInformation</span> <span class="o">||</span> <span class="dl">"</span><span class="s2">Failed to fetch lead owners</span><span class="dl">"</span><span class="p">;</span>
+          <span class="p">}</span>
+        <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Failed to fetch lead owners</span><span class="dl">"</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">};</span>
+
+      <span class="nf">onMounted</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nf">fetchLeadOwners</span><span class="p">();</span>
+      <span class="p">});</span>
+
+      <span class="nf">watch</span><span class="p">(</span><span class="nx">selectedOwnerId</span><span class="p">,</span> <span class="p">(</span><span class="nx">newOwnerId</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nf">fetchActiveLeadsByOwner</span><span class="p">(</span><span class="nx">newOwnerId</span><span class="p">);</span>
+      <span class="p">});</span>
+
+      <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">activeleads</span><span class="p">,</span>
+        <span class="nx">loading</span><span class="p">,</span>
+        <span class="nx">error</span><span class="p">,</span>
+        <span class="nx">leadOwners</span><span class="p">,</span>
+        <span class="nx">selectedOwnerId</span><span class="p">,</span>
+        <span class="nx">fetchActiveLeadsByOwner</span><span class="p">,</span>
+      <span class="p">};</span>
+    <span class="p">},</span>
+  <span class="p">};</span>
+<span class="nt">&lt;/script&gt;</span>
+
+<span class="nt">&lt;style </span><span class="na">scoped</span><span class="nt">&gt;</span>
+  <span class="nt">h1</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">24px</span><span class="p">;</span>
+    <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">20px</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="nt">&lt;/style&gt;</span>
+</code></pre></div></div>
+
+<p><strong>Figure 2</strong> shows the rendered page.</p>
+
+<p><img src="../assets/images/2025-02-24/Active-Leads-By-Owner-2.png" alt="The Active Leads report after the Copilot modifications." /></p>
+
+<p><strong>Figure 2:</strong> The Active Leads report after the Copilot modifications.</p>
+
+<p>The app has been correctly updated to include a new component and all of the code necessary to wire up the component into the existing app is implemented and working.</p>
+
+<h2 id="revisiting-the-prompt">Revisiting the Prompt</h2>
+
+<p>Let’s take another look at the prompt that caused Copilot to correctly implement the new feature. Here is the prompt again:</p>
+
+<blockquote>
+  <p>@workspace Add a drop-down component for ownerId. Populate the drop-down with the lead owners from the getAllLeadOwners function. When the user selects a lead owner, fetch the active leads for that owner.</p>
+</blockquote>
+
+<p>It’s key to provide Copilot with the information it needs to complete a task successfully. Here is a breakdown of the prompt:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Prompt</th>
+      <th>Requirement</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Add a drop-down component for ownerId.</td>
+      <td>Bind the drop-down to the OwnerId value.</td>
+    </tr>
+    <tr>
+      <td>Populate the drop-down with the lead owners from the <code class="language-plaintext highlighter-rouge">getAllLeadOwners</code> function.</td>
+      <td>Without the <code class="language-plaintext highlighter-rouge">getAllLeadOwners</code> specification, Copilot will try to infer the data source, often incorrectly.</td>
+    </tr>
+    <tr>
+      <td>When the user selects a lead owner, fetch the active leads for that owner.</td>
+      <td>Defines the expected behavior when an owner is selected.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><br /></p>
+
+<p>This is where we developers add value. We provide direction, context and review.</p>
+
+<ul>
+  <li>By providing clear direction, we communicate our expectations for what should be produced.</li>
+  <li>When providing context we include specific details to point Copilot in the right direction. In this case, providing the name of the function that provides the data allows Copilot to correctly bind the control to the data.</li>
+  <li>We always need to review the generated code for completeness and accuracy. Leveraging test automation can help here.</li>
+</ul>
+
+<p>When prompts are not specific enough, we can find ourselves in debugging cycles that may, or may not, result in a working fix. When Copilot is producing code that doesn’t run, or run properly, we have two options:</p>
+
+<ol>
+  <li>Revise the prompt to provide better direction and more context.</li>
+  <li>Provide feedback to Copilot (as additional prompts) that describes the errant behavior and give Copilot a chance to address the issue.</li>
+</ol>
+
+<p>I’ve seen both work acceptably. With the second option, if Copilot can’t determine the root cause it will add debugging code to expose the internals of the code. This information can be given back to Copilot which can help in determining what changes are needed. This information is additional context including error messages, logs and any other output pertinent to the problem at hand.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>As you can see, Copilot made a number of non-trivial changes to the app in order to implement the new feature. We provided Copilot clear direction on what we expected and the context needed for Copilot to understand the current implementation and Copilot determined what changes needed to be made and the changes it made worked without further modification.</p>
+
+<p>In the next installment in this series, we’ll use Copilot to turn this new control into a reuseable component, update this page to use the new component and add the component to another page that could take advantage of this functionality.</p>
+
+<h3 id="feedback-loop">Feedback Loop</h3>
+
+<p>Feedback is always welcome. Please direct it to <a href="mailto:AIP@pdata.com" target="_blank">AIP@pdata.com</a></p>
+
+<h4 id="disclaimer">Disclaimer</h4>
+
+<p>AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<p>Prompts:</p>
+
+<ul>
+  <li>What are the pros of using Vue.js for front-end development?</li>
+  <li>In vue.js, what is a vue?</li>
+</ul>
+
+<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/UIAI1">post</a></small></small></small></p>
+
+  </div><a class="u-url" href="/UIAI1/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">AI Practitioner</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">John Michael Miller</li><li><a class="u-email" href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>jMM&#39;s AI Practitioner Blog</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

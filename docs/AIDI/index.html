@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Adding Dependency Injection to an Existing Solution | AI Practitioner</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Adding Dependency Injection to an Existing Solution" />
+<meta name="author" content="John Michael Miller" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Modernizing legacy code can feel like renovating an old house – you know the foundation is solid, but there are improvements to be made. This article explores how to improve the maintainability and test-ability of existing code by introducing dependency injection. Making Big Changes to a Legacy Code Base Sometimes when working with legacy code, the code is not as testable as you may like. Making the code more testable requires, in part, to loosen tight dependencies in order to reduce the scope of the code under test. What Is Legacy Code? According to some, code becomes legacy once it’s pushed to main and released to users. The heuristic, when you write code, You and God know how it works; in a month, only God knows, is a good way to think about legacy code. Another more precise definition is legacy code lacks sufficient tests. One benefit of test automation is that the tests document the expected behavior of the code under test. Some Reasons Why Code Is Not Testable There are many factors that make code testable. Some of the reasons code may not be testable are listed below: Tight coupling: Dependencies are hard-coded, making it difficult to isolate the unit of code under test. Lack of interfaces: Without interfaces, it’s challenging to mock dependencies. Global state: Use of global variables or singletons can lead to unpredictable behavior in tests. Complex logic: Methods with high cyclomatic complexity are harder to test. Side effects: Code that performs I/O operations, such as reading from or writing to a database or file system, can be difficult to test. No dependency injection (DI): Without DI, it’s hard to replace real dependencies with mocks or stubs. Hidden dependencies: Dependencies that are not explicitly passed to the class or method make it hard to control the test environment. Static methods: Static methods can’t be easily mocked or stubbed. Large methods: Methods that do too much are harder to test in isolation. Lack of modularity: Code that is not broken down into smaller, reusable components is harder to test. For the purposes of this post I’m focusing on tight coupling, the lack of interfaces, and no dependency injection. Addressing Tight Coupling with Interfaces and Dependency Injection Tight coupling is when components in a system are highly dependent on each other. Changes in one component often require changes in another, making the system harder to maintain and making it difficult to isolate and test individual components, as they rely on the presence and behavior of other components. Interfaces and dependency injection make code more testable in the following ways: Interfaces Abstraction: Interfaces provide a way to define contracts for components without specifying their implementation. This allows you to create mock implementations for testing purposes. Decoupling: By programming to an interface rather than a concrete class, you reduce the dependency on specific implementations, making it easier to swap out components. Dependency Injection (DI) Control over dependencies: DI allows you to inject dependencies into a class rather than having the class create them itself. This makes it easier to replace real dependencies with mocks or stubs during testing. Isolation: DI helps in isolating the unit of code under test by providing mock implementations of its dependencies, making it easier to test the class in isolation. Flexibility: DI containers can manage the lifecycle and configuration of dependencies, making it easier to manage complex dependency graphs and ensuring that tests can be set up and torn down cleanly. Interfaces and DI together make code more modular, flexible and testable. Our Legacy Code Example Before introducing DI, let me explain my sample application. It has a document management service that handles file storage and a service that provides user access controls. The document management service, DocumentService, handles document operations like upload, download, and deletion and currently uses an Azure SQL Database for document storage. The tight coupling between the service and the application is blocking support for other document storage methods and other cloud providers. The user access service, UserService, manages user permissions and access to documents and also uses an Azure SQL Database for storing users, groups, and permissions. The tight coupling between the service and the application is blocking support for other authentication frameworks, such as Entra, Auth0, etc. More importantly, the application is difficult to test due to the coupling between the application and the document and user services. Any application behavior that depends on the document service or the user service requires a running instance of SQL (hopefully not production) in order to test the application. These tests are, by definition, integration tests. This is a common scenario in enterprise applications where improving testability and flexibility becomes crucial as the system grows. Document Service Here is the relevant code from the DocumentService class: public class DocumentService : IDocumentService { private readonly DocumentStorageAzureProvider _documentStorageProvider = new(); // Implementation... } In the class the internal variable _documentStorageProvider is assigned a new instance of the DocumentStorageAzureProvider class. This tightly couples instances of the DocumentService class to instances of the DocumentStorageAzureProvider class. Any test of the DocumentService class will execute the methods of the DocumentStorageAzureProvider class and will need to contend with any side effects introduced by the provider class. To be more testable, the DocumentService class should be able to use any another class that implements the needed methods of the provider class in any way that satisfies the needs of the service class. Further, once the service is decoupled from the provider, it’s possible to use a different concrete implementation of the provider for another purpose without changing the service. For example the DocumentStorageAzureProvider class could be replaced with a DocumentStorageAWSProvider class. User Service Similarly to DocumentService, the UserService class is tightly coupled to the DocumentStorageAzureProvider class and we want to be able to address coupling throughout the solution. public class UserService : IUserService { private readonly DocumentStorageAzureProvider _documentStorageProvider = new(); // Implementation... } To loosen the coupling with the provider, we need to remove the instantiation of the provider from the services and give the services an instance of the provider to use. This is what DI is for. Of course, we could refactor this code to add dependency injection manually. Using GitHub Copilot can significantly speed up the implementation. Copilot is particularly helpful when working with legacy code because it can: Analyze the entire codebase context and suggest consistent changes across multiple files. Generate boilerplate DI configuration code that follows best practices. Help identify all the places where dependency injection needs to be introduced. Provide example test implementations that work with the new DI structure. Let’s see how Copilot can assist us with this refactoring. Leveraging Copilot to Make Code More Testable In addition to writing docs and generating unit tests, Copilot can also help us with larger tasks such as adding DI to an existing code base. @Workspace Prompts Given the prompt: @Workspace Agent how do I add dependency injection to this solution? Copilot will use the entire codebase as the context and generate step-by-step instructions, with suggested code modifications. The prompt: @Workspace Agent implement dependency injection in this solution Copilot will produce modified versions of the code that you can choose to accept or reject. Let’s look at the response from the first prompt. Workspace Agent Response What follows is the response from Copilot to the first prompt. My comments appear in italics after the code. To add dependency injection to your solution, you need to register your services in the dependency injection container and then inject them where needed. Here’s a step-by-step guide to achieve this: Register services in the DI container: Modify the ZeusStartup class to register your services in the DI container. This is typically done in the Builder method. using Zeus.DocumentStorage; using Zeus.Services.Contract; using Zeus.Services.Implementation; namespace Zeus.Host { public static class ZeusStartup { public static string Builder(WebApplicationBuilder builder) { // Register services builder.Services.AddSingleton&lt;IDocumentStorage, DocumentStorageAzureProvider&gt;(); builder.Services.AddScoped&lt;IUserService, UserService&gt;(); builder.Services.AddScoped&lt;IDocumentService, DocumentService&gt;(); // Other configurations... return &quot;Builder configuration complete&quot;; } // Other methods... } } This is somewhat specific to the solution and the DI framework. In ASP.NET, the WebApplicationBuilder class provides a DI container and the ability to register services with the container. In this case, the suggestion is register the DocumentStorageAzureProvider class as a singleton meaning a single instance will serve all requests. The services are registered as scoped to the request and not shared between requests. Of note is that by registering the DocumentStorageAzureProvider class as the implementation of the IDocumentStorage interface, the existing behavior is preserved. Inject services into constructors: Modify your classes to accept the dependencies via constructor injection. For example, in UserService: public class UserService : IUserService { private readonly IDocumentStorage _documentService; public UserService(IDocumentStorage documentService) { _documentService = documentService; } // Methods... } Here the DocumentStorageAzureProvider class is replaced with the IDocumentStorage interface and the variable _documentService will accept any instance that implements this interface. Copilot also suggests that a constructor be added that accepts a parameter that implements the IDocumentStorage interface and assigns it to the _documentService variable. Also of note is that we are not required to pass to the constructor an IDocumentStorage instance. When the UserService is instantiated, the DI container will pass an instance of the registered class to the UserService constructor for us. Update Program.cs: Ensure that the ZeusStartup.Builder method is called in your Program.cs to configure the services. var builder = WebApplication.CreateBuilder(args); // Call the Builder method to register services ZeusStartup.Builder(builder); var app = builder.Build(); // Call the App method to configure the app ZeusStartup.App(app, &quot;your-cors-origins&quot;); app.Run(); Finally, Copilot suggests adding code to the startup program to call the builder to register the services with the container. Conclusion The Copilot suggestions implement DI while preserving the existing behavior. We can now go forward with implementing tests that mock the provider, isolating the service from the provider implementation. This allows us to test the service without a concern for the provider implementation. We can also implement a new provider and invoke it by registering it with the DI container. The code is more testable and the tests are simpler to implement. The code is also more flexible in that we can easily provide other implementations. Copilot was there to help us find the code that needed to change and to suggest the changes. Feedback Loop Feedback is always welcome. Please direct it to AIP@pdata.com Disclaimer AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul. Prompts: @Workspace Agent how do I add dependency injection to this solution? What are some reason why code is not testable? What is a definition of tight coupling How do interfaces and dependency injection make code more testable? Original post" />
+<meta property="og:description" content="Modernizing legacy code can feel like renovating an old house – you know the foundation is solid, but there are improvements to be made. This article explores how to improve the maintainability and test-ability of existing code by introducing dependency injection. Making Big Changes to a Legacy Code Base Sometimes when working with legacy code, the code is not as testable as you may like. Making the code more testable requires, in part, to loosen tight dependencies in order to reduce the scope of the code under test. What Is Legacy Code? According to some, code becomes legacy once it’s pushed to main and released to users. The heuristic, when you write code, You and God know how it works; in a month, only God knows, is a good way to think about legacy code. Another more precise definition is legacy code lacks sufficient tests. One benefit of test automation is that the tests document the expected behavior of the code under test. Some Reasons Why Code Is Not Testable There are many factors that make code testable. Some of the reasons code may not be testable are listed below: Tight coupling: Dependencies are hard-coded, making it difficult to isolate the unit of code under test. Lack of interfaces: Without interfaces, it’s challenging to mock dependencies. Global state: Use of global variables or singletons can lead to unpredictable behavior in tests. Complex logic: Methods with high cyclomatic complexity are harder to test. Side effects: Code that performs I/O operations, such as reading from or writing to a database or file system, can be difficult to test. No dependency injection (DI): Without DI, it’s hard to replace real dependencies with mocks or stubs. Hidden dependencies: Dependencies that are not explicitly passed to the class or method make it hard to control the test environment. Static methods: Static methods can’t be easily mocked or stubbed. Large methods: Methods that do too much are harder to test in isolation. Lack of modularity: Code that is not broken down into smaller, reusable components is harder to test. For the purposes of this post I’m focusing on tight coupling, the lack of interfaces, and no dependency injection. Addressing Tight Coupling with Interfaces and Dependency Injection Tight coupling is when components in a system are highly dependent on each other. Changes in one component often require changes in another, making the system harder to maintain and making it difficult to isolate and test individual components, as they rely on the presence and behavior of other components. Interfaces and dependency injection make code more testable in the following ways: Interfaces Abstraction: Interfaces provide a way to define contracts for components without specifying their implementation. This allows you to create mock implementations for testing purposes. Decoupling: By programming to an interface rather than a concrete class, you reduce the dependency on specific implementations, making it easier to swap out components. Dependency Injection (DI) Control over dependencies: DI allows you to inject dependencies into a class rather than having the class create them itself. This makes it easier to replace real dependencies with mocks or stubs during testing. Isolation: DI helps in isolating the unit of code under test by providing mock implementations of its dependencies, making it easier to test the class in isolation. Flexibility: DI containers can manage the lifecycle and configuration of dependencies, making it easier to manage complex dependency graphs and ensuring that tests can be set up and torn down cleanly. Interfaces and DI together make code more modular, flexible and testable. Our Legacy Code Example Before introducing DI, let me explain my sample application. It has a document management service that handles file storage and a service that provides user access controls. The document management service, DocumentService, handles document operations like upload, download, and deletion and currently uses an Azure SQL Database for document storage. The tight coupling between the service and the application is blocking support for other document storage methods and other cloud providers. The user access service, UserService, manages user permissions and access to documents and also uses an Azure SQL Database for storing users, groups, and permissions. The tight coupling between the service and the application is blocking support for other authentication frameworks, such as Entra, Auth0, etc. More importantly, the application is difficult to test due to the coupling between the application and the document and user services. Any application behavior that depends on the document service or the user service requires a running instance of SQL (hopefully not production) in order to test the application. These tests are, by definition, integration tests. This is a common scenario in enterprise applications where improving testability and flexibility becomes crucial as the system grows. Document Service Here is the relevant code from the DocumentService class: public class DocumentService : IDocumentService { private readonly DocumentStorageAzureProvider _documentStorageProvider = new(); // Implementation... } In the class the internal variable _documentStorageProvider is assigned a new instance of the DocumentStorageAzureProvider class. This tightly couples instances of the DocumentService class to instances of the DocumentStorageAzureProvider class. Any test of the DocumentService class will execute the methods of the DocumentStorageAzureProvider class and will need to contend with any side effects introduced by the provider class. To be more testable, the DocumentService class should be able to use any another class that implements the needed methods of the provider class in any way that satisfies the needs of the service class. Further, once the service is decoupled from the provider, it’s possible to use a different concrete implementation of the provider for another purpose without changing the service. For example the DocumentStorageAzureProvider class could be replaced with a DocumentStorageAWSProvider class. User Service Similarly to DocumentService, the UserService class is tightly coupled to the DocumentStorageAzureProvider class and we want to be able to address coupling throughout the solution. public class UserService : IUserService { private readonly DocumentStorageAzureProvider _documentStorageProvider = new(); // Implementation... } To loosen the coupling with the provider, we need to remove the instantiation of the provider from the services and give the services an instance of the provider to use. This is what DI is for. Of course, we could refactor this code to add dependency injection manually. Using GitHub Copilot can significantly speed up the implementation. Copilot is particularly helpful when working with legacy code because it can: Analyze the entire codebase context and suggest consistent changes across multiple files. Generate boilerplate DI configuration code that follows best practices. Help identify all the places where dependency injection needs to be introduced. Provide example test implementations that work with the new DI structure. Let’s see how Copilot can assist us with this refactoring. Leveraging Copilot to Make Code More Testable In addition to writing docs and generating unit tests, Copilot can also help us with larger tasks such as adding DI to an existing code base. @Workspace Prompts Given the prompt: @Workspace Agent how do I add dependency injection to this solution? Copilot will use the entire codebase as the context and generate step-by-step instructions, with suggested code modifications. The prompt: @Workspace Agent implement dependency injection in this solution Copilot will produce modified versions of the code that you can choose to accept or reject. Let’s look at the response from the first prompt. Workspace Agent Response What follows is the response from Copilot to the first prompt. My comments appear in italics after the code. To add dependency injection to your solution, you need to register your services in the dependency injection container and then inject them where needed. Here’s a step-by-step guide to achieve this: Register services in the DI container: Modify the ZeusStartup class to register your services in the DI container. This is typically done in the Builder method. using Zeus.DocumentStorage; using Zeus.Services.Contract; using Zeus.Services.Implementation; namespace Zeus.Host { public static class ZeusStartup { public static string Builder(WebApplicationBuilder builder) { // Register services builder.Services.AddSingleton&lt;IDocumentStorage, DocumentStorageAzureProvider&gt;(); builder.Services.AddScoped&lt;IUserService, UserService&gt;(); builder.Services.AddScoped&lt;IDocumentService, DocumentService&gt;(); // Other configurations... return &quot;Builder configuration complete&quot;; } // Other methods... } } This is somewhat specific to the solution and the DI framework. In ASP.NET, the WebApplicationBuilder class provides a DI container and the ability to register services with the container. In this case, the suggestion is register the DocumentStorageAzureProvider class as a singleton meaning a single instance will serve all requests. The services are registered as scoped to the request and not shared between requests. Of note is that by registering the DocumentStorageAzureProvider class as the implementation of the IDocumentStorage interface, the existing behavior is preserved. Inject services into constructors: Modify your classes to accept the dependencies via constructor injection. For example, in UserService: public class UserService : IUserService { private readonly IDocumentStorage _documentService; public UserService(IDocumentStorage documentService) { _documentService = documentService; } // Methods... } Here the DocumentStorageAzureProvider class is replaced with the IDocumentStorage interface and the variable _documentService will accept any instance that implements this interface. Copilot also suggests that a constructor be added that accepts a parameter that implements the IDocumentStorage interface and assigns it to the _documentService variable. Also of note is that we are not required to pass to the constructor an IDocumentStorage instance. When the UserService is instantiated, the DI container will pass an instance of the registered class to the UserService constructor for us. Update Program.cs: Ensure that the ZeusStartup.Builder method is called in your Program.cs to configure the services. var builder = WebApplication.CreateBuilder(args); // Call the Builder method to register services ZeusStartup.Builder(builder); var app = builder.Build(); // Call the App method to configure the app ZeusStartup.App(app, &quot;your-cors-origins&quot;); app.Run(); Finally, Copilot suggests adding code to the startup program to call the builder to register the services with the container. Conclusion The Copilot suggestions implement DI while preserving the existing behavior. We can now go forward with implementing tests that mock the provider, isolating the service from the provider implementation. This allows us to test the service without a concern for the provider implementation. We can also implement a new provider and invoke it by registering it with the DI container. The code is more testable and the tests are simpler to implement. The code is also more flexible in that we can easily provide other implementations. Copilot was there to help us find the code that needed to change and to suggest the changes. Feedback Loop Feedback is always welcome. Please direct it to AIP@pdata.com Disclaimer AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul. Prompts: @Workspace Agent how do I add dependency injection to this solution? What are some reason why code is not testable? What is a definition of tight coupling How do interfaces and dependency injection make code more testable? Original post" />
+<link rel="canonical" href="https://blog.pdata.com/AIDI/" />
+<meta property="og:url" content="https://blog.pdata.com/AIDI/" />
+<meta property="og:site_name" content="AI Practitioner" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-01-29T16:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Adding Dependency Injection to an Existing Solution" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-01-29T16:00:00-08:00","datePublished":"2025-01-29T16:00:00-08:00","description":"Modernizing legacy code can feel like renovating an old house – you know the foundation is solid, but there are improvements to be made. This article explores how to improve the maintainability and test-ability of existing code by introducing dependency injection. Making Big Changes to a Legacy Code Base Sometimes when working with legacy code, the code is not as testable as you may like. Making the code more testable requires, in part, to loosen tight dependencies in order to reduce the scope of the code under test. What Is Legacy Code? According to some, code becomes legacy once it’s pushed to main and released to users. The heuristic, when you write code, You and God know how it works; in a month, only God knows, is a good way to think about legacy code. Another more precise definition is legacy code lacks sufficient tests. One benefit of test automation is that the tests document the expected behavior of the code under test. Some Reasons Why Code Is Not Testable There are many factors that make code testable. Some of the reasons code may not be testable are listed below: Tight coupling: Dependencies are hard-coded, making it difficult to isolate the unit of code under test. Lack of interfaces: Without interfaces, it’s challenging to mock dependencies. Global state: Use of global variables or singletons can lead to unpredictable behavior in tests. Complex logic: Methods with high cyclomatic complexity are harder to test. Side effects: Code that performs I/O operations, such as reading from or writing to a database or file system, can be difficult to test. No dependency injection (DI): Without DI, it’s hard to replace real dependencies with mocks or stubs. Hidden dependencies: Dependencies that are not explicitly passed to the class or method make it hard to control the test environment. Static methods: Static methods can’t be easily mocked or stubbed. Large methods: Methods that do too much are harder to test in isolation. Lack of modularity: Code that is not broken down into smaller, reusable components is harder to test. For the purposes of this post I’m focusing on tight coupling, the lack of interfaces, and no dependency injection. Addressing Tight Coupling with Interfaces and Dependency Injection Tight coupling is when components in a system are highly dependent on each other. Changes in one component often require changes in another, making the system harder to maintain and making it difficult to isolate and test individual components, as they rely on the presence and behavior of other components. Interfaces and dependency injection make code more testable in the following ways: Interfaces Abstraction: Interfaces provide a way to define contracts for components without specifying their implementation. This allows you to create mock implementations for testing purposes. Decoupling: By programming to an interface rather than a concrete class, you reduce the dependency on specific implementations, making it easier to swap out components. Dependency Injection (DI) Control over dependencies: DI allows you to inject dependencies into a class rather than having the class create them itself. This makes it easier to replace real dependencies with mocks or stubs during testing. Isolation: DI helps in isolating the unit of code under test by providing mock implementations of its dependencies, making it easier to test the class in isolation. Flexibility: DI containers can manage the lifecycle and configuration of dependencies, making it easier to manage complex dependency graphs and ensuring that tests can be set up and torn down cleanly. Interfaces and DI together make code more modular, flexible and testable. Our Legacy Code Example Before introducing DI, let me explain my sample application. It has a document management service that handles file storage and a service that provides user access controls. The document management service, DocumentService, handles document operations like upload, download, and deletion and currently uses an Azure SQL Database for document storage. The tight coupling between the service and the application is blocking support for other document storage methods and other cloud providers. The user access service, UserService, manages user permissions and access to documents and also uses an Azure SQL Database for storing users, groups, and permissions. The tight coupling between the service and the application is blocking support for other authentication frameworks, such as Entra, Auth0, etc. More importantly, the application is difficult to test due to the coupling between the application and the document and user services. Any application behavior that depends on the document service or the user service requires a running instance of SQL (hopefully not production) in order to test the application. These tests are, by definition, integration tests. This is a common scenario in enterprise applications where improving testability and flexibility becomes crucial as the system grows. Document Service Here is the relevant code from the DocumentService class: public class DocumentService : IDocumentService { private readonly DocumentStorageAzureProvider _documentStorageProvider = new(); // Implementation... } In the class the internal variable _documentStorageProvider is assigned a new instance of the DocumentStorageAzureProvider class. This tightly couples instances of the DocumentService class to instances of the DocumentStorageAzureProvider class. Any test of the DocumentService class will execute the methods of the DocumentStorageAzureProvider class and will need to contend with any side effects introduced by the provider class. To be more testable, the DocumentService class should be able to use any another class that implements the needed methods of the provider class in any way that satisfies the needs of the service class. Further, once the service is decoupled from the provider, it’s possible to use a different concrete implementation of the provider for another purpose without changing the service. For example the DocumentStorageAzureProvider class could be replaced with a DocumentStorageAWSProvider class. User Service Similarly to DocumentService, the UserService class is tightly coupled to the DocumentStorageAzureProvider class and we want to be able to address coupling throughout the solution. public class UserService : IUserService { private readonly DocumentStorageAzureProvider _documentStorageProvider = new(); // Implementation... } To loosen the coupling with the provider, we need to remove the instantiation of the provider from the services and give the services an instance of the provider to use. This is what DI is for. Of course, we could refactor this code to add dependency injection manually. Using GitHub Copilot can significantly speed up the implementation. Copilot is particularly helpful when working with legacy code because it can: Analyze the entire codebase context and suggest consistent changes across multiple files. Generate boilerplate DI configuration code that follows best practices. Help identify all the places where dependency injection needs to be introduced. Provide example test implementations that work with the new DI structure. Let’s see how Copilot can assist us with this refactoring. Leveraging Copilot to Make Code More Testable In addition to writing docs and generating unit tests, Copilot can also help us with larger tasks such as adding DI to an existing code base. @Workspace Prompts Given the prompt: @Workspace Agent how do I add dependency injection to this solution? Copilot will use the entire codebase as the context and generate step-by-step instructions, with suggested code modifications. The prompt: @Workspace Agent implement dependency injection in this solution Copilot will produce modified versions of the code that you can choose to accept or reject. Let’s look at the response from the first prompt. Workspace Agent Response What follows is the response from Copilot to the first prompt. My comments appear in italics after the code. To add dependency injection to your solution, you need to register your services in the dependency injection container and then inject them where needed. Here’s a step-by-step guide to achieve this: Register services in the DI container: Modify the ZeusStartup class to register your services in the DI container. This is typically done in the Builder method. using Zeus.DocumentStorage; using Zeus.Services.Contract; using Zeus.Services.Implementation; namespace Zeus.Host { public static class ZeusStartup { public static string Builder(WebApplicationBuilder builder) { // Register services builder.Services.AddSingleton&lt;IDocumentStorage, DocumentStorageAzureProvider&gt;(); builder.Services.AddScoped&lt;IUserService, UserService&gt;(); builder.Services.AddScoped&lt;IDocumentService, DocumentService&gt;(); // Other configurations... return &quot;Builder configuration complete&quot;; } // Other methods... } } This is somewhat specific to the solution and the DI framework. In ASP.NET, the WebApplicationBuilder class provides a DI container and the ability to register services with the container. In this case, the suggestion is register the DocumentStorageAzureProvider class as a singleton meaning a single instance will serve all requests. The services are registered as scoped to the request and not shared between requests. Of note is that by registering the DocumentStorageAzureProvider class as the implementation of the IDocumentStorage interface, the existing behavior is preserved. Inject services into constructors: Modify your classes to accept the dependencies via constructor injection. For example, in UserService: public class UserService : IUserService { private readonly IDocumentStorage _documentService; public UserService(IDocumentStorage documentService) { _documentService = documentService; } // Methods... } Here the DocumentStorageAzureProvider class is replaced with the IDocumentStorage interface and the variable _documentService will accept any instance that implements this interface. Copilot also suggests that a constructor be added that accepts a parameter that implements the IDocumentStorage interface and assigns it to the _documentService variable. Also of note is that we are not required to pass to the constructor an IDocumentStorage instance. When the UserService is instantiated, the DI container will pass an instance of the registered class to the UserService constructor for us. Update Program.cs: Ensure that the ZeusStartup.Builder method is called in your Program.cs to configure the services. var builder = WebApplication.CreateBuilder(args); // Call the Builder method to register services ZeusStartup.Builder(builder); var app = builder.Build(); // Call the App method to configure the app ZeusStartup.App(app, &quot;your-cors-origins&quot;); app.Run(); Finally, Copilot suggests adding code to the startup program to call the builder to register the services with the container. Conclusion The Copilot suggestions implement DI while preserving the existing behavior. We can now go forward with implementing tests that mock the provider, isolating the service from the provider implementation. This allows us to test the service without a concern for the provider implementation. We can also implement a new provider and invoke it by registering it with the DI container. The code is more testable and the tests are simpler to implement. The code is also more flexible in that we can easily provide other implementations. Copilot was there to help us find the code that needed to change and to suggest the changes. Feedback Loop Feedback is always welcome. Please direct it to AIP@pdata.com Disclaimer AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul. Prompts: @Workspace Agent how do I add dependency injection to this solution? What are some reason why code is not testable? What is a definition of tight coupling How do interfaces and dependency injection make code more testable? Original post","headline":"Adding Dependency Injection to an Existing Solution","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIDI/"},"url":"https://blog.pdata.com/AIDI/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">AI Practitioner</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/">Home</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Adding Dependency Injection to an Existing Solution</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2025-01-29T16:00:00-08:00" itemprop="datePublished">Jan 29, 2025
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Modernizing legacy code can feel like renovating an old house – you know the foundation is solid, but there are improvements to be made. This article explores how to improve the maintainability and test-ability of existing code by introducing dependency injection.</p>
+
+<h1 id="making-big-changes-to-a-legacy-code-base">Making Big Changes to a Legacy Code Base</h1>
+
+<p>Sometimes when working with legacy code, the code is not as testable as you may like. Making the code more testable requires, in part, to loosen tight dependencies in order to reduce the scope of the code under test.</p>
+
+<h2 id="what-is-legacy-code">What Is Legacy Code?</h2>
+
+<p>According to some, code becomes legacy once it’s pushed to main and released to users. The heuristic, when you write code, <em>You and God know how it works; in a month, only God knows,</em> is a good way to think about legacy code. Another more precise definition is legacy code lacks sufficient tests. One benefit of test automation is that the tests document the expected behavior of the code under test.</p>
+
+<h2 id="some-reasons-why-code-is-not-testable">Some Reasons Why Code Is Not Testable</h2>
+
+<p>There are many factors that make code testable. Some of the reasons code may not be testable are listed below:</p>
+
+<ul>
+  <li><strong>Tight coupling:</strong> Dependencies are hard-coded, making it difficult to isolate the unit of code under test.</li>
+  <li><strong>Lack of interfaces:</strong> Without interfaces, it’s challenging to mock dependencies.</li>
+  <li><strong>Global state:</strong> Use of global variables or singletons can lead to unpredictable behavior in tests.</li>
+  <li><strong>Complex logic:</strong> Methods with high cyclomatic complexity are harder to test.</li>
+  <li><strong>Side effects:</strong> Code that performs I/O operations, such as reading from or writing to a database or file system, can be difficult to test.</li>
+  <li><strong>No dependency injection (DI):</strong> Without DI, it’s hard to replace real dependencies with mocks or stubs.</li>
+  <li><strong>Hidden dependencies:</strong> Dependencies that are not explicitly passed to the class or method make it hard to control the test environment.</li>
+  <li><strong>Static methods:</strong> Static methods can’t be easily mocked or stubbed.</li>
+  <li><strong>Large methods:</strong> Methods that do too much are harder to test in isolation.</li>
+  <li><strong>Lack of modularity:</strong> Code that is not broken down into smaller, reusable components is harder to test.</li>
+</ul>
+
+<p>For the purposes of this post I’m focusing on tight coupling, the lack of interfaces, and no dependency injection.</p>
+
+<h2 id="addressing-tight-coupling-with-interfaces-and-dependency-injection">Addressing Tight Coupling with Interfaces and Dependency Injection</h2>
+
+<p>Tight coupling is when components in a system are highly dependent on each other. Changes in one component often require changes in another, making the system harder to maintain and making it difficult to isolate and test individual components, as they rely on the presence and behavior of other components.</p>
+
+<p>Interfaces and dependency injection make code more testable in the following ways:</p>
+
+<h3 id="interfaces">Interfaces</h3>
+
+<ul>
+  <li><strong>Abstraction:</strong> Interfaces provide a way to define contracts for components without specifying their implementation. This allows you to create mock implementations for testing purposes.</li>
+  <li><strong>Decoupling:</strong> By programming to an interface rather than a concrete class, you reduce the dependency on specific implementations, making it easier to swap out components.</li>
+</ul>
+
+<h3 id="dependency-injection-di">Dependency Injection (DI)</h3>
+
+<ul>
+  <li><strong>Control over dependencies:</strong> DI allows you to inject dependencies into a class rather than having the class create them itself. This makes it easier to replace real dependencies with mocks or stubs during testing.</li>
+  <li><strong>Isolation:</strong> DI helps in isolating the unit of code under test by providing mock implementations of its dependencies, making it easier to test the class in isolation.</li>
+  <li><strong>Flexibility:</strong> DI containers can manage the lifecycle and configuration of dependencies, making it easier to manage complex dependency graphs and ensuring that tests can be set up and torn down cleanly.</li>
+</ul>
+
+<p>Interfaces and DI together make code more modular, flexible and testable.</p>
+
+<h2 id="our-legacy-code-example">Our Legacy Code Example</h2>
+
+<p>Before introducing DI, let me explain my sample application. It has a document management service that handles file storage and a service that provides user access controls.</p>
+
+<p>The document management service, <code class="language-plaintext highlighter-rouge">DocumentService</code>, handles document operations like upload, download, and deletion and currently uses an Azure SQL Database for document storage. The tight coupling between the service and the application is blocking support for other document storage methods and other cloud providers.</p>
+
+<p>The user access service, <code class="language-plaintext highlighter-rouge">UserService</code>, manages user permissions and access to documents and also uses an Azure SQL Database for storing users, groups, and permissions. The tight coupling between the service and the application is blocking support for other authentication frameworks, such as Entra, Auth0, etc.</p>
+
+<p>More importantly, the application is difficult to test due to the coupling between the application and the document and user services. Any application behavior that depends on the document service or the user service requires a running instance of SQL (hopefully not production) in order to test the application. These tests are, by definition, integration tests.</p>
+
+<p>This is a common scenario in enterprise applications where improving testability and flexibility becomes crucial as the system grows.</p>
+
+<h3 id="document-service">Document Service</h3>
+
+<p>Here is the relevant code from the <code class="language-plaintext highlighter-rouge">DocumentService</code> class:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">class</span> <span class="nc">DocumentService</span> <span class="p">:</span> <span class="n">IDocumentService</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">DocumentStorageAzureProvider</span> <span class="n">_documentStorageProvider</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+    
+    <span class="c1">// Implementation...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>In the class the internal variable <code class="language-plaintext highlighter-rouge">_documentStorageProvider</code> is assigned a new instance of the <code class="language-plaintext highlighter-rouge">DocumentStorageAzureProvider</code> class. This tightly couples instances of the <code class="language-plaintext highlighter-rouge">DocumentService</code> class to instances of the <code class="language-plaintext highlighter-rouge">DocumentStorageAzureProvider</code> class. Any test of the <code class="language-plaintext highlighter-rouge">DocumentService</code> class will execute the methods of the <code class="language-plaintext highlighter-rouge">DocumentStorageAzureProvider</code> class and will need to contend with any side effects introduced by the provider class. To be more testable, the <code class="language-plaintext highlighter-rouge">DocumentService</code> class should be able to use any another class that implements the needed methods of the provider class in any way that satisfies the needs of the service class.</p>
+
+<p>Further, once the service is decoupled from the provider, it’s possible to use a different concrete implementation of the provider for another purpose without changing the service. For example the <code class="language-plaintext highlighter-rouge">DocumentStorageAzureProvider</code> class could be replaced with a <code class="language-plaintext highlighter-rouge">DocumentStorageAWSProvider</code> class.</p>
+
+<h3 id="user-service">User Service</h3>
+
+<p>Similarly to <code class="language-plaintext highlighter-rouge">DocumentService</code>, the <code class="language-plaintext highlighter-rouge">UserService</code> class is tightly coupled to the <code class="language-plaintext highlighter-rouge">DocumentStorageAzureProvider</code> class and we want to be able to address coupling throughout the solution.</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">class</span> <span class="nc">UserService</span> <span class="p">:</span> <span class="n">IUserService</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">DocumentStorageAzureProvider</span> <span class="n">_documentStorageProvider</span> <span class="p">=</span> <span class="k">new</span><span class="p">();</span>
+
+    <span class="c1">// Implementation...</span>
+
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>To loosen the coupling with the provider, we need to remove the instantiation of the provider from the services and give the services an instance of the provider to use. This is what DI is for.</p>
+
+<p>Of course, we could refactor this code to add dependency injection manually. Using GitHub Copilot can significantly speed up the implementation. Copilot is particularly helpful when working with legacy code because it can:</p>
+
+<ol>
+  <li>Analyze the entire codebase context and suggest consistent changes across multiple files.</li>
+  <li>Generate boilerplate DI configuration code that follows best practices.</li>
+  <li>Help identify all the places where dependency injection needs to be introduced.</li>
+  <li>Provide example test implementations that work with the new DI structure.</li>
+</ol>
+
+<p>Let’s see how Copilot can assist us with this refactoring.</p>
+
+<h2 id="leveraging-copilot-to-make-code-more-testable">Leveraging Copilot to Make Code More Testable</h2>
+
+<p>In addition to writing docs and generating unit tests, Copilot can also help us with larger tasks such as adding DI to an existing code base.</p>
+
+<h3 id="workspace-prompts">@Workspace Prompts</h3>
+
+<p>Given the prompt: <code class="language-plaintext highlighter-rouge">@Workspace Agent</code> how do I add dependency injection to this solution?</p>
+
+<p>Copilot will use the entire codebase as the context and generate step-by-step instructions, with suggested code modifications.</p>
+
+<p>The prompt: <code class="language-plaintext highlighter-rouge">@Workspace Agent</code> implement dependency injection in this solution</p>
+
+<p>Copilot will produce modified versions of the code that you can choose to accept or reject. Let’s look at the response from the first prompt.</p>
+
+<h3 id="workspace-agent-response">Workspace Agent Response</h3>
+
+<p>What follows is the response from Copilot to the first prompt. My comments appear in italics after the code.</p>
+
+<p>To add dependency injection to your solution, you need to register your services in the dependency injection container and then inject them where needed. Here’s a step-by-step guide to achieve this:</p>
+
+<ol>
+  <li><strong>Register services in the DI container:</strong> Modify the <code class="language-plaintext highlighter-rouge">ZeusStartup</code> class to register your services in the DI container. This is typically done in the <code class="language-plaintext highlighter-rouge">Builder</code> method.</li>
+</ol>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">Zeus.DocumentStorage</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Zeus.Services.Contract</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Zeus.Services.Implementation</span><span class="p">;</span>
+
+<span class="k">namespace</span> <span class="nn">Zeus.Host</span>
+<span class="p">{</span>
+   <span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">ZeusStartup</span>
+   <span class="p">{</span>
+       <span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">Builder</span><span class="p">(</span><span class="n">WebApplicationBuilder</span> <span class="n">builder</span><span class="p">)</span>
+       <span class="p">{</span>
+           <span class="c1">// Register services</span>
+           <span class="n">builder</span><span class="p">.</span><span class="n">Services</span><span class="p">.</span><span class="n">AddSingleton</span><span class="p">&lt;</span><span class="n">IDocumentStorage</span><span class="p">,</span> <span class="n">DocumentStorageAzureProvider</span><span class="p">&gt;();</span>
+           <span class="n">builder</span><span class="p">.</span><span class="n">Services</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">IUserService</span><span class="p">,</span> <span class="n">UserService</span><span class="p">&gt;();</span>
+           <span class="n">builder</span><span class="p">.</span><span class="n">Services</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">IDocumentService</span><span class="p">,</span> <span class="n">DocumentService</span><span class="p">&gt;();</span>
+
+           <span class="c1">// Other configurations...</span>
+
+           <span class="k">return</span> <span class="s">"Builder configuration complete"</span><span class="p">;</span>
+       <span class="p">}</span>
+
+       <span class="c1">// Other methods...</span>
+   <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This is somewhat specific to the solution and the DI framework. In ASP.NET, the <code class="language-plaintext highlighter-rouge">WebApplicationBuilder</code> class provides a DI container and the ability to register services with the container. In this case, the suggestion is register the <code class="language-plaintext highlighter-rouge">DocumentStorageAzureProvider</code> class as a singleton meaning a single instance will serve all requests. The services are registered as scoped to the request and not shared between requests. Of note is that by registering the <code class="language-plaintext highlighter-rouge">DocumentStorageAzureProvider</code> class as the implementation of the IDocumentStorage interface, the existing behavior is preserved.</p>
+
+<ol>
+  <li><strong>Inject services into constructors:</strong> Modify your classes to accept the dependencies via constructor injection.</li>
+</ol>
+
+<p>For example, in <code class="language-plaintext highlighter-rouge">UserService</code>:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">class</span> <span class="nc">UserService</span> <span class="p">:</span> <span class="n">IUserService</span>
+<span class="p">{</span>
+   <span class="k">private</span> <span class="k">readonly</span> <span class="n">IDocumentStorage</span> <span class="n">_documentService</span><span class="p">;</span>
+
+   <span class="k">public</span> <span class="nf">UserService</span><span class="p">(</span><span class="n">IDocumentStorage</span> <span class="n">documentService</span><span class="p">)</span>
+   <span class="p">{</span>
+       <span class="n">_documentService</span> <span class="p">=</span> <span class="n">documentService</span><span class="p">;</span>
+   <span class="p">}</span>
+
+   <span class="c1">// Methods...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Here the <code class="language-plaintext highlighter-rouge">DocumentStorageAzureProvider</code> class is replaced with the IDocumentStorage interface and the variable <code class="language-plaintext highlighter-rouge">_documentService</code> will accept any instance that implements this interface. Copilot also suggests that a constructor be added that accepts a parameter that implements the IDocumentStorage interface and assigns it to the <code class="language-plaintext highlighter-rouge">_documentService</code> variable. Also of note is that we are not required to pass to the constructor an IDocumentStorage instance. When the <code class="language-plaintext highlighter-rouge">UserService</code> is instantiated, the DI container will pass an instance of the registered class to the UserService constructor for us.</p>
+
+<ol>
+  <li><strong>Update Program.cs:</strong> Ensure that the <code class="language-plaintext highlighter-rouge">ZeusStartup.Builder</code> method is called in your <code class="language-plaintext highlighter-rouge">Program.cs</code> to configure the services.</li>
+</ol>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">var</span> <span class="n">builder</span> <span class="p">=</span> <span class="n">WebApplication</span><span class="p">.</span><span class="nf">CreateBuilder</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+
+<span class="c1">// Call the Builder method to register services</span>
+<span class="n">ZeusStartup</span><span class="p">.</span><span class="nf">Builder</span><span class="p">(</span><span class="n">builder</span><span class="p">);</span>
+
+<span class="kt">var</span> <span class="n">app</span> <span class="p">=</span> <span class="n">builder</span><span class="p">.</span><span class="nf">Build</span><span class="p">();</span>
+
+<span class="c1">// Call the App method to configure the app</span>
+<span class="n">ZeusStartup</span><span class="p">.</span><span class="nf">App</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s">"your-cors-origins"</span><span class="p">);</span>
+
+<span class="n">app</span><span class="p">.</span><span class="nf">Run</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>Finally, Copilot suggests adding code to the startup program to call the builder to register the services with the container.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>The Copilot suggestions implement DI while preserving the existing behavior. We can now go forward with implementing tests that mock the provider, isolating the service from the provider implementation. This allows us to test the service without a concern for the provider implementation. We can also implement a new provider and invoke it by registering it with the DI container.</p>
+
+<p>The code is more testable and the tests are simpler to implement. The code is also more flexible in that we can easily provide other implementations. Copilot was there to help us find the code that needed to change and to suggest the changes.</p>
+
+<h3 id="feedback-loop">Feedback Loop</h3>
+
+<p>Feedback is always welcome. Please direct it to <a href="mailto:AIP@pdata.com" target="_blank">AIP@pdata.com</a></p>
+
+<h4 id="disclaimer">Disclaimer</h4>
+
+<p>AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul.</p>
+
+<p>Prompts:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@Workspace Agent</code> how do I add dependency injection to this solution?</li>
+  <li>What are some reason why code is not testable?</li>
+  <li>What is a definition of tight coupling</li>
+  <li>How do interfaces and dependency injection make code more testable?</li>
+</ul>
+
+<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/AIDI">post</a></small></small></small></p>
+
+  </div><a class="u-url" href="/AIDI/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">AI Practitioner</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">John Michael Miller</li><li><a class="u-email" href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>jMM&#39;s AI Practitioner Blog</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

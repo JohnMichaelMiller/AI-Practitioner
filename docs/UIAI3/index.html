@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Developing User Interfaces with GitHub Copilot, Part 3 | AI Practitioner</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Developing User Interfaces with GitHub Copilot, Part 3" />
+<meta name="author" content="John Michael Miller" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="This post is the third installment in the series on AI assisted UI development. While this post is largely stand-alone, consider reading parts 1 and 2 before reading this post. Have AI Add a Data Visualization We’ve looked at using AI to create and add UI components in prior posts. In this post I’ll add a data visualization to a page. This figure shows a rendered Sales Funnel Summary page before making any changes: The goal in this post is to have AI add a data visualization of the sales funnel to the page. Prompt: Using css, add a Sales Funnel graphic from the data in the detail-table. Include the total value and the average age. Don’t include ‘unknown’ or ‘closed lost’. Below is the response from the Claude 3.7 Sonnet Thinking model. Begin Response I’ll add a CSS-based Sales Funnel visualization between your summary table and the details table. Here’s how to implement it: &lt;template&gt; &lt;div class=&quot;sales-funnel-summary&quot;&gt; &lt;h1&gt;Sales Funnel Summary&lt;/h1&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;table class=&quot;summary-table&quot;&gt; &lt;!-- ...existing summary table content... --&gt; &lt;/table&gt; &lt;!-- Sales Funnel Visualization --&gt; &lt;h2&gt;Sales Pipeline&lt;/h2&gt; &lt;div class=&quot;funnel-container&quot;&gt; &lt;div v-for=&quot;stage in funnelStages&quot; :key=&quot;stage.dealStatus&quot; class=&quot;funnel-stage&quot; :style=&quot;{ width: getStageWidth(stage) + &#39;%&#39; }&quot;&gt; &lt;div class=&quot;stage-header&quot;&gt;{{ getDealStatusDescription(stage.dealStatus) }}&lt;/div&gt; &lt;div class=&quot;stage-count&quot;&gt;{{ stage.count }} deals&lt;/div&gt; &lt;div class=&quot;stage-value&quot;&gt;Total: {{ formatCurrency(stage.totalDealValue) }}&lt;/div&gt; &lt;div class=&quot;stage-age&quot;&gt;Avg Age: {{ stage.averageAge.toFixed(1) }} days&lt;/div&gt; &lt;/div&gt; &lt;/div&gt; &lt;h2&gt;Deals by Status&lt;/h2&gt; &lt;table class=&quot;detail-table&quot;&gt; &lt;!-- ...existing detail table content... --&gt; &lt;/table&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, computed } from &quot;vue&quot;; import { getSalesFunnelSummary } from &quot;@/services/leadService&quot;; export default { name: &quot;SalesFunnelSummary&quot;, setup() { const summary = ref(null); const loading = ref(true); const error = ref(null); // ...existing functions... // Computed property for funnel stages (filtered and sorted) const funnelStages = computed(() =&gt; { if (!summary.value || !summary.value.byDealStatus) return []; // Filter out &quot;Unknown&quot; (0) and &quot;Closed Lost&quot; (5) return summary.value.byDealStatus .filter(status =&gt; ![0, 5].includes(status.dealStatus)) .sort((a, b) =&gt; a.dealStatus - b.dealStatus); // Sort by deal status }); // Calculate the width for each stage based on count const getStageWidth = (stage) =&gt; { if (!funnelStages.value.length) return 0; const maxCount = Math.max(...funnelStages.value.map(s =&gt; s.count)); // Scale width from 40% to 90% for better visibility return 40 + ((stage.count / maxCount) * 50); }; onMounted(() =&gt; { fetchSalesFunnelSummary(); }); return { summary, loading, error, funnelStages, getStageWidth, getDealStatusDescription, formatCurrency, }; }, }; &lt;/script&gt; &lt;style scoped&gt; /* ...existing styles... */ /* Funnel Visualization */ .funnel-container { display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 900px; margin: 25px auto; padding: 15px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); } .funnel-stage { height: auto; min-height: 80px; padding: 12px 20px; background: linear-gradient(90deg, #3498db, #5dade2); color: white; border-radius: 6px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: center; text-align: center; } .funnel-stage:hover { transform: translateX(5px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); } .stage-header { font-weight: bold; font-size: 1.1em; margin-bottom: 6px; } .stage-count { font-size: 0.95em; margin-bottom: 4px; } .stage-value { font-size: 0.9em; font-weight: 500; } .stage-age { font-size: 0.9em; margin-top: 4px; opacity: 0.9; } /* Create color variations based on the stage */ .funnel-stage:nth-child(1) { background: linear-gradient(90deg, #3498db, #5dade2); } .funnel-stage:nth-child(2) { background: linear-gradient(90deg, #2e86c1, #5499c7); } .funnel-stage:nth-child(3) { background: linear-gradient(90deg, #2874a6, #4a87af); } .funnel-stage:nth-child(4) { background: linear-gradient(90deg, #21618c, #417699); } .funnel-stage:nth-child(5) { background: linear-gradient(90deg, #1a5276, #386288); } h2 { margin-top: 30px; margin-bottom: 15px; font-size: 150%; text-align: center; } h1 { font-size: 175%; padding-top: 2%; text-align: center; } &lt;/style&gt; This implementation: Adds a new funnel visualization between your summary table and details table Filters the data to exclude “Unknown” (status 0) and “Closed Lost” (status 5) Sorts the stages by deal status for a logical progression Dynamic sizing - Each stage’s width is calculated based on the number of deals relative to the maximum count Includes key metrics - Each stage shows: The stage name Number of deals Total deal value Average age Visually appealing design with: Gradient backgrounds that vary by stage Hover effects for interactivity Smooth transitions Consistent spacing and alignment Box shadows for depth The funnel provides a clear visual representation of your sales pipeline, showing how deals progress through different stages while highlighting the total value and average age at each stage. End Response Here’s a breakdown of the changes: Add the funnel-container div that contains a div for each stage being rendered, which in turn, contains divs for the data elements. Add stage filtering and width calculation. Import computed in order to filter out the unknown and closed won stages and define a function that does the filtering. Also define a function to calculate the stage width based on the number of leads. Finally, return the new function so that it can be called elsewhere. Because I asked for a CSS implementation, most of the work in rendering sales funnel visualization is done with CSS styles. These styles define the backgrounds of each stage and change to the headings. The linear gradient is a nice touch! The remainder of the CSS sales funnel visualization styles define the appearance of the stages and the appearance of the text in each stage. Including a nice hover effect. Here is the page rendered with the CSS data visualization: This is a workable implementation of the Sales Funnel visualization. It certainly could be improved by altering the styles or even have Copilot alter the styles. As is, it does the job without manual coding. Now I’ll ask Copilot to remove the CSS implementation and replace it with an implementation built with chart.js. Replace the CSS Implementation with a chart.js Implementation chart.js is a flexible and widely-used open-source JavaScript library for creating interactive, responsive data visualizations in web applications. It provides a simple yet powerful API that enables developers to render various chart types (including bar, line, pie, radar, and many others) using HTML5 Canvas elements. chart.js offers extensive customization options for colors, animations, legends, tooltips, and scales, while maintaining excellent performance even with large datasets. The library automatically handles responsiveness across different screen sizes, supports accessibility features, and integrates seamlessly with modern JavaScript frameworks like Vue, React, and Angular. Here is how I used Copilot to implement the chart.js visualization: Prompt: Replace the CSS chart with a similar chart using chart.js Below is the response from the Claude 3.7 Sonnet Thinking model. As it was generated: Begin Response To replace the CSS-based chart with a chart.js implementation, you’ll need to: Install chart.js Replace the CSS funnel visualization with a canvas element Add the chart.js initialization code Here’s how to implement it: Step 1: Install chart.js npm install chart.js Step 2: Update Your Component &lt;template&gt; &lt;div class=&quot;sales-funnel-summary&quot;&gt; &lt;h1&gt;Sales Funnel Summary&lt;/h1&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;table class=&quot;summary-table&quot;&gt; &lt;!-- existing summary table content --&gt; &lt;/table&gt; &lt;!-- Replace CSS Funnel with chart.js Canvas --&gt; &lt;h2&gt;Sales Pipeline&lt;/h2&gt; &lt;div class=&quot;chart-container&quot;&gt; &lt;canvas ref=&quot;chartCanvas&quot;&gt;&lt;/canvas&gt; &lt;/div&gt; &lt;h2&gt;Deals by Status&lt;/h2&gt; &lt;table class=&quot;detail-table&quot;&gt; &lt;!-- existing detail table content --&gt; &lt;/table&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, computed, watch, nextTick } from &quot;vue&quot;; import { getSalesFunnelSummary } from &quot;@/services/leadService&quot;; import { Chart, registerables } from &#39;chart.js&#39;; Step 3: Add the chart.js initialization code // Register chart.js components Chart.register(...registerables); export default { name: &quot;SalesFunnelSummary&quot;, setup() { const summary = ref(null); const loading = ref(true); const error = ref(null); const chartCanvas = ref(null); let chart = null; const fetchSalesFunnelSummary = async () =&gt; { try { const response = await getSalesFunnelSummary(); if (response.success) { summary.value = response; } else { error.value = response.failureInformation || &quot;Failed to fetch sales funnel summary&quot;; } } catch (err) { error.value = &quot;Failed to fetch sales funnel summary&quot;; } finally { loading.value = false; } }; const getDealStatusDescription = (dealStatus) =&gt; { const statusMap = { 0: &quot;Unknown&quot;, 1: &quot;Initial Discussion&quot;, 2: &quot;Serious Discussion&quot;, 3: &quot;Contract Discussion&quot;, 4: &quot;Closed (Won)&quot;, 5: &quot;Closed (Lost)&quot;, 6: &quot;Closed (Abandoned)&quot;, }; return statusMap[dealStatus] || `Status ${dealStatus}`; }; const formatCurrency = (value) =&gt; { return new Intl.NumberFormat(&quot;en-US&quot;, { style: &quot;currency&quot;, currency: &quot;USD&quot;, }).format(value || 0); }; // Computed property for filtered funnel stages const funnelStages = computed(() =&gt; { if (!summary.value || !summary.value.byDealStatus) return []; // Filter out &quot;Unknown&quot; (0) and &quot;Closed Lost&quot; (5) return summary.value.byDealStatus .filter((status) =&gt; ![0, 5].includes(status.dealStatus)) .sort((a, b) =&gt; a.dealStatus - b.dealStatus); }); // Render the chart.js chart const renderChart = () =&gt; { if (!chartCanvas.value || !funnelStages.value.length) return; // Destroy existing chart if it exists if (chart) { chart.destroy(); } const ctx = chartCanvas.value.getContext(&#39;2d&#39;); // Prepare data for chart const labels = funnelStages.value.map(stage =&gt; getDealStatusDescription(stage.dealStatus)); const counts = funnelStages.value.map(stage =&gt; stage.count); // Color palette for chart bars const colors = [ &#39;rgba(52, 152, 219, 0.8)&#39;, &#39;rgba(46, 134, 193, 0.8)&#39;, &#39;rgba(40, 116, 166, 0.8)&#39;, &#39;rgba(33, 97, 140, 0.8)&#39;, &#39;rgba(26, 82, 118, 0.8)&#39; ]; const borderColors = [ &#39;rgb(52, 152, 219)&#39;, &#39;rgb(46, 134, 193)&#39;, &#39;rgb(40, 116, 166)&#39;, &#39;rgb(33, 97, 140)&#39;, &#39;rgb(26, 82, 118)&#39; ]; // Create the chart chart = new Chart(ctx, { type: &#39;bar&#39;, data: { labels: labels, datasets: [{ label: &#39;Number of Deals&#39;, data: counts, backgroundColor: colors, borderColor: borderColors, borderWidth: 1 }] }, options: { indexAxis: &#39;y&#39;, // Horizontal bar chart responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (context) =&gt; { const index = context.dataIndex; const stage = funnelStages.value[index]; return `Count: ${stage.count} deals`; }, afterLabel: (context) =&gt; { const index = context.dataIndex; const stage = funnelStages.value[index]; return [ `Total: ${formatCurrency(stage.totalDealValue)}`, `Avg Age: ${stage.averageAge.toFixed(1)} days` ]; } } }, legend: { display: false // Hide legend } }, scales: { x: { beginAtZero: true, title: { display: true, text: &#39;Number of Deals&#39; } }, y: { title: { display: true, text: &#39;Pipeline Stage&#39; } } } } }); }; onMounted(() =&gt; { fetchSalesFunnelSummary(); }); // Watch for changes to render chart when data is loaded watch(summary, () =&gt; { nextTick(() =&gt; { renderChart(); }); }); return { summary, loading, error, chartCanvas, getDealStatusDescription, formatCurrency, funnelStages }; }, }; &lt;/script&gt; &lt;style scoped&gt; .summary-table th { width: fit-content; text-align: right; } .summary-table td { padding-left: 10px; } .detail-table th { text-align: right; padding-right: 15px; width: fit-content; } .detail-table td { text-align: right; padding-right: 16px; width: fit-content; } /* Chart Container */ .chart-container { height: 400px; max-width: 900px; margin: 25px auto; padding: 15px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); } h2 { margin-top: 30px; margin-bottom: 15px; font-size: 150%; text-align: center; } h1 { font-size: 175%; padding-top: 2%; text-align: center; } &lt;/style&gt; End Response Here is a breakdown of the changes: Replace the funnel-container div with the chart-container div." />
+<meta property="og:description" content="This post is the third installment in the series on AI assisted UI development. While this post is largely stand-alone, consider reading parts 1 and 2 before reading this post. Have AI Add a Data Visualization We’ve looked at using AI to create and add UI components in prior posts. In this post I’ll add a data visualization to a page. This figure shows a rendered Sales Funnel Summary page before making any changes: The goal in this post is to have AI add a data visualization of the sales funnel to the page. Prompt: Using css, add a Sales Funnel graphic from the data in the detail-table. Include the total value and the average age. Don’t include ‘unknown’ or ‘closed lost’. Below is the response from the Claude 3.7 Sonnet Thinking model. Begin Response I’ll add a CSS-based Sales Funnel visualization between your summary table and the details table. Here’s how to implement it: &lt;template&gt; &lt;div class=&quot;sales-funnel-summary&quot;&gt; &lt;h1&gt;Sales Funnel Summary&lt;/h1&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;table class=&quot;summary-table&quot;&gt; &lt;!-- ...existing summary table content... --&gt; &lt;/table&gt; &lt;!-- Sales Funnel Visualization --&gt; &lt;h2&gt;Sales Pipeline&lt;/h2&gt; &lt;div class=&quot;funnel-container&quot;&gt; &lt;div v-for=&quot;stage in funnelStages&quot; :key=&quot;stage.dealStatus&quot; class=&quot;funnel-stage&quot; :style=&quot;{ width: getStageWidth(stage) + &#39;%&#39; }&quot;&gt; &lt;div class=&quot;stage-header&quot;&gt;{{ getDealStatusDescription(stage.dealStatus) }}&lt;/div&gt; &lt;div class=&quot;stage-count&quot;&gt;{{ stage.count }} deals&lt;/div&gt; &lt;div class=&quot;stage-value&quot;&gt;Total: {{ formatCurrency(stage.totalDealValue) }}&lt;/div&gt; &lt;div class=&quot;stage-age&quot;&gt;Avg Age: {{ stage.averageAge.toFixed(1) }} days&lt;/div&gt; &lt;/div&gt; &lt;/div&gt; &lt;h2&gt;Deals by Status&lt;/h2&gt; &lt;table class=&quot;detail-table&quot;&gt; &lt;!-- ...existing detail table content... --&gt; &lt;/table&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, computed } from &quot;vue&quot;; import { getSalesFunnelSummary } from &quot;@/services/leadService&quot;; export default { name: &quot;SalesFunnelSummary&quot;, setup() { const summary = ref(null); const loading = ref(true); const error = ref(null); // ...existing functions... // Computed property for funnel stages (filtered and sorted) const funnelStages = computed(() =&gt; { if (!summary.value || !summary.value.byDealStatus) return []; // Filter out &quot;Unknown&quot; (0) and &quot;Closed Lost&quot; (5) return summary.value.byDealStatus .filter(status =&gt; ![0, 5].includes(status.dealStatus)) .sort((a, b) =&gt; a.dealStatus - b.dealStatus); // Sort by deal status }); // Calculate the width for each stage based on count const getStageWidth = (stage) =&gt; { if (!funnelStages.value.length) return 0; const maxCount = Math.max(...funnelStages.value.map(s =&gt; s.count)); // Scale width from 40% to 90% for better visibility return 40 + ((stage.count / maxCount) * 50); }; onMounted(() =&gt; { fetchSalesFunnelSummary(); }); return { summary, loading, error, funnelStages, getStageWidth, getDealStatusDescription, formatCurrency, }; }, }; &lt;/script&gt; &lt;style scoped&gt; /* ...existing styles... */ /* Funnel Visualization */ .funnel-container { display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 900px; margin: 25px auto; padding: 15px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); } .funnel-stage { height: auto; min-height: 80px; padding: 12px 20px; background: linear-gradient(90deg, #3498db, #5dade2); color: white; border-radius: 6px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: center; text-align: center; } .funnel-stage:hover { transform: translateX(5px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); } .stage-header { font-weight: bold; font-size: 1.1em; margin-bottom: 6px; } .stage-count { font-size: 0.95em; margin-bottom: 4px; } .stage-value { font-size: 0.9em; font-weight: 500; } .stage-age { font-size: 0.9em; margin-top: 4px; opacity: 0.9; } /* Create color variations based on the stage */ .funnel-stage:nth-child(1) { background: linear-gradient(90deg, #3498db, #5dade2); } .funnel-stage:nth-child(2) { background: linear-gradient(90deg, #2e86c1, #5499c7); } .funnel-stage:nth-child(3) { background: linear-gradient(90deg, #2874a6, #4a87af); } .funnel-stage:nth-child(4) { background: linear-gradient(90deg, #21618c, #417699); } .funnel-stage:nth-child(5) { background: linear-gradient(90deg, #1a5276, #386288); } h2 { margin-top: 30px; margin-bottom: 15px; font-size: 150%; text-align: center; } h1 { font-size: 175%; padding-top: 2%; text-align: center; } &lt;/style&gt; This implementation: Adds a new funnel visualization between your summary table and details table Filters the data to exclude “Unknown” (status 0) and “Closed Lost” (status 5) Sorts the stages by deal status for a logical progression Dynamic sizing - Each stage’s width is calculated based on the number of deals relative to the maximum count Includes key metrics - Each stage shows: The stage name Number of deals Total deal value Average age Visually appealing design with: Gradient backgrounds that vary by stage Hover effects for interactivity Smooth transitions Consistent spacing and alignment Box shadows for depth The funnel provides a clear visual representation of your sales pipeline, showing how deals progress through different stages while highlighting the total value and average age at each stage. End Response Here’s a breakdown of the changes: Add the funnel-container div that contains a div for each stage being rendered, which in turn, contains divs for the data elements. Add stage filtering and width calculation. Import computed in order to filter out the unknown and closed won stages and define a function that does the filtering. Also define a function to calculate the stage width based on the number of leads. Finally, return the new function so that it can be called elsewhere. Because I asked for a CSS implementation, most of the work in rendering sales funnel visualization is done with CSS styles. These styles define the backgrounds of each stage and change to the headings. The linear gradient is a nice touch! The remainder of the CSS sales funnel visualization styles define the appearance of the stages and the appearance of the text in each stage. Including a nice hover effect. Here is the page rendered with the CSS data visualization: This is a workable implementation of the Sales Funnel visualization. It certainly could be improved by altering the styles or even have Copilot alter the styles. As is, it does the job without manual coding. Now I’ll ask Copilot to remove the CSS implementation and replace it with an implementation built with chart.js. Replace the CSS Implementation with a chart.js Implementation chart.js is a flexible and widely-used open-source JavaScript library for creating interactive, responsive data visualizations in web applications. It provides a simple yet powerful API that enables developers to render various chart types (including bar, line, pie, radar, and many others) using HTML5 Canvas elements. chart.js offers extensive customization options for colors, animations, legends, tooltips, and scales, while maintaining excellent performance even with large datasets. The library automatically handles responsiveness across different screen sizes, supports accessibility features, and integrates seamlessly with modern JavaScript frameworks like Vue, React, and Angular. Here is how I used Copilot to implement the chart.js visualization: Prompt: Replace the CSS chart with a similar chart using chart.js Below is the response from the Claude 3.7 Sonnet Thinking model. As it was generated: Begin Response To replace the CSS-based chart with a chart.js implementation, you’ll need to: Install chart.js Replace the CSS funnel visualization with a canvas element Add the chart.js initialization code Here’s how to implement it: Step 1: Install chart.js npm install chart.js Step 2: Update Your Component &lt;template&gt; &lt;div class=&quot;sales-funnel-summary&quot;&gt; &lt;h1&gt;Sales Funnel Summary&lt;/h1&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;table class=&quot;summary-table&quot;&gt; &lt;!-- existing summary table content --&gt; &lt;/table&gt; &lt;!-- Replace CSS Funnel with chart.js Canvas --&gt; &lt;h2&gt;Sales Pipeline&lt;/h2&gt; &lt;div class=&quot;chart-container&quot;&gt; &lt;canvas ref=&quot;chartCanvas&quot;&gt;&lt;/canvas&gt; &lt;/div&gt; &lt;h2&gt;Deals by Status&lt;/h2&gt; &lt;table class=&quot;detail-table&quot;&gt; &lt;!-- existing detail table content --&gt; &lt;/table&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, computed, watch, nextTick } from &quot;vue&quot;; import { getSalesFunnelSummary } from &quot;@/services/leadService&quot;; import { Chart, registerables } from &#39;chart.js&#39;; Step 3: Add the chart.js initialization code // Register chart.js components Chart.register(...registerables); export default { name: &quot;SalesFunnelSummary&quot;, setup() { const summary = ref(null); const loading = ref(true); const error = ref(null); const chartCanvas = ref(null); let chart = null; const fetchSalesFunnelSummary = async () =&gt; { try { const response = await getSalesFunnelSummary(); if (response.success) { summary.value = response; } else { error.value = response.failureInformation || &quot;Failed to fetch sales funnel summary&quot;; } } catch (err) { error.value = &quot;Failed to fetch sales funnel summary&quot;; } finally { loading.value = false; } }; const getDealStatusDescription = (dealStatus) =&gt; { const statusMap = { 0: &quot;Unknown&quot;, 1: &quot;Initial Discussion&quot;, 2: &quot;Serious Discussion&quot;, 3: &quot;Contract Discussion&quot;, 4: &quot;Closed (Won)&quot;, 5: &quot;Closed (Lost)&quot;, 6: &quot;Closed (Abandoned)&quot;, }; return statusMap[dealStatus] || `Status ${dealStatus}`; }; const formatCurrency = (value) =&gt; { return new Intl.NumberFormat(&quot;en-US&quot;, { style: &quot;currency&quot;, currency: &quot;USD&quot;, }).format(value || 0); }; // Computed property for filtered funnel stages const funnelStages = computed(() =&gt; { if (!summary.value || !summary.value.byDealStatus) return []; // Filter out &quot;Unknown&quot; (0) and &quot;Closed Lost&quot; (5) return summary.value.byDealStatus .filter((status) =&gt; ![0, 5].includes(status.dealStatus)) .sort((a, b) =&gt; a.dealStatus - b.dealStatus); }); // Render the chart.js chart const renderChart = () =&gt; { if (!chartCanvas.value || !funnelStages.value.length) return; // Destroy existing chart if it exists if (chart) { chart.destroy(); } const ctx = chartCanvas.value.getContext(&#39;2d&#39;); // Prepare data for chart const labels = funnelStages.value.map(stage =&gt; getDealStatusDescription(stage.dealStatus)); const counts = funnelStages.value.map(stage =&gt; stage.count); // Color palette for chart bars const colors = [ &#39;rgba(52, 152, 219, 0.8)&#39;, &#39;rgba(46, 134, 193, 0.8)&#39;, &#39;rgba(40, 116, 166, 0.8)&#39;, &#39;rgba(33, 97, 140, 0.8)&#39;, &#39;rgba(26, 82, 118, 0.8)&#39; ]; const borderColors = [ &#39;rgb(52, 152, 219)&#39;, &#39;rgb(46, 134, 193)&#39;, &#39;rgb(40, 116, 166)&#39;, &#39;rgb(33, 97, 140)&#39;, &#39;rgb(26, 82, 118)&#39; ]; // Create the chart chart = new Chart(ctx, { type: &#39;bar&#39;, data: { labels: labels, datasets: [{ label: &#39;Number of Deals&#39;, data: counts, backgroundColor: colors, borderColor: borderColors, borderWidth: 1 }] }, options: { indexAxis: &#39;y&#39;, // Horizontal bar chart responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (context) =&gt; { const index = context.dataIndex; const stage = funnelStages.value[index]; return `Count: ${stage.count} deals`; }, afterLabel: (context) =&gt; { const index = context.dataIndex; const stage = funnelStages.value[index]; return [ `Total: ${formatCurrency(stage.totalDealValue)}`, `Avg Age: ${stage.averageAge.toFixed(1)} days` ]; } } }, legend: { display: false // Hide legend } }, scales: { x: { beginAtZero: true, title: { display: true, text: &#39;Number of Deals&#39; } }, y: { title: { display: true, text: &#39;Pipeline Stage&#39; } } } } }); }; onMounted(() =&gt; { fetchSalesFunnelSummary(); }); // Watch for changes to render chart when data is loaded watch(summary, () =&gt; { nextTick(() =&gt; { renderChart(); }); }); return { summary, loading, error, chartCanvas, getDealStatusDescription, formatCurrency, funnelStages }; }, }; &lt;/script&gt; &lt;style scoped&gt; .summary-table th { width: fit-content; text-align: right; } .summary-table td { padding-left: 10px; } .detail-table th { text-align: right; padding-right: 15px; width: fit-content; } .detail-table td { text-align: right; padding-right: 16px; width: fit-content; } /* Chart Container */ .chart-container { height: 400px; max-width: 900px; margin: 25px auto; padding: 15px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); } h2 { margin-top: 30px; margin-bottom: 15px; font-size: 150%; text-align: center; } h1 { font-size: 175%; padding-top: 2%; text-align: center; } &lt;/style&gt; End Response Here is a breakdown of the changes: Replace the funnel-container div with the chart-container div." />
+<link rel="canonical" href="https://blog.pdata.com/UIAI3/" />
+<meta property="og:url" content="https://blog.pdata.com/UIAI3/" />
+<meta property="og:site_name" content="AI Practitioner" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-04-29T17:00:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Developing User Interfaces with GitHub Copilot, Part 3" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-04-29T17:00:00-07:00","datePublished":"2025-04-29T17:00:00-07:00","description":"This post is the third installment in the series on AI assisted UI development. While this post is largely stand-alone, consider reading parts 1 and 2 before reading this post. Have AI Add a Data Visualization We’ve looked at using AI to create and add UI components in prior posts. In this post I’ll add a data visualization to a page. This figure shows a rendered Sales Funnel Summary page before making any changes: The goal in this post is to have AI add a data visualization of the sales funnel to the page. Prompt: Using css, add a Sales Funnel graphic from the data in the detail-table. Include the total value and the average age. Don’t include ‘unknown’ or ‘closed lost’. Below is the response from the Claude 3.7 Sonnet Thinking model. Begin Response I’ll add a CSS-based Sales Funnel visualization between your summary table and the details table. Here’s how to implement it: &lt;template&gt; &lt;div class=&quot;sales-funnel-summary&quot;&gt; &lt;h1&gt;Sales Funnel Summary&lt;/h1&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;table class=&quot;summary-table&quot;&gt; &lt;!-- ...existing summary table content... --&gt; &lt;/table&gt; &lt;!-- Sales Funnel Visualization --&gt; &lt;h2&gt;Sales Pipeline&lt;/h2&gt; &lt;div class=&quot;funnel-container&quot;&gt; &lt;div v-for=&quot;stage in funnelStages&quot; :key=&quot;stage.dealStatus&quot; class=&quot;funnel-stage&quot; :style=&quot;{ width: getStageWidth(stage) + &#39;%&#39; }&quot;&gt; &lt;div class=&quot;stage-header&quot;&gt;{{ getDealStatusDescription(stage.dealStatus) }}&lt;/div&gt; &lt;div class=&quot;stage-count&quot;&gt;{{ stage.count }} deals&lt;/div&gt; &lt;div class=&quot;stage-value&quot;&gt;Total: {{ formatCurrency(stage.totalDealValue) }}&lt;/div&gt; &lt;div class=&quot;stage-age&quot;&gt;Avg Age: {{ stage.averageAge.toFixed(1) }} days&lt;/div&gt; &lt;/div&gt; &lt;/div&gt; &lt;h2&gt;Deals by Status&lt;/h2&gt; &lt;table class=&quot;detail-table&quot;&gt; &lt;!-- ...existing detail table content... --&gt; &lt;/table&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, computed } from &quot;vue&quot;; import { getSalesFunnelSummary } from &quot;@/services/leadService&quot;; export default { name: &quot;SalesFunnelSummary&quot;, setup() { const summary = ref(null); const loading = ref(true); const error = ref(null); // ...existing functions... // Computed property for funnel stages (filtered and sorted) const funnelStages = computed(() =&gt; { if (!summary.value || !summary.value.byDealStatus) return []; // Filter out &quot;Unknown&quot; (0) and &quot;Closed Lost&quot; (5) return summary.value.byDealStatus .filter(status =&gt; ![0, 5].includes(status.dealStatus)) .sort((a, b) =&gt; a.dealStatus - b.dealStatus); // Sort by deal status }); // Calculate the width for each stage based on count const getStageWidth = (stage) =&gt; { if (!funnelStages.value.length) return 0; const maxCount = Math.max(...funnelStages.value.map(s =&gt; s.count)); // Scale width from 40% to 90% for better visibility return 40 + ((stage.count / maxCount) * 50); }; onMounted(() =&gt; { fetchSalesFunnelSummary(); }); return { summary, loading, error, funnelStages, getStageWidth, getDealStatusDescription, formatCurrency, }; }, }; &lt;/script&gt; &lt;style scoped&gt; /* ...existing styles... */ /* Funnel Visualization */ .funnel-container { display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 900px; margin: 25px auto; padding: 15px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); } .funnel-stage { height: auto; min-height: 80px; padding: 12px 20px; background: linear-gradient(90deg, #3498db, #5dade2); color: white; border-radius: 6px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: center; text-align: center; } .funnel-stage:hover { transform: translateX(5px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); } .stage-header { font-weight: bold; font-size: 1.1em; margin-bottom: 6px; } .stage-count { font-size: 0.95em; margin-bottom: 4px; } .stage-value { font-size: 0.9em; font-weight: 500; } .stage-age { font-size: 0.9em; margin-top: 4px; opacity: 0.9; } /* Create color variations based on the stage */ .funnel-stage:nth-child(1) { background: linear-gradient(90deg, #3498db, #5dade2); } .funnel-stage:nth-child(2) { background: linear-gradient(90deg, #2e86c1, #5499c7); } .funnel-stage:nth-child(3) { background: linear-gradient(90deg, #2874a6, #4a87af); } .funnel-stage:nth-child(4) { background: linear-gradient(90deg, #21618c, #417699); } .funnel-stage:nth-child(5) { background: linear-gradient(90deg, #1a5276, #386288); } h2 { margin-top: 30px; margin-bottom: 15px; font-size: 150%; text-align: center; } h1 { font-size: 175%; padding-top: 2%; text-align: center; } &lt;/style&gt; This implementation: Adds a new funnel visualization between your summary table and details table Filters the data to exclude “Unknown” (status 0) and “Closed Lost” (status 5) Sorts the stages by deal status for a logical progression Dynamic sizing - Each stage’s width is calculated based on the number of deals relative to the maximum count Includes key metrics - Each stage shows: The stage name Number of deals Total deal value Average age Visually appealing design with: Gradient backgrounds that vary by stage Hover effects for interactivity Smooth transitions Consistent spacing and alignment Box shadows for depth The funnel provides a clear visual representation of your sales pipeline, showing how deals progress through different stages while highlighting the total value and average age at each stage. End Response Here’s a breakdown of the changes: Add the funnel-container div that contains a div for each stage being rendered, which in turn, contains divs for the data elements. Add stage filtering and width calculation. Import computed in order to filter out the unknown and closed won stages and define a function that does the filtering. Also define a function to calculate the stage width based on the number of leads. Finally, return the new function so that it can be called elsewhere. Because I asked for a CSS implementation, most of the work in rendering sales funnel visualization is done with CSS styles. These styles define the backgrounds of each stage and change to the headings. The linear gradient is a nice touch! The remainder of the CSS sales funnel visualization styles define the appearance of the stages and the appearance of the text in each stage. Including a nice hover effect. Here is the page rendered with the CSS data visualization: This is a workable implementation of the Sales Funnel visualization. It certainly could be improved by altering the styles or even have Copilot alter the styles. As is, it does the job without manual coding. Now I’ll ask Copilot to remove the CSS implementation and replace it with an implementation built with chart.js. Replace the CSS Implementation with a chart.js Implementation chart.js is a flexible and widely-used open-source JavaScript library for creating interactive, responsive data visualizations in web applications. It provides a simple yet powerful API that enables developers to render various chart types (including bar, line, pie, radar, and many others) using HTML5 Canvas elements. chart.js offers extensive customization options for colors, animations, legends, tooltips, and scales, while maintaining excellent performance even with large datasets. The library automatically handles responsiveness across different screen sizes, supports accessibility features, and integrates seamlessly with modern JavaScript frameworks like Vue, React, and Angular. Here is how I used Copilot to implement the chart.js visualization: Prompt: Replace the CSS chart with a similar chart using chart.js Below is the response from the Claude 3.7 Sonnet Thinking model. As it was generated: Begin Response To replace the CSS-based chart with a chart.js implementation, you’ll need to: Install chart.js Replace the CSS funnel visualization with a canvas element Add the chart.js initialization code Here’s how to implement it: Step 1: Install chart.js npm install chart.js Step 2: Update Your Component &lt;template&gt; &lt;div class=&quot;sales-funnel-summary&quot;&gt; &lt;h1&gt;Sales Funnel Summary&lt;/h1&gt; &lt;div v-if=&quot;loading&quot;&gt;Loading...&lt;/div&gt; &lt;div v-else-if=&quot;error&quot;&gt;{{ error }}&lt;/div&gt; &lt;div v-else&gt; &lt;table class=&quot;summary-table&quot;&gt; &lt;!-- existing summary table content --&gt; &lt;/table&gt; &lt;!-- Replace CSS Funnel with chart.js Canvas --&gt; &lt;h2&gt;Sales Pipeline&lt;/h2&gt; &lt;div class=&quot;chart-container&quot;&gt; &lt;canvas ref=&quot;chartCanvas&quot;&gt;&lt;/canvas&gt; &lt;/div&gt; &lt;h2&gt;Deals by Status&lt;/h2&gt; &lt;table class=&quot;detail-table&quot;&gt; &lt;!-- existing detail table content --&gt; &lt;/table&gt; &lt;/div&gt; &lt;/div&gt; &lt;/template&gt; &lt;script&gt; import { ref, onMounted, computed, watch, nextTick } from &quot;vue&quot;; import { getSalesFunnelSummary } from &quot;@/services/leadService&quot;; import { Chart, registerables } from &#39;chart.js&#39;; Step 3: Add the chart.js initialization code // Register chart.js components Chart.register(...registerables); export default { name: &quot;SalesFunnelSummary&quot;, setup() { const summary = ref(null); const loading = ref(true); const error = ref(null); const chartCanvas = ref(null); let chart = null; const fetchSalesFunnelSummary = async () =&gt; { try { const response = await getSalesFunnelSummary(); if (response.success) { summary.value = response; } else { error.value = response.failureInformation || &quot;Failed to fetch sales funnel summary&quot;; } } catch (err) { error.value = &quot;Failed to fetch sales funnel summary&quot;; } finally { loading.value = false; } }; const getDealStatusDescription = (dealStatus) =&gt; { const statusMap = { 0: &quot;Unknown&quot;, 1: &quot;Initial Discussion&quot;, 2: &quot;Serious Discussion&quot;, 3: &quot;Contract Discussion&quot;, 4: &quot;Closed (Won)&quot;, 5: &quot;Closed (Lost)&quot;, 6: &quot;Closed (Abandoned)&quot;, }; return statusMap[dealStatus] || `Status ${dealStatus}`; }; const formatCurrency = (value) =&gt; { return new Intl.NumberFormat(&quot;en-US&quot;, { style: &quot;currency&quot;, currency: &quot;USD&quot;, }).format(value || 0); }; // Computed property for filtered funnel stages const funnelStages = computed(() =&gt; { if (!summary.value || !summary.value.byDealStatus) return []; // Filter out &quot;Unknown&quot; (0) and &quot;Closed Lost&quot; (5) return summary.value.byDealStatus .filter((status) =&gt; ![0, 5].includes(status.dealStatus)) .sort((a, b) =&gt; a.dealStatus - b.dealStatus); }); // Render the chart.js chart const renderChart = () =&gt; { if (!chartCanvas.value || !funnelStages.value.length) return; // Destroy existing chart if it exists if (chart) { chart.destroy(); } const ctx = chartCanvas.value.getContext(&#39;2d&#39;); // Prepare data for chart const labels = funnelStages.value.map(stage =&gt; getDealStatusDescription(stage.dealStatus)); const counts = funnelStages.value.map(stage =&gt; stage.count); // Color palette for chart bars const colors = [ &#39;rgba(52, 152, 219, 0.8)&#39;, &#39;rgba(46, 134, 193, 0.8)&#39;, &#39;rgba(40, 116, 166, 0.8)&#39;, &#39;rgba(33, 97, 140, 0.8)&#39;, &#39;rgba(26, 82, 118, 0.8)&#39; ]; const borderColors = [ &#39;rgb(52, 152, 219)&#39;, &#39;rgb(46, 134, 193)&#39;, &#39;rgb(40, 116, 166)&#39;, &#39;rgb(33, 97, 140)&#39;, &#39;rgb(26, 82, 118)&#39; ]; // Create the chart chart = new Chart(ctx, { type: &#39;bar&#39;, data: { labels: labels, datasets: [{ label: &#39;Number of Deals&#39;, data: counts, backgroundColor: colors, borderColor: borderColors, borderWidth: 1 }] }, options: { indexAxis: &#39;y&#39;, // Horizontal bar chart responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (context) =&gt; { const index = context.dataIndex; const stage = funnelStages.value[index]; return `Count: ${stage.count} deals`; }, afterLabel: (context) =&gt; { const index = context.dataIndex; const stage = funnelStages.value[index]; return [ `Total: ${formatCurrency(stage.totalDealValue)}`, `Avg Age: ${stage.averageAge.toFixed(1)} days` ]; } } }, legend: { display: false // Hide legend } }, scales: { x: { beginAtZero: true, title: { display: true, text: &#39;Number of Deals&#39; } }, y: { title: { display: true, text: &#39;Pipeline Stage&#39; } } } } }); }; onMounted(() =&gt; { fetchSalesFunnelSummary(); }); // Watch for changes to render chart when data is loaded watch(summary, () =&gt; { nextTick(() =&gt; { renderChart(); }); }); return { summary, loading, error, chartCanvas, getDealStatusDescription, formatCurrency, funnelStages }; }, }; &lt;/script&gt; &lt;style scoped&gt; .summary-table th { width: fit-content; text-align: right; } .summary-table td { padding-left: 10px; } .detail-table th { text-align: right; padding-right: 15px; width: fit-content; } .detail-table td { text-align: right; padding-right: 16px; width: fit-content; } /* Chart Container */ .chart-container { height: 400px; max-width: 900px; margin: 25px auto; padding: 15px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); } h2 { margin-top: 30px; margin-bottom: 15px; font-size: 150%; text-align: center; } h1 { font-size: 175%; padding-top: 2%; text-align: center; } &lt;/style&gt; End Response Here is a breakdown of the changes: Replace the funnel-container div with the chart-container div.","headline":"Developing User Interfaces with GitHub Copilot, Part 3","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/UIAI3/"},"url":"https://blog.pdata.com/UIAI3/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">AI Practitioner</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/">Home</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Developing User Interfaces with GitHub Copilot, Part 3</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2025-04-29T17:00:00-07:00" itemprop="datePublished">Apr 29, 2025
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This post is the third installment in the series on AI assisted UI development. While this post is largely stand-alone, consider reading parts <a href="https://www.codemag.com/blog/AIPractitioner/UIAI" target="_blank">1</a> and <a href="https://www.codemag.com/Blog/AIPractitioner/UIAI2" target="_blank">2</a> before reading this post.</p>
+
+<h2 id="have-ai-add-a-data-visualization">Have AI Add a Data Visualization</h2>
+
+<p>We’ve looked at using AI to create and add UI components in prior posts. In this post I’ll add a data visualization to a page.</p>
+
+<p>This figure shows a rendered Sales Funnel Summary page before making any changes:</p>
+
+<p><img src="../assets/images/2025-04-30/vSalesFunnelSummary-Rendered-before-Changes.png" alt="The vSalesFunnelSummary page rendered before any changes" /></p>
+
+<p>The goal in this post is to have AI add a data visualization of the sales funnel to the page.</p>
+
+<p><strong>Prompt: Using css, add a Sales Funnel graphic from the data in the detail-table. Include the total value and the average age. Don’t include ‘unknown’ or ‘closed lost’.</strong></p>
+
+<p>Below is the response from the Claude 3.7 Sonnet Thinking model.</p>
+
+<p><em>Begin Response</em></p>
+
+<p><em>I’ll add a CSS-based Sales Funnel visualization between your summary table and the details table. Here’s how to implement it:</em></p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;template&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"sales-funnel-summary"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Sales Funnel Summary<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"loading"</span><span class="nt">&gt;</span>Loading...<span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-else-if=</span><span class="s">"error"</span><span class="nt">&gt;</span>{{ error }}<span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-else</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;table</span> <span class="na">class=</span><span class="s">"summary-table"</span><span class="nt">&gt;</span>
+        <span class="c">&lt;!-- ...existing summary table content... --&gt;</span>
+      <span class="nt">&lt;/table&gt;</span>
+
+      <span class="c">&lt;!-- Sales Funnel Visualization --&gt;</span>
+      <span class="nt">&lt;h2&gt;</span>Sales Pipeline<span class="nt">&lt;/h2&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"funnel-container"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">v-for=</span><span class="s">"stage in funnelStages"</span> <span class="na">:key=</span><span class="s">"stage.dealStatus"</span>
+             <span class="na">class=</span><span class="s">"funnel-stage"</span> <span class="na">:style=</span><span class="s">"{ width: getStageWidth(stage) + '%' }"</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-header"</span><span class="nt">&gt;</span>{{ getDealStatusDescription(stage.dealStatus) }}<span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-count"</span><span class="nt">&gt;</span>{{ stage.count }} deals<span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-value"</span><span class="nt">&gt;</span>Total: {{ formatCurrency(stage.totalDealValue) }}<span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-age"</span><span class="nt">&gt;</span>Avg Age: {{ stage.averageAge.toFixed(1) }} days<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;/div&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+
+      <span class="nt">&lt;h2&gt;</span>Deals by Status<span class="nt">&lt;/h2&gt;</span>
+      <span class="nt">&lt;table</span> <span class="na">class=</span><span class="s">"detail-table"</span><span class="nt">&gt;</span>
+        <span class="c">&lt;!-- ...existing detail table content... --&gt;</span>
+      <span class="nt">&lt;/table&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/template&gt;</span>
+
+<span class="nt">&lt;script&gt;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span><span class="p">,</span> <span class="nx">onMounted</span><span class="p">,</span> <span class="nx">computed</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">getSalesFunnelSummary</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SalesFunnelSummary</span><span class="dl">"</span><span class="p">,</span>
+  <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">summary</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">error</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+
+    <span class="c1">// ...existing functions...</span>
+
+    <span class="c1">// Computed property for funnel stages (filtered and sorted)</span>
+    <span class="kd">const</span> <span class="nx">funnelStages</span> <span class="o">=</span> <span class="nf">computed</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span> <span class="o">||</span> <span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span><span class="p">)</span> <span class="k">return</span> <span class="p">[];</span>
+
+      <span class="c1">// Filter out "Unknown" (0) and "Closed Lost" (5)</span>
+      <span class="k">return</span> <span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span>
+        <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="nx">status</span> <span class="o">=&gt;</span> <span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">].</span><span class="nf">includes</span><span class="p">(</span><span class="nx">status</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">))</span>
+        <span class="p">.</span><span class="nf">sort</span><span class="p">((</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">a</span><span class="p">.</span><span class="nx">dealStatus</span> <span class="o">-</span> <span class="nx">b</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">);</span> <span class="c1">// Sort by deal status</span>
+    <span class="p">});</span>
+
+    <span class="c1">// Calculate the width for each stage based on count</span>
+    <span class="kd">const</span> <span class="nx">getStageWidth</span> <span class="o">=</span> <span class="p">(</span><span class="nx">stage</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+
+      <span class="kd">const</span> <span class="nx">maxCount</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nf">max</span><span class="p">(...</span><span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">s</span> <span class="o">=&gt;</span> <span class="nx">s</span><span class="p">.</span><span class="nx">count</span><span class="p">));</span>
+      <span class="c1">// Scale width from 40% to 90% for better visibility</span>
+      <span class="k">return</span> <span class="mi">40</span> <span class="o">+</span> <span class="p">((</span><span class="nx">stage</span><span class="p">.</span><span class="nx">count</span> <span class="o">/</span> <span class="nx">maxCount</span><span class="p">)</span> <span class="o">*</span> <span class="mi">50</span><span class="p">);</span>
+    <span class="p">};</span>
+
+    <span class="nf">onMounted</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="nf">fetchSalesFunnelSummary</span><span class="p">();</span>
+    <span class="p">});</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+      <span class="nx">summary</span><span class="p">,</span>
+      <span class="nx">loading</span><span class="p">,</span>
+      <span class="nx">error</span><span class="p">,</span>
+      <span class="nx">funnelStages</span><span class="p">,</span>
+      <span class="nx">getStageWidth</span><span class="p">,</span>
+      <span class="nx">getDealStatusDescription</span><span class="p">,</span>
+      <span class="nx">formatCurrency</span><span class="p">,</span>
+    <span class="p">};</span>
+  <span class="p">},</span>
+<span class="p">};</span>
+<span class="nt">&lt;/script&gt;</span>
+
+<span class="nt">&lt;style </span><span class="na">scoped</span><span class="nt">&gt;</span>
+<span class="c">/* ...existing styles... */</span>
+
+<span class="c">/* Funnel Visualization */</span>
+<span class="nc">.funnel-container</span> <span class="p">{</span>
+  <span class="nl">display</span><span class="p">:</span> <span class="nb">flex</span><span class="p">;</span>
+  <span class="nl">flex-direction</span><span class="p">:</span> <span class="nb">column</span><span class="p">;</span>
+  <span class="nl">align-items</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+  <span class="nl">gap</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
+  <span class="nl">max-width</span><span class="p">:</span> <span class="m">900px</span><span class="p">;</span>
+  <span class="nl">margin</span><span class="p">:</span> <span class="m">25px</span> <span class="nb">auto</span><span class="p">;</span>
+  <span class="nl">padding</span><span class="p">:</span> <span class="m">15px</span><span class="p">;</span>
+  <span class="nl">background-color</span><span class="p">:</span> <span class="nx">#f8f9fa</span><span class="p">;</span>
+  <span class="nl">border-radius</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
+  <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">2px</span> <span class="m">4px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.05</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.funnel-stage</span> <span class="p">{</span>
+  <span class="nl">height</span><span class="p">:</span> <span class="nb">auto</span><span class="p">;</span>
+  <span class="nl">min-height</span><span class="p">:</span> <span class="m">80px</span><span class="p">;</span>
+  <span class="nl">padding</span><span class="p">:</span> <span class="m">12px</span> <span class="m">20px</span><span class="p">;</span>
+  <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#3498db</span><span class="p">,</span> <span class="nx">#5dade2</span><span class="p">);</span>
+  <span class="nl">color</span><span class="p">:</span> <span class="nx">white</span><span class="p">;</span>
+  <span class="nl">border-radius</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span>
+  <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">2px</span> <span class="m">5px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.1</span><span class="p">);</span>
+  <span class="nl">transition</span><span class="p">:</span> <span class="nb">all</span> <span class="m">0.3s</span> <span class="nb">ease</span><span class="p">;</span>
+  <span class="nl">display</span><span class="p">:</span> <span class="nb">flex</span><span class="p">;</span>
+  <span class="nl">flex-direction</span><span class="p">:</span> <span class="nb">column</span><span class="p">;</span>
+  <span class="nl">justify-content</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+  <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.funnel-stage</span><span class="nd">:hover</span> <span class="p">{</span>
+  <span class="nl">transform</span><span class="p">:</span> <span class="nf">translateX</span><span class="p">(</span><span class="m">5px</span><span class="p">);</span>
+  <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">4px</span> <span class="m">8px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.15</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.stage-header</span> <span class="p">{</span>
+  <span class="nl">font-weight</span><span class="p">:</span> <span class="nb">bold</span><span class="p">;</span>
+  <span class="nl">font-size</span><span class="p">:</span> <span class="m">1.1em</span><span class="p">;</span>
+  <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.stage-count</span> <span class="p">{</span>
+  <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.95em</span><span class="p">;</span>
+  <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.stage-value</span> <span class="p">{</span>
+  <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.9em</span><span class="p">;</span>
+  <span class="nl">font-weight</span><span class="p">:</span> <span class="m">500</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.stage-age</span> <span class="p">{</span>
+  <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.9em</span><span class="p">;</span>
+  <span class="nl">margin-top</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
+  <span class="nl">opacity</span><span class="p">:</span> <span class="m">0.9</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* Create color variations based on the stage */</span>
+<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">1</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#3498db</span><span class="p">,</span> <span class="nx">#5dade2</span><span class="p">);</span> <span class="p">}</span>
+<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">2</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#2e86c1</span><span class="p">,</span> <span class="nx">#5499c7</span><span class="p">);</span> <span class="p">}</span>
+<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">3</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#2874a6</span><span class="p">,</span> <span class="nx">#4a87af</span><span class="p">);</span> <span class="p">}</span>
+<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">4</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#21618c</span><span class="p">,</span> <span class="nx">#417699</span><span class="p">);</span> <span class="p">}</span>
+<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">5</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#1a5276</span><span class="p">,</span> <span class="nx">#386288</span><span class="p">);</span> <span class="p">}</span>
+
+<span class="nt">h2</span> <span class="p">{</span>
+  <span class="nl">margin-top</span><span class="p">:</span> <span class="m">30px</span><span class="p">;</span>
+  <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">15px</span><span class="p">;</span>
+  <span class="nl">font-size</span><span class="p">:</span> <span class="m">150%</span><span class="p">;</span>
+  <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nt">h1</span> <span class="p">{</span>
+  <span class="nl">font-size</span><span class="p">:</span> <span class="m">175%</span><span class="p">;</span>
+  <span class="nl">padding-top</span><span class="p">:</span> <span class="m">2%</span><span class="p">;</span>
+  <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nt">&lt;/style&gt;</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<p>This implementation:</p>
+
+<ol>
+  <li>Adds a new funnel visualization between your summary table and details table</li>
+  <li>Filters the data to exclude “Unknown” (status 0) and “Closed Lost” (status 5)</li>
+  <li>Sorts the stages by deal status for a logical progression</li>
+  <li>Dynamic sizing - Each stage’s width is calculated based on the number of deals relative to the maximum count</li>
+  <li>Includes key metrics - Each stage shows:
+    <ul>
+      <li>The stage name</li>
+      <li>Number of deals</li>
+      <li>Total deal value</li>
+      <li>Average age</li>
+    </ul>
+  </li>
+  <li>Visually appealing design with:
+    <ul>
+      <li>Gradient backgrounds that vary by stage</li>
+      <li>Hover effects for interactivity</li>
+      <li>Smooth transitions</li>
+      <li>Consistent spacing and alignment</li>
+      <li>Box shadows for depth</li>
+    </ul>
+  </li>
+</ol>
+
+<p><em>The funnel provides a clear visual representation of your sales pipeline, showing how deals progress through different stages while highlighting the total value and average age at each stage.</em></p>
+
+<p><em>End Response</em></p>
+
+<p>Here’s a breakdown of the changes:</p>
+
+<p>Add the <code class="language-plaintext highlighter-rouge">funnel-container</code> <code class="language-plaintext highlighter-rouge">div</code> that contains a <code class="language-plaintext highlighter-rouge">div</code> for each stage being rendered, which in turn, contains divs for the data elements.</p>
+
+<p><img src="../assets/images/2025-04-30/vSalesFunnelSummary-Template-Changes.png" alt="Changes to the vSalesFunnelSummary Vue Template implementing the CSS data visualization" /></p>
+
+<p>Add stage filtering and width calculation. Import <code class="language-plaintext highlighter-rouge">computed</code> in order to filter out the unknown and closed won stages and define a function that does the filtering. Also define a function to calculate the stage width based on the number of leads. Finally, return the new function so that it can be called elsewhere.</p>
+
+<p><img src="../assets/images/2025-04-30/vSalesFunnelSummary-Script-Changes.png" alt="Changes to the vSalesFunnelSummary Vue Script implementing the function needed for the CSS data visualization" /></p>
+
+<p>Because I asked for a CSS implementation, most of the work in rendering sales funnel visualization is done with CSS styles. These styles define the backgrounds of each stage and change to the headings. The linear gradient is a nice touch!</p>
+
+<p><img src="../assets/images/2025-04-30/vSalesFunnelSummary-Style-Changes-2.png" alt="Changes to the vSalesFunnelSummary Vue Styles for the CSS data visualization" /></p>
+
+<p>The remainder of the CSS sales funnel visualization styles define the appearance of the stages and the appearance of the text in each stage. Including a nice hover effect.</p>
+
+<p><img src="../assets/images/2025-04-30/vSalesFunnelSummary-Style-Changes.png" alt="Additional changes to the vSalesFunnelSummary Vue Styles for the CSS data visualization" /></p>
+
+<p>Here is the page rendered with the CSS data visualization:</p>
+
+<p><img src="../assets/images/2025-04-30/vSalesFunnelSummary-Rendered-After-Changes.png" alt="The vSalesFunnelSummary Vue Rendered After the CSS data visualization changes" /></p>
+
+<p>This is a workable implementation of the Sales Funnel visualization. It certainly could be improved by altering the styles or even have Copilot alter the styles. As is, it does the job without manual coding.</p>
+
+<p>Now I’ll ask Copilot to remove the CSS implementation and replace it with an implementation built with chart.js.</p>
+
+<h2 id="replace-the-css-implementation-with-a-chartjs-implementation">Replace the CSS Implementation with a chart.js Implementation</h2>
+
+<p><a href="https://www.chartjs.org/" target="_blank">chart.js</a> is a flexible and widely-used open-source JavaScript library for creating interactive, responsive data visualizations in web applications. It provides a simple yet powerful API that enables developers to render various chart types (including bar, line, pie, radar, and many others) using HTML5 Canvas elements. chart.js offers extensive customization options for colors, animations, legends, tooltips, and scales, while maintaining excellent performance even with large datasets. The library automatically handles responsiveness across different screen sizes, supports accessibility features, and integrates seamlessly with modern JavaScript frameworks like Vue, React, and Angular.</p>
+
+<p>Here is how I used Copilot to implement the chart.js visualization:</p>
+
+<p><strong>Prompt: Replace the CSS chart with a similar chart using chart.js</strong></p>
+
+<p>Below is the response from the Claude 3.7 Sonnet Thinking model. As it was generated:</p>
+
+<p><em>Begin Response</em></p>
+
+<p><em>To replace the CSS-based chart with a chart.js implementation, you’ll need to:</em></p>
+
+<ol>
+  <li>Install chart.js</li>
+  <li>Replace the CSS funnel visualization with a canvas element</li>
+  <li>Add the chart.js initialization code</li>
+</ol>
+
+<p><em>Here’s how to implement it:</em></p>
+
+<h3 id="step-1-install-chartjs">Step 1: Install chart.js</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm <span class="nb">install </span>chart.js
+</code></pre></div></div>
+
+<h3 id="step-2-update-your-component">Step 2: Update Your Component</h3>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;template&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"sales-funnel-summary"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Sales Funnel Summary<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"loading"</span><span class="nt">&gt;</span>Loading...<span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-else-if=</span><span class="s">"error"</span><span class="nt">&gt;</span>{{ error }}<span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">v-else</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;table</span> <span class="na">class=</span><span class="s">"summary-table"</span><span class="nt">&gt;</span>
+        <span class="c">&lt;!-- existing summary table content --&gt;</span>
+      <span class="nt">&lt;/table&gt;</span>
+
+      <span class="c">&lt;!-- Replace CSS Funnel with chart.js Canvas --&gt;</span>
+      <span class="nt">&lt;h2&gt;</span>Sales Pipeline<span class="nt">&lt;/h2&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"chart-container"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;canvas</span> <span class="na">ref=</span><span class="s">"chartCanvas"</span><span class="nt">&gt;&lt;/canvas&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+
+      <span class="nt">&lt;h2&gt;</span>Deals by Status<span class="nt">&lt;/h2&gt;</span>
+      <span class="nt">&lt;table</span> <span class="na">class=</span><span class="s">"detail-table"</span><span class="nt">&gt;</span>
+        <span class="c">&lt;!-- existing detail table content --&gt;</span>
+      <span class="nt">&lt;/table&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/template&gt;</span>
+
+<span class="nt">&lt;script&gt;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span><span class="p">,</span> <span class="nx">onMounted</span><span class="p">,</span> <span class="nx">computed</span><span class="p">,</span> <span class="nx">watch</span><span class="p">,</span> <span class="nx">nextTick</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">getSalesFunnelSummary</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">Chart</span><span class="p">,</span> <span class="nx">registerables</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">chart.js</span><span class="dl">'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="step-3-add-the-chartjs-initialization-code">Step 3: Add the chart.js initialization code</h3>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Register chart.js components</span>
+<span class="nx">Chart</span><span class="p">.</span><span class="nf">register</span><span class="p">(...</span><span class="nx">registerables</span><span class="p">);</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SalesFunnelSummary</span><span class="dl">"</span><span class="p">,</span>
+  <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">summary</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">error</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">chartCanvas</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+    <span class="kd">let</span> <span class="nx">chart</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="kd">const</span> <span class="nx">fetchSalesFunnelSummary</span> <span class="o">=</span> <span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">try</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getSalesFunnelSummary</span><span class="p">();</span>
+        <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">summary</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">response</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+          <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">failureInformation</span> <span class="o">||</span> <span class="dl">"</span><span class="s2">Failed to fetch sales funnel summary</span><span class="dl">"</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Failed to fetch sales funnel summary</span><span class="dl">"</span><span class="p">;</span>
+      <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+        <span class="nx">loading</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">};</span>
+
+    <span class="kd">const</span> <span class="nx">getDealStatusDescription</span> <span class="o">=</span> <span class="p">(</span><span class="nx">dealStatus</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">statusMap</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Unknown</span><span class="dl">"</span><span class="p">,</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Initial Discussion</span><span class="dl">"</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Serious Discussion</span><span class="dl">"</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Contract Discussion</span><span class="dl">"</span><span class="p">,</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Closed (Won)</span><span class="dl">"</span><span class="p">,</span>
+        <span class="mi">5</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Closed (Lost)</span><span class="dl">"</span><span class="p">,</span>
+        <span class="mi">6</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Closed (Abandoned)</span><span class="dl">"</span><span class="p">,</span>
+      <span class="p">};</span>
+      <span class="k">return</span> <span class="nx">statusMap</span><span class="p">[</span><span class="nx">dealStatus</span><span class="p">]</span> <span class="o">||</span> <span class="s2">`Status </span><span class="p">${</span><span class="nx">dealStatus</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
+    <span class="p">};</span>
+
+    <span class="kd">const</span> <span class="nx">formatCurrency</span> <span class="o">=</span> <span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="k">new</span> <span class="nx">Intl</span><span class="p">.</span><span class="nc">NumberFormat</span><span class="p">(</span><span class="dl">"</span><span class="s2">en-US</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">style</span><span class="p">:</span> <span class="dl">"</span><span class="s2">currency</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">currency</span><span class="p">:</span> <span class="dl">"</span><span class="s2">USD</span><span class="dl">"</span><span class="p">,</span>
+      <span class="p">}).</span><span class="nf">format</span><span class="p">(</span><span class="nx">value</span> <span class="o">||</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="p">};</span>
+
+    <span class="c1">// Computed property for filtered funnel stages</span>
+    <span class="kd">const</span> <span class="nx">funnelStages</span> <span class="o">=</span> <span class="nf">computed</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span> <span class="o">||</span> <span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span><span class="p">)</span> <span class="k">return</span> <span class="p">[];</span>
+
+      <span class="c1">// Filter out "Unknown" (0) and "Closed Lost" (5)</span>
+      <span class="k">return</span> <span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span>
+        <span class="p">.</span><span class="nf">filter</span><span class="p">((</span><span class="nx">status</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">].</span><span class="nf">includes</span><span class="p">(</span><span class="nx">status</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">))</span>
+        <span class="p">.</span><span class="nf">sort</span><span class="p">((</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">a</span><span class="p">.</span><span class="nx">dealStatus</span> <span class="o">-</span> <span class="nx">b</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">);</span>
+    <span class="p">});</span>
+
+    <span class="c1">// Render the chart.js chart</span>
+    <span class="kd">const</span> <span class="nx">renderChart</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">chartCanvas</span><span class="p">.</span><span class="nx">value</span> <span class="o">||</span> <span class="o">!</span><span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+
+      <span class="c1">// Destroy existing chart if it exists</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">chart</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">chart</span><span class="p">.</span><span class="nf">destroy</span><span class="p">();</span>
+      <span class="p">}</span>
+
+      <span class="kd">const</span> <span class="nx">ctx</span> <span class="o">=</span> <span class="nx">chartCanvas</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nf">getContext</span><span class="p">(</span><span class="dl">'</span><span class="s1">2d</span><span class="dl">'</span><span class="p">);</span>
+
+      <span class="c1">// Prepare data for chart</span>
+      <span class="kd">const</span> <span class="nx">labels</span> <span class="o">=</span> <span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">stage</span> <span class="o">=&gt;</span> <span class="nf">getDealStatusDescription</span><span class="p">(</span><span class="nx">stage</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">));</span>
+      <span class="kd">const</span> <span class="nx">counts</span> <span class="o">=</span> <span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">stage</span> <span class="o">=&gt;</span> <span class="nx">stage</span><span class="p">.</span><span class="nx">count</span><span class="p">);</span>
+
+      <span class="c1">// Color palette for chart bars</span>
+      <span class="kd">const</span> <span class="nx">colors</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="dl">'</span><span class="s1">rgba(52, 152, 219, 0.8)</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">rgba(46, 134, 193, 0.8)</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">rgba(40, 116, 166, 0.8)</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">rgba(33, 97, 140, 0.8)</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">rgba(26, 82, 118, 0.8)</span><span class="dl">'</span>
+      <span class="p">];</span>
+
+      <span class="kd">const</span> <span class="nx">borderColors</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="dl">'</span><span class="s1">rgb(52, 152, 219)</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">rgb(46, 134, 193)</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">rgb(40, 116, 166)</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">rgb(33, 97, 140)</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">rgb(26, 82, 118)</span><span class="dl">'</span>
+      <span class="p">];</span>
+
+      <span class="c1">// Create the chart</span>
+      <span class="nx">chart</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Chart</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">bar</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">labels</span><span class="p">:</span> <span class="nx">labels</span><span class="p">,</span>
+          <span class="na">datasets</span><span class="p">:</span> <span class="p">[{</span>
+            <span class="na">label</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Number of Deals</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">data</span><span class="p">:</span> <span class="nx">counts</span><span class="p">,</span>
+            <span class="na">backgroundColor</span><span class="p">:</span> <span class="nx">colors</span><span class="p">,</span>
+            <span class="na">borderColor</span><span class="p">:</span> <span class="nx">borderColors</span><span class="p">,</span>
+            <span class="na">borderWidth</span><span class="p">:</span> <span class="mi">1</span>
+          <span class="p">}]</span>
+        <span class="p">},</span>
+        <span class="na">options</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">indexAxis</span><span class="p">:</span> <span class="dl">'</span><span class="s1">y</span><span class="dl">'</span><span class="p">,</span>  <span class="c1">// Horizontal bar chart</span>
+          <span class="na">responsive</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+          <span class="na">maintainAspectRatio</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+          <span class="na">plugins</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">tooltip</span><span class="p">:</span> <span class="p">{</span>
+              <span class="na">callbacks</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">label</span><span class="p">:</span> <span class="p">(</span><span class="nx">context</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                  <span class="kd">const</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">context</span><span class="p">.</span><span class="nx">dataIndex</span><span class="p">;</span>
+                  <span class="kd">const</span> <span class="nx">stage</span> <span class="o">=</span> <span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
+                  <span class="k">return</span> <span class="s2">`Count: </span><span class="p">${</span><span class="nx">stage</span><span class="p">.</span><span class="nx">count</span><span class="p">}</span><span class="s2"> deals`</span><span class="p">;</span>
+                <span class="p">},</span>
+                <span class="na">afterLabel</span><span class="p">:</span> <span class="p">(</span><span class="nx">context</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                  <span class="kd">const</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">context</span><span class="p">.</span><span class="nx">dataIndex</span><span class="p">;</span>
+                  <span class="kd">const</span> <span class="nx">stage</span> <span class="o">=</span> <span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
+                  <span class="k">return</span> <span class="p">[</span>
+                    <span class="s2">`Total: </span><span class="p">${</span><span class="nf">formatCurrency</span><span class="p">(</span><span class="nx">stage</span><span class="p">.</span><span class="nx">totalDealValue</span><span class="p">)}</span><span class="s2">`</span><span class="p">,</span>
+                    <span class="s2">`Avg Age: </span><span class="p">${</span><span class="nx">stage</span><span class="p">.</span><span class="nx">averageAge</span><span class="p">.</span><span class="nf">toFixed</span><span class="p">(</span><span class="mi">1</span><span class="p">)}</span><span class="s2"> days`</span>
+                  <span class="p">];</span>
+                <span class="p">}</span>
+              <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="na">legend</span><span class="p">:</span> <span class="p">{</span>
+              <span class="na">display</span><span class="p">:</span> <span class="kc">false</span> <span class="c1">// Hide legend</span>
+            <span class="p">}</span>
+          <span class="p">},</span>
+          <span class="na">scales</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">x</span><span class="p">:</span> <span class="p">{</span>
+              <span class="na">beginAtZero</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+              <span class="na">title</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">display</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="na">text</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Number of Deals</span><span class="dl">'</span>
+              <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="na">y</span><span class="p">:</span> <span class="p">{</span>
+              <span class="na">title</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">display</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="na">text</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Pipeline Stage</span><span class="dl">'</span>
+              <span class="p">}</span>
+            <span class="p">}</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+      <span class="p">});</span>
+    <span class="p">};</span>
+
+    <span class="nf">onMounted</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="nf">fetchSalesFunnelSummary</span><span class="p">();</span>
+    <span class="p">});</span>
+
+    <span class="c1">// Watch for changes to render chart when data is loaded</span>
+    <span class="nf">watch</span><span class="p">(</span><span class="nx">summary</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="nf">nextTick</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nf">renderChart</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+      <span class="nx">summary</span><span class="p">,</span>
+      <span class="nx">loading</span><span class="p">,</span>
+      <span class="nx">error</span><span class="p">,</span>
+      <span class="nx">chartCanvas</span><span class="p">,</span>
+      <span class="nx">getDealStatusDescription</span><span class="p">,</span>
+      <span class="nx">formatCurrency</span><span class="p">,</span>
+      <span class="nx">funnelStages</span>
+    <span class="p">};</span>
+  <span class="p">},</span>
+<span class="p">};</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span>
+<span class="o">&lt;</span><span class="nx">style</span> <span class="nx">scoped</span><span class="o">&gt;</span>
+<span class="p">.</span><span class="nx">summary</span><span class="o">-</span><span class="nx">table</span> <span class="nx">th</span> <span class="p">{</span>
+  <span class="nl">width</span><span class="p">:</span> <span class="nx">fit</span><span class="o">-</span><span class="nx">content</span><span class="p">;</span>
+  <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="p">:</span> <span class="nx">right</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">.</span><span class="nx">summary</span><span class="o">-</span><span class="nx">table</span> <span class="nx">td</span> <span class="p">{</span>
+  <span class="nx">padding</span><span class="o">-</span><span class="nx">left</span><span class="p">:</span> <span class="mi">10</span><span class="nx">px</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">.</span><span class="nx">detail</span><span class="o">-</span><span class="nx">table</span> <span class="nx">th</span> <span class="p">{</span>
+  <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="p">:</span> <span class="nx">right</span><span class="p">;</span>
+  <span class="nx">padding</span><span class="o">-</span><span class="nx">right</span><span class="p">:</span> <span class="mi">15</span><span class="nx">px</span><span class="p">;</span>
+  <span class="nl">width</span><span class="p">:</span> <span class="nx">fit</span><span class="o">-</span><span class="nx">content</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">.</span><span class="nx">detail</span><span class="o">-</span><span class="nx">table</span> <span class="nx">td</span> <span class="p">{</span>
+  <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="p">:</span> <span class="nx">right</span><span class="p">;</span>
+  <span class="nx">padding</span><span class="o">-</span><span class="nx">right</span><span class="p">:</span> <span class="mi">16</span><span class="nx">px</span><span class="p">;</span>
+  <span class="nl">width</span><span class="p">:</span> <span class="nx">fit</span><span class="o">-</span><span class="nx">content</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cm">/* Chart Container */</span>
+<span class="p">.</span><span class="nx">chart</span><span class="o">-</span><span class="nx">container</span> <span class="p">{</span>
+  <span class="nl">height</span><span class="p">:</span> <span class="mi">400</span><span class="nx">px</span><span class="p">;</span>
+  <span class="nx">max</span><span class="o">-</span><span class="nx">width</span><span class="p">:</span> <span class="mi">900</span><span class="nx">px</span><span class="p">;</span>
+  <span class="nl">margin</span><span class="p">:</span> <span class="mi">25</span><span class="nx">px</span> <span class="nx">auto</span><span class="p">;</span>
+  <span class="nl">padding</span><span class="p">:</span> <span class="mi">15</span><span class="nx">px</span><span class="p">;</span>
+  <span class="nx">background</span><span class="o">-</span><span class="nx">color</span><span class="p">:</span> <span class="nx">#f8f9fa</span><span class="p">;</span>
+  <span class="nx">border</span><span class="o">-</span><span class="nx">radius</span><span class="p">:</span> <span class="mi">8</span><span class="nx">px</span><span class="p">;</span>
+  <span class="nx">box</span><span class="o">-</span><span class="nx">shadow</span><span class="p">:</span> <span class="mi">0</span> <span class="mi">2</span><span class="nx">px</span> <span class="mi">4</span><span class="nx">px</span> <span class="nf">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nx">h2</span> <span class="p">{</span>
+  <span class="nx">margin</span><span class="o">-</span><span class="nx">top</span><span class="p">:</span> <span class="mi">30</span><span class="nx">px</span><span class="p">;</span>
+  <span class="nx">margin</span><span class="o">-</span><span class="nx">bottom</span><span class="p">:</span> <span class="mi">15</span><span class="nx">px</span><span class="p">;</span>
+  <span class="nx">font</span><span class="o">-</span><span class="nx">size</span><span class="p">:</span> <span class="mi">150</span><span class="o">%</span><span class="p">;</span>
+  <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="p">:</span> <span class="nx">center</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nx">h1</span> <span class="p">{</span>
+  <span class="nx">font</span><span class="o">-</span><span class="nx">size</span><span class="p">:</span> <span class="mi">175</span><span class="o">%</span><span class="p">;</span>
+  <span class="nx">padding</span><span class="o">-</span><span class="nx">top</span><span class="p">:</span> <span class="mi">2</span><span class="o">%</span><span class="p">;</span>
+  <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="p">:</span> <span class="nx">center</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/style</span><span class="err">&gt;
+</span></code></pre></div></div>
+
+<p><br /></p>
+
+<p><em>End Response</em></p>
+
+<p>Here is a breakdown of the changes:</p>
+
+<ol>
+  <li>Replace the <code class="language-plaintext highlighter-rouge">funnel-container</code> div with the <code class="language-plaintext highlighter-rouge">chart-container</code> div.</li>
+</ol>
+
+<p><img src="../assets/images/2025-04-30/vSalesFunnelSummary-chartjs-Template-Changes.png" alt="Replacing the funnel container with the chart.js chart container in the vSalesFunnelSummary Vue" /></p>
+
+<p><br /><br /></p>
+
+<ol>
+  <li>The <code class="language-plaintext highlighter-rouge">Chart</code> and <code class="language-plaintext highlighter-rouge">registrables</code> functions are imported from the chart.js library, along with the associated <code class="language-plaintext highlighter-rouge">watch</code> and <code class="language-plaintext highlighter-rouge">nextTick</code> triggers.</li>
+</ol>
+
+<p><img src="../assets/images/2025-04-30/vSalesFunnelSummary-chartjs-Script-Changes-1.png" alt="Importing the chart.js functions and triggers in the vSalesFunnelSummary Vue" /></p>
+
+<p><br /><br /></p>
+
+<ol>
+  <li>The stage width calculation is no longer needed and is removed.</li>
+</ol>
+
+<p><br />
+<img src="../assets/images/2025-04-30/vSalesFunnelSummary-chartjs-Script-Changes-2.png" alt="Removing the stage width calculation from the vSalesFunnelSummary Vue" /></p>
+
+<p><br /></p>
+
+<ol>
+  <li>Add the <code class="language-plaintext highlighter-rouge">renderChart</code> function that defines the chart.js data visualization.</li>
+</ol>
+
+<p><br />
+<img src="../assets/images/2025-04-30/vSalesFunnelSummary-chartjs-Script-Changes-3.png" alt="Add the renderChart function to the vSalesFunnelSummary Vue" /></p>
+
+<p><br /><br /></p>
+
+<ol>
+  <li>Wire up triggers and drop <code class="language-plaintext highlighter-rouge">getStageWidth</code> from return in favor of <code class="language-plaintext highlighter-rouge">chartCanvas</code>.</li>
+</ol>
+
+<p><br />
+<img src="../assets/images/2025-04-30/vSalesFunnelSummary-chartjs-Script-Changes-4.png" alt="Wiring up new triggers and dropping getStageWidth from return in favor of chartCanvas in the vSalesFunnelSummary Vue" /></p>
+
+<p><br /><br /></p>
+
+<ol>
+  <li>Replace <code class="language-plaintext highlighter-rouge">.funnel-container</code> style with the <code class="language-plaintext highlighter-rouge">.chart-container</code> style.</li>
+</ol>
+
+<p><br />
+<img src="../assets/images/2025-04-30/vSalesFunnelSummary-chartjs-Style-Changes-1.png" alt="Replacing the .funnel-container style with the .chart-container style in the .vSalesFunnelSummary Vue" /></p>
+
+<p><br /><br /></p>
+
+<ol>
+  <li>Remove the styles used by the CSS Sales Funnel visualization implementation.</li>
+</ol>
+
+<p><br />
+<img src="../assets/images/2025-04-30/vSalesFunnelSummary-chartjs-Style-Changes-2.png" alt="Removing the styles used by the CSS visualization from the vSalesFunnelSummary Vue" /></p>
+
+<p><br /><br /></p>
+
+<ol>
+  <li>Here is the page rendered with the chart.js data visualization.</li>
+</ol>
+
+<p><br />
+<img src="../assets/images/2025-04-30/vSalesFunnelSummary-Rendered-After-chartjs-Changes.png" alt="Rendering the vSalesFunnelSummary Vue after implementing chart.js changes" /></p>
+
+<p>This is also a workable implementation. It’s lost the “funnel” appearance from the CSS implementation but adds the Number of Deals axis. Also the data is hidden in a tool tip:</p>
+
+<p><img src="../assets/images/2025-04-30/vSalesFunnelSummary-Rendered-After-chartjs-Changes-with-tooltip.png" alt="The vSalesFunnelSummary Vue showing the stage data in a tool tip" /></p>
+
+<p>As you can see creating data visualizations using Copilot is surprisingly easy. Even to the point of being able to remove an existing implementation and replacing it with a new implementation. Also important is that no manual code changes were needed and both implementations worked the first time.</p>
+
+<h3 id="feedback-loop">Feedback Loop</h3>
+
+<p>Feedback is always welcome. Please direct it to <a href="mailto:AIP@pdata.com" target="_blank">AIP@pdata.com</a></p>
+
+<h4 id="disclaimer">Disclaimer</h4>
+
+<p>AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul.</p>
+
+<ul>
+  <li><strong>Prompts:</strong> Give a one paragraph description of the chart.js library.</li>
+</ul>
+
+<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/UIAI3">post</a></small></small></small></p>
+
+  </div><a class="u-url" href="/UIAI3/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">AI Practitioner</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">John Michael Miller</li><li><a class="u-email" href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>jMM&#39;s AI Practitioner Blog</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
