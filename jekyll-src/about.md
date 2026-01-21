@@ -4,4 +4,4 @@ title: About
 permalink: /about/
 ---
 
-About John Michael Miller and the AI Practitioner blog. This is a placeholder About page — update jekyll-src/about.md with your preferred content.
+For more about [John Michael Miller](https://www.linkedin.com/in/johnmichaelmiller) and the [AI Practitioner]({% post_url 2026-01-20-WTAIP %}) blog.
