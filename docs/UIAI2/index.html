@@ -8,8 +8,8 @@
 <meta property="og:title" content="Developing User Interfaces with GitHub Copilot, Part 2" />
 <meta name="author" content="John Michael Miller" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="jMM’s AI Practitioner Blog" />
-<meta property="og:description" content="jMM’s AI Practitioner Blog" />
+<meta name="description" content="This is the second installment of my series on using Copilot to implement user interfaces. It does build on the topics discussed in part one, so if you missed it you can check it out here. In this article, I (well, Copilot) will expand on the implementation of the owner-select drop-down by encapsulating the drop-down logic into a new vue component and then replacing the implementation on the Active Leads by Owner vue with the new component." />
+<meta property="og:description" content="This is the second installment of my series on using Copilot to implement user interfaces. It does build on the topics discussed in part one, so if you missed it you can check it out here. In this article, I (well, Copilot) will expand on the implementation of the owner-select drop-down by encapsulating the drop-down logic into a new vue component and then replacing the implementation on the Active Leads by Owner vue with the new component." />
 <link rel="canonical" href="https://blog.pdata.com/UIAI2/" />
 <meta property="og:url" content="https://blog.pdata.com/UIAI2/" />
 <meta property="og:site_name" content="AI Practitioner" />
@@ -20,7 +20,7 @@
 <meta property="twitter:image" content="https://blog.pdata.com/assets/images/2025-03-29/header-UIAI2.jpg" />
 <meta property="twitter:title" content="Developing User Interfaces with GitHub Copilot, Part 2" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-03-29T00:00:00-07:00","datePublished":"2025-03-29T00:00:00-07:00","description":"jMM’s AI Practitioner Blog","headline":"Developing User Interfaces with GitHub Copilot, Part 2","image":"https://blog.pdata.com/assets/images/2025-03-29/header-UIAI2.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/UIAI2/"},"url":"https://blog.pdata.com/UIAI2/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-03-29T00:00:00-07:00","datePublished":"2025-03-29T00:00:00-07:00","description":"This is the second installment of my series on using Copilot to implement user interfaces. It does build on the topics discussed in part one, so if you missed it you can check it out here. In this article, I (well, Copilot) will expand on the implementation of the owner-select drop-down by encapsulating the drop-down logic into a new vue component and then replacing the implementation on the Active Leads by Owner vue with the new component.","headline":"Developing User Interfaces with GitHub Copilot, Part 2","image":"https://blog.pdata.com/assets/images/2025-03-29/header-UIAI2.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/UIAI2/"},"url":"https://blog.pdata.com/UIAI2/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
 <body><header class="site-header" role="banner">
@@ -50,15 +50,15 @@
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p><img src="/assets/images/2025-03-29/header-UIAI2.jpg" alt="Header Image" /></p>
+    <p>This is the second installment of my series on using Copilot to implement user interfaces. It does build on the topics discussed in part one, so if you missed it you can check it out <a href="https://www.codemag.com/blog/AIPractitioner/UIAI">here</a>.</p>
 
-<p><img src="/assets/images/2025-03-29/header-UIAI2.png" alt="Header Image" /></p>
+<p>In this article, I (well, Copilot) will expand on the implementation of the <code class="language-plaintext highlighter-rouge">owner-select</code> drop-down by encapsulating the drop-down logic into a new vue component and then replacing the implementation on the <code class="language-plaintext highlighter-rouge">Active Leads by Owner</code> vue with the new component.</p>
 
-<p>This is the second installment of my series on using Copilot to implement user interfaces. It does build on the topics discussed in part one, so if you missed it you can check it out <a href="https://www.codemag.com/blog/AIPractitioner/UIAI">here</a>.</p>
+<!--more-->
 
-<h2 id="creating-components-that-can-be-shared-with-multiple-pages">Creating Components That Can Be Shared with Multiple Pages</h2>
+<p><img src="/assets/images/2025-03-29/header-UIAI2.jpg" alt="Header Image" /></p>
 
-<p>In this article, I (well, Copilot) will expand on the implementation of the <code class="language-plaintext highlighter-rouge">owner-select</code> drop-down by encapsulating the drop-down logic into a new vue component and then replacing the implementation on the <code class="language-plaintext highlighter-rouge">Active Leads by Owner</code> vue with the new component. I’ll also add the new component to a different vue that could benefit from this feature.</p>
+<p><img src="/assets/images/2025-03-29/header-UIAI2.png" alt="Header Image" /> I’ll also add the new component to a different vue that could benefit from this feature.</p>
 
 <p>The two vues will share the same component and any changes to the component will be reflected in both vues.</p>
 

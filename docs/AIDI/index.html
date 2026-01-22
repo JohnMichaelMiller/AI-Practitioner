@@ -8,8 +8,8 @@
 <meta property="og:title" content="Adding Dependency Injection to an Existing Solution" />
 <meta name="author" content="John Michael Miller" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="jMM’s AI Practitioner Blog" />
-<meta property="og:description" content="jMM’s AI Practitioner Blog" />
+<meta name="description" content="Modernizing legacy code can feel like renovating an old house – you know the foundation is solid, but there are improvements to be made. This article explores how to improve the maintainability and test-ability of existing code by introducing dependency injection. Sometimes when working with legacy code, the code is not as testable as you may like. Making the code more testable requires, in part, to loosen tight dependencies in order to reduce the scope of the code under test." />
+<meta property="og:description" content="Modernizing legacy code can feel like renovating an old house – you know the foundation is solid, but there are improvements to be made. This article explores how to improve the maintainability and test-ability of existing code by introducing dependency injection. Sometimes when working with legacy code, the code is not as testable as you may like. Making the code more testable requires, in part, to loosen tight dependencies in order to reduce the scope of the code under test." />
 <link rel="canonical" href="https://blog.pdata.com/AIDI/" />
 <meta property="og:url" content="https://blog.pdata.com/AIDI/" />
 <meta property="og:site_name" content="AI Practitioner" />
@@ -20,7 +20,7 @@
 <meta property="twitter:image" content="https://blog.pdata.com/assets/images/2025-01-30/header-AIDI.jpg" />
 <meta property="twitter:title" content="Adding Dependency Injection to an Existing Solution" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-01-29T16:00:00-08:00","datePublished":"2025-01-29T16:00:00-08:00","description":"jMM’s AI Practitioner Blog","headline":"Adding Dependency Injection to an Existing Solution","image":"https://blog.pdata.com/assets/images/2025-01-30/header-AIDI.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIDI/"},"url":"https://blog.pdata.com/AIDI/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-01-29T16:00:00-08:00","datePublished":"2025-01-29T16:00:00-08:00","description":"Modernizing legacy code can feel like renovating an old house – you know the foundation is solid, but there are improvements to be made. This article explores how to improve the maintainability and test-ability of existing code by introducing dependency injection. Sometimes when working with legacy code, the code is not as testable as you may like. Making the code more testable requires, in part, to loosen tight dependencies in order to reduce the scope of the code under test.","headline":"Adding Dependency Injection to an Existing Solution","image":"https://blog.pdata.com/assets/images/2025-01-30/header-AIDI.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIDI/"},"url":"https://blog.pdata.com/AIDI/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
 <body><header class="site-header" role="banner">
@@ -50,13 +50,13 @@
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p><img src="/assets/images/2025-01-30/header-AIDI.jpg" alt="Header Image" /></p>
-
-<p>Modernizing legacy code can feel like renovating an old house – you know the foundation is solid, but there are improvements to be made. This article explores how to improve the maintainability and test-ability of existing code by introducing dependency injection.</p>
-
-<h1 id="making-big-changes-to-a-legacy-code-base">Making Big Changes to a Legacy Code Base</h1>
+    <p>Modernizing legacy code can feel like renovating an old house – you know the foundation is solid, but there are improvements to be made. This article explores how to improve the maintainability and test-ability of existing code by introducing dependency injection.</p>
 
 <p>Sometimes when working with legacy code, the code is not as testable as you may like. Making the code more testable requires, in part, to loosen tight dependencies in order to reduce the scope of the code under test.</p>
+
+<!--more-->
+
+<p><img src="/assets/images/2025-01-30/header-AIDI.jpg" alt="Header Image" /></p>
 
 <h2 id="what-is-legacy-code">What Is Legacy Code?</h2>
 

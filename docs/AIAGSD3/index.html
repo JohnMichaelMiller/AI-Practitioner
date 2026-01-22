@@ -8,8 +8,8 @@
 <meta property="og:title" content="AI Assisted Greenfield Software Development, Part 3: Generating the Process Instruction Files" />
 <meta name="author" content="John Michael Miller" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="jMM’s AI Practitioner Blog" />
-<meta property="og:description" content="jMM’s AI Practitioner Blog" />
+<meta name="description" content="This is the 3rd post in the series on AI assisted greenfield software development. This post builds on the first AI-Assisted Greenfield Software Development, Part 1: Business Requirements and subsequent posts. If you haven’t read these posts, you might consider starting there. In Part 1 we defined the high-level business requirements and in Part 2 we started building out the scaffolding supporting AI code generation. In part 3, we’ll continue to add guidance for AI code generation. Starting with project guidance and process definitions, we’ll create prompts that create project overview instructions, AI code generation guidance, and Git workflow instructions." />
+<meta property="og:description" content="This is the 3rd post in the series on AI assisted greenfield software development. This post builds on the first AI-Assisted Greenfield Software Development, Part 1: Business Requirements and subsequent posts. If you haven’t read these posts, you might consider starting there. In Part 1 we defined the high-level business requirements and in Part 2 we started building out the scaffolding supporting AI code generation. In part 3, we’ll continue to add guidance for AI code generation. Starting with project guidance and process definitions, we’ll create prompts that create project overview instructions, AI code generation guidance, and Git workflow instructions." />
 <link rel="canonical" href="https://blog.pdata.com/AIAGSD3/" />
 <meta property="og:url" content="https://blog.pdata.com/AIAGSD3/" />
 <meta property="og:site_name" content="AI Practitioner" />
@@ -20,7 +20,7 @@
 <meta property="twitter:image" content="https://blog.pdata.com/assets/images/2025-12-30/header-AIAGSD3.jpg" />
 <meta property="twitter:title" content="AI Assisted Greenfield Software Development, Part 3: Generating the Process Instruction Files" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-12-30T00:00:00-08:00","datePublished":"2025-12-30T00:00:00-08:00","description":"jMM’s AI Practitioner Blog","headline":"AI Assisted Greenfield Software Development, Part 3: Generating the Process Instruction Files","image":"https://blog.pdata.com/assets/images/2025-12-30/header-AIAGSD3.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIAGSD3/"},"url":"https://blog.pdata.com/AIAGSD3/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-12-30T00:00:00-08:00","datePublished":"2025-12-30T00:00:00-08:00","description":"This is the 3rd post in the series on AI assisted greenfield software development. This post builds on the first AI-Assisted Greenfield Software Development, Part 1: Business Requirements and subsequent posts. If you haven’t read these posts, you might consider starting there. In Part 1 we defined the high-level business requirements and in Part 2 we started building out the scaffolding supporting AI code generation. In part 3, we’ll continue to add guidance for AI code generation. Starting with project guidance and process definitions, we’ll create prompts that create project overview instructions, AI code generation guidance, and Git workflow instructions.","headline":"AI Assisted Greenfield Software Development, Part 3: Generating the Process Instruction Files","image":"https://blog.pdata.com/assets/images/2025-12-30/header-AIAGSD3.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIAGSD3/"},"url":"https://blog.pdata.com/AIAGSD3/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
 <body><header class="site-header" role="banner">
@@ -50,13 +50,15 @@
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p><img src="/assets/images/2025-12-30/header-AIAGSD3.jpg" alt="Header Image" /></p>
+    <p>This is the 3rd post in the series on AI assisted greenfield software development. This post builds on the first <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1" target="_blank">AI-Assisted Greenfield Software Development, Part 1: Business Requirements</a> and subsequent posts. If you haven’t read these posts, you might consider starting there.</p>
 
-<p><img src="/assets/images/2025-12-30/header-AIAGSD3.png" alt="Header Image" /></p>
+<p>In Part 1 we defined the high-level business requirements and in Part 2 we started building out the scaffolding supporting AI code generation. In part 3, we’ll continue to add guidance for AI code generation. Starting with project guidance and process definitions, we’ll create prompts that create project overview instructions, AI code generation guidance, and Git workflow instructions.</p>
 
-<p>This is the 3rd post in the series on AI assisted greenfield software development. This post builds on the first <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1" target="_blank">AI-Assisted Greenfield Software Development, Part 1: Business Requirements</a> and subsequent posts. If you haven’t read these posts, you might consider starting there.</p>
+<!--more-->
 
-<p>In Part 1 we defined the high-level business requirements and in Part 2 we started building out the scaffolding supporting AI code generation. In part 3, we’ll continue to add guidance for AI code generation. Starting with project guidance and process definitions, we’ll create prompts that create project overview instructions, AI code generation guidance, and Git workflow instructions. We’ll use these prompt’s to create instruction files and then check the guidance for errors and redundancies.</p>
+<p><img src="/assets/images/2025-12-30/header-AIAGSD3.jpg" alt="Header Image" /></p>
+
+<p><img src="/assets/images/2025-12-30/header-AIAGSD3.png" alt="Header Image" /> We’ll use these prompt’s to create instruction files and then check the guidance for errors and redundancies.</p>
 
 <p>To achieve quality in AI code generation you need to constrain the AI model and focus it on what you intend to accomplish. Unconstrained, AI has many options to choose from and the chances that the AI will choose the wrong option are the greatest. This is where models are most non-deterministic and subject to hallucinations and errors.</p>
 

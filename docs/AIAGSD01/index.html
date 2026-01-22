@@ -8,8 +8,8 @@
 <meta property="og:title" content="AI-Assisted Greenfield Software Development, Part 1: Business Requirements" />
 <meta name="author" content="John Michael Miller" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="jMM’s AI Practitioner Blog" />
-<meta property="og:description" content="jMM’s AI Practitioner Blog" />
+<meta name="description" content="This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot. In this first installment we’ll look at the initial context provided to Copilot. This will include the initial instructions and the first prompts submitted to Copilot." />
+<meta property="og:description" content="This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot. In this first installment we’ll look at the initial context provided to Copilot. This will include the initial instructions and the first prompts submitted to Copilot." />
 <link rel="canonical" href="https://blog.pdata.com/AIAGSD01/" />
 <meta property="og:url" content="https://blog.pdata.com/AIAGSD01/" />
 <meta property="og:site_name" content="AI Practitioner" />
@@ -20,7 +20,7 @@
 <meta property="twitter:image" content="https://blog.pdata.com/assets/images/2025-08-30/header-AIAGSD01.jpg" />
 <meta property="twitter:title" content="AI-Assisted Greenfield Software Development, Part 1: Business Requirements" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-08-30T00:00:00-07:00","datePublished":"2025-08-30T00:00:00-07:00","description":"jMM’s AI Practitioner Blog","headline":"AI-Assisted Greenfield Software Development, Part 1: Business Requirements","image":"https://blog.pdata.com/assets/images/2025-08-30/header-AIAGSD01.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIAGSD01/"},"url":"https://blog.pdata.com/AIAGSD01/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-08-30T00:00:00-07:00","datePublished":"2025-08-30T00:00:00-07:00","description":"This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot. In this first installment we’ll look at the initial context provided to Copilot. This will include the initial instructions and the first prompts submitted to Copilot.","headline":"AI-Assisted Greenfield Software Development, Part 1: Business Requirements","image":"https://blog.pdata.com/assets/images/2025-08-30/header-AIAGSD01.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIAGSD01/"},"url":"https://blog.pdata.com/AIAGSD01/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
 <body><header class="site-header" role="banner">
@@ -50,13 +50,15 @@
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p><img src="/assets/images/2025-08-30/header-AIAGSD01.jpg" alt="Header Image" /></p>
-
-<p><img src="/assets/images/2025-08-30/header-AIAGSD01.png" alt="Header Image" /></p>
-
-<p>This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot.</p>
+    <p>This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot.</p>
 
 <p>In this first installment we’ll look at the initial context provided to Copilot. This will include the initial instructions and the first prompts submitted to Copilot.</p>
+
+<!--more-->
+
+<p><img src="/assets/images/2025-08-30/header-AIAGSD01.jpg" alt="Header Image" /></p>
+
+<p><img src="/assets/images/2025-08-30/header-AIAGSD01.png" alt="Header Image" /></p>
 
 <p>In this series we’ll start with a conceptual model of an academic system. The academic system is a standin for any complex enterprise scale system. I’m using it because it’s a familiar domain and a publicly available model.</p>
 
@@ -129,6 +131,7 @@ Each Teacher is audited by at most one Teacher.
 It is possible that some Teacher audits more than one Teacher.
 No Teacher is audited by the same Teacher.
 </code></pre>
+
 <p>The fact that no teacher is audited by the same teacher is an ir-refexive ring constraint. This constraint prevents a teacher from auditing themselves. This is an important business rule that we want to make sure the solution enforces.</p>
 
 <pre><code class="language-txt">If some Professor heads some Dept then some Academic that is that Professor works for that Dept.

@@ -8,8 +8,8 @@
 <meta property="og:title" content="Developing User Interfaces with GitHub Copilot, Part 1" />
 <meta name="author" content="John Michael Miller" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="jMM’s AI Practitioner Blog" />
-<meta property="og:description" content="jMM’s AI Practitioner Blog" />
+<meta name="description" content="In the next few posts I will explore techniques for creating and maintaining user interfaces leveraging GitHub Copilot. Using real-world examples, I’ll show how AI handles making UI modifications. Including: Adding new controls to an existing page Creating components that can be shared with multiple pages Creating data visualizations Adding client-side sorting to data tables." />
+<meta property="og:description" content="In the next few posts I will explore techniques for creating and maintaining user interfaces leveraging GitHub Copilot. Using real-world examples, I’ll show how AI handles making UI modifications. Including: Adding new controls to an existing page Creating components that can be shared with multiple pages Creating data visualizations Adding client-side sorting to data tables." />
 <link rel="canonical" href="https://blog.pdata.com/UIAI1/" />
 <meta property="og:url" content="https://blog.pdata.com/UIAI1/" />
 <meta property="og:site_name" content="AI Practitioner" />
@@ -20,7 +20,7 @@
 <meta property="twitter:image" content="https://blog.pdata.com/assets/images/2025-02-24/header-UIAI1.jpg" />
 <meta property="twitter:title" content="Developing User Interfaces with GitHub Copilot, Part 1" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-02-24T00:00:00-08:00","datePublished":"2025-02-24T00:00:00-08:00","description":"jMM’s AI Practitioner Blog","headline":"Developing User Interfaces with GitHub Copilot, Part 1","image":"https://blog.pdata.com/assets/images/2025-02-24/header-UIAI1.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/UIAI1/"},"url":"https://blog.pdata.com/UIAI1/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-02-24T00:00:00-08:00","datePublished":"2025-02-24T00:00:00-08:00","description":"In the next few posts I will explore techniques for creating and maintaining user interfaces leveraging GitHub Copilot. Using real-world examples, I’ll show how AI handles making UI modifications. Including: Adding new controls to an existing page Creating components that can be shared with multiple pages Creating data visualizations Adding client-side sorting to data tables.","headline":"Developing User Interfaces with GitHub Copilot, Part 1","image":"https://blog.pdata.com/assets/images/2025-02-24/header-UIAI1.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/UIAI1/"},"url":"https://blog.pdata.com/UIAI1/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
 <body><header class="site-header" role="banner">
@@ -50,9 +50,7 @@
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p><img src="/assets/images/2025-02-24/header-UIAI1.jpg" alt="Header Image" /></p>
-
-<p>In the next few posts I will explore techniques for creating and maintaining user interfaces leveraging GitHub Copilot. Using real-world examples, I’ll show how AI handles making UI modifications. Including:</p>
+    <p>In the next few posts I will explore techniques for creating and maintaining user interfaces leveraging GitHub Copilot. Using real-world examples, I’ll show how AI handles making UI modifications. Including:</p>
 
 <ul>
   <li>Adding new controls to an existing page</li>
@@ -61,7 +59,9 @@
   <li>Adding client-side sorting to data tables.</li>
 </ul>
 
-<p>In this post I will take on adding a new control to an existing page. While my demo application will show a <code class="language-plaintext highlighter-rouge">Vue.js</code> <code class="language-plaintext highlighter-rouge">Typescript</code> implementation, you can apply the techniques I’ll demonstrate to many UI frameworks.</p>
+<!--more-->
+
+<p><img src="/assets/images/2025-02-24/header-UIAI1.jpg" alt="Header Image" /> While my demo application will show a <code class="language-plaintext highlighter-rouge">Vue.js</code> <code class="language-plaintext highlighter-rouge">Typescript</code> implementation, you can apply the techniques I’ll demonstrate to many UI frameworks.</p>
 
 <p>The app I’ll modify in this series is a lead management app written in <code class="language-plaintext highlighter-rouge">Vue.js</code>. In this post, I’ll show you the changes Copilot suggests that we make to the <strong>Active Leads by Owner</strong> <code class="language-plaintext highlighter-rouge">vue</code> to show the number of active leads for individual owners. The vue currently reports the total for all owners and it needs to report the total for individual owners. Our first modification is to add a new control to a page and wire the control to parameterize the request for data from the back end. Before we begin to make modifications let’s review the existing app.</p>
 
