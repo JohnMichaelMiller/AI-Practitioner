@@ -1,0 +1,54 @@
+---
+---
+
+@import "minima";
+
+/* Post list styling with images */
+.post-list li {
+  margin-bottom: 30px;
+}
+
+.post-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.post-image-link {
+  flex-shrink: 0;
+}
+
+.post-thumbnail {
+  width: auto;
+  height: 2.5em; /* Match approximately 2 lines of h3 text */
+  object-fit: cover;
+  border-radius: 4px;
+  transition: opacity 0.2s ease;
+}
+
+.post-thumbnail:hover {
+  opacity: 0.8;
+}
+
+.post-content {
+  flex: 1;
+  min-width: 0; /* Prevent overflow */
+}
+
+.post-content h3 {
+  margin-top: 0;
+  line-height: 1.25;
+}
+
+/* Responsive: stack on small screens */
+@media screen and (max-width: 600px) {
+  .post-item {
+    flex-direction: column;
+  }
+  
+  .post-thumbnail {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+  }
+}
