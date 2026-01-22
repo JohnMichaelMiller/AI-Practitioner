@@ -87,3 +87,22 @@ After making changes, rebuild the site and commit both source and generated file
 - Test locally before pushing to ensure everything looks correct
 - Keep the Jekyll version and dependencies up to date with `bundle update`
 
+## GitHub Multi-Account Setup
+
+This repository includes tools for managing multiple GitHub accounts:
+
+- **[GITHUB_ACCOUNTS_SETUP.md](GITHUB_ACCOUNTS_SETUP.md)**: Comprehensive setup guide for three GitHub accounts
+- **[scripts/github-setup.ps1](scripts/github-setup.ps1)**: PowerShell script for managing SSH keys and testing connections
+
+### Quick Setup Commands
+
+```powershell
+# Show SSH public keys to add to GitHub accounts
+.\scripts\github-setup.ps1 -Action show-keys
+
+# Test all GitHub connections
+.\scripts\github-setup.ps1 -Action test-connections
+
+# Configure git settings for current repository
+.\scripts\github-setup.ps1 -Action setup-git-configs
+```
