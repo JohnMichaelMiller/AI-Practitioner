@@ -41,7 +41,191 @@
 
 <p>Welcome to jMM’s AI Practitioner Blog.</p>
 <h2 class="post-list-heading">Posts</h2>
-    <ul class="post-list"><li><div class="post-item"><a href="/WTAIP/" class="post-image-link">
+    <ul class="post-list"><li><div class="post-item"><div class="post-content">
+            <span class="post-meta">Jan 26, 2026</span>
+            <h3>
+              <a class="post-link" href="/AIAGSD4/">
+                AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files
+              </a>
+            </h3><h1 id="ai-assisted-greenfield-software-development-part-4-architecture-prompts-and-instructions">AI-Assisted Greenfield Software Development, Part 4: Architecture Prompts and Instructions</h1>
+
+<p>This is the fourth post in the series on AI‑assisted greenfield software development. If you’re joining mid‑stream, you may want to begin with <a href="https://blog.pdata.com/AIAGSD1/">Part 1: Business Requirements</a>, where we established the foundation for an AI‑driven development workflow. Parts 2 and 3 expanded that foundation with scaffolding, project‑level instructions, and Git workflow guidance.</p>
+
+<p>In this post, we shift from <em>project‑level</em> instructions to <em>architecture‑level</em> instructions. This is where we define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
+
+<hr />
+
+<h2 id="why-architecture-instruction-files-matter">Why Architecture Instruction Files Matter</h2>
+
+<p>When humans build software, architecture is often implicit—shared understanding, tribal knowledge, and experience fill in the gaps. AI doesn’t have that luxury. Without explicit architectural rules, AI agents tend to optimize for convenience rather than coherence.</p>
+
+<p>Architecture instruction files solve this by providing:</p>
+
+<ul>
+  <li>A clear architectural pattern</li>
+  <li>Implementation rules and constraints</li>
+  <li>Folder and feature structure</li>
+  <li>Cross‑cutting concerns</li>
+  <li>Anti‑patterns to avoid</li>
+  <li>Testing expectations</li>
+  <li>Success criteria for generated code</li>
+</ul>
+
+<p>These files become the “rails” that keep AI‑generated code aligned with the intended system design.</p>
+
+<p>In <a href="https://blog.pdata.com/AIAGSD4/">Part 4</a>, we focus on one of the most widely used architectural patterns in modern backend systems: <code class="language-plaintext highlighter-rouge">CQRS</code>. I’ve chosen <code class="language-plaintext highlighter-rouge">CQRS</code> because it is not a trivial architecture and is a good test of AI’s ability to create architectural instructions and implement in accordance with those instructions.</p>
+
+<hr />
+
+<h2 id="what-is-cqrs">What Is CQRS?</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">CQRS</code> (Command Query Responsibility Segregation) architectural pattern separates read operations (queries) from write operations (commands). Instead of a single model handling everything, <code class="language-plaintext highlighter-rouge">CQRS</code> splits responsibilities so each side can be optimized independently.</p>
+
+<h3 id="core-principle">Core Principle</h3>
+
+<p>Traditional <code class="language-plaintext highlighter-rouge">CRUD</code> applications use a single model to handle both read and write operations. <code class="language-plaintext highlighter-rouge">CQRS</code> separates these concerns by introducing two distinct models: one dedicated to commands (writes) and another focused on queries (reads).</p>
+
+<p><strong>Commands</strong></p>
+
+<p>A command is responsible for modifying the system’s state and carrying out the necessary business logic to make that change meaningful. Its job ends there—it does not return any domain‑level data, only an acknowledgment that the operation completed. Command examples are <code class="language-plaintext highlighter-rouge">CreateOrderCommand</code> and <code class="language-plaintext highlighter-rouge">ChangePasswordCommand</code></p>
+
+<p><strong>Queries</strong></p>
+
+<p>A query’s sole responsibility is to retrieve information from the system. It provides data back to the caller but never alters application state or triggers any side effects</p>
+
+<h3 id="key-benefits">Key Benefits</h3>
+
+<p><code class="language-plaintext highlighter-rouge">CQRS</code> makes it possible to scale the read and write sides of the system independently, allowing each to grow according to its own demands. Because the two responsibilities are separated, each side can use models tailored to its specific purpose, with the read side often taking advantage of denormalized structures to maximize performance. This separation also creates cleaner security boundaries, making it easier to control who can read or modify data. And since the two sides operate independently, each can use the storage technology best suited to its workload, giving the architecture far more flexibility overall</p>
+
+<h3 id="common-implementation-pattern">Common Implementation Pattern</h3>
+
+<p>Write operations trigger events that update read models. This creates an <em>eventually consistent</em> system—an intentional tradeoff that unlocks performance and scalability.</p>
+
+<h3 id="when-cqrs-is-a-good-fit">When <code class="language-plaintext highlighter-rouge">CQRS</code> Is a Good Fit</h3>
+
+<p><code class="language-plaintext highlighter-rouge">CQRS</code> is especially effective in environments where read operations vastly outnumber writes, allowing the system to optimize each side independently. It also shines in domains with intricate business rules, where separating commands and queries helps keep complexity manageable. Architectures built around event sourcing benefit naturally from <code class="language-plaintext highlighter-rouge">CQRS</code>, as do multi‑tenant applications that must serve diverse read patterns. And in systems where auditability is essential, the clear separation of responsibilities makes tracking and verifying changes far more straightforward.</p>
+
+<h3 id="when-to-avoid-it">When to Avoid It</h3>
+
+<p>If your application is simple <code class="language-plaintext highlighter-rouge">CRUD</code>, <code class="language-plaintext highlighter-rouge">CQRS</code> adds complexity without meaningful benefit.</p>
+
+<hr />
+
+<h2 id="creating-the-architecture-prompt-file">Creating the Architecture Prompt File</h2>
+
+<p>Prior to creating CQRS instructions, I created a prompt file to guide the creation of the instructions. By asking Copilot to create a prompt file, you give Copilot a chance to add relevant context to the which improves the prompt, which in turn will improve the instructions generated by the prompt.</p>
+
+<p>When generating GitHub AI guidance I used the custom <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/chatmodes/prompt-engineer.chatmode.md">prompt-engineer.chatmode.md</a> chat mode, introduced in <a href="https://blog.pdata.com/AIAGSD2/">Part 2</a>, which focuses Copilot on the skills needed to generate effective prompts.</p>
+
+<p>When working with GitHub AI guidance there is always a chicken-and-egg problem. For Copilot to generate an artifact, you need a prompt. In this case we want Copilot to generate a prompt file. We could create a prompt file that would generate the prompt file we need to generate the instruction file. This is a recursive process with diminishing returns. At some point we’d need to manually prompt Copilot to bootstrap the artifact generation.</p>
+
+<p>Here is the manual prompt I used to generate the prompt file: <em>Create a prompt file that generates instruction files for a CQRS architecture. The prompt file should target AI agents and be optimized to reduce token consumption.</em></p>
+
+<p>By asking Copilot to generate a prompt file, Copilot will use the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/instructions/ai-assisted-output.instructions.md">ai-assisted-output.instructions.md</a> and the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/instructions/prompt-file-generation.instructions.md">prompt-file-generation.instructions.md</a> to guide the generation of the prompt file. This ensures the prompt file conforms to the AI output instructions and the instructions for generating prompts.</p>
+
+<p>All of this meta guidance (prompts that generate prompts which create instructions that govern the generation of code) can get confusing. Take a close look at the files I’ve referenced in this post and have Copilot explain anything you don’t quite understand.</p>
+
+<hr />
+
+<h3 id="understanding-the-generate-cqrs-eventsourcing-instructionspromptmd-prompt-file">Understanding the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/13fc7e8eb6fa47a5f933cd0e427dc7c65642f5c0/.github/prompts/generate-cqrs-eventsourcing-instructions.prompt.md">generate-cqrs-eventsourcing-instructions.prompt.md</a> prompt file.</h3>
+
+<p>The <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/13fc7e8eb6fa47a5f933cd0e427dc7c65642f5c0/.github/prompts/generate-cqrs-eventsourcing-instructions.prompt.md">generate-cqrs-eventsourcing-instructions.prompt.md</a> prompt file instructs an AI agent to generate a complete instruction file for implementing CQRS with Event Sourcing patterns in a specific programming language and technology stack. The agent takes four parameters, the programming language, mediator framework, event store implementation, and projection strategy, and produces a comprehensive .instructions.md file that will guide future AI-assisted code generation.</p>
+
+<p>The instruction file content follows a rigid 15-section structure. The agent begins with a brief overview, then creates a reference table defining core concepts like events, aggregates, event stores, projections, and snapshots. It documents three main implementation patterns, command handling with event-sourced aggregates, event store operations for writing and reading event streams, and query handling using projections rather than direct event store access.</p>
+
+<p>For each pattern, the agent provides structure tables showing components, their purposes, and file locations, followed by implementation rules written as imperative directives. It includes minimal code templates demonstrating aggregate event application, command handlers that append events with optimistic concurrency, and projection subscribers that update read models. The agent specifies snapshot strategies for performance optimization when aggregates accumulate many events, and documents the chosen projection approach (inline, background worker, or separate service).</p>
+
+<p>Additional sections cover event schema design with versioning strategies, aggregate reconstruction patterns, idempotency handling, anti-patterns to avoid, event schema evolution techniques using upcasters, and testing approaches. The agent concludes with a validation checklist ensuring all critical patterns are documented.</p>
+
+<hr />
+
+<h2 id="creating-the-architecture-instruction-file">Creating the Architecture Instruction File</h2>
+
+<p>With the prompt file in place, I generated a concrete instruction file. Using the prompt:</p>
+
+<p><em>Submit the prompt <code class="language-plaintext highlighter-rouge">generate-cqrs-eventsourcing-instructions.prompt.md</code> in the C# language, the MediatR framework, the EventStoreDB event_store and inline projections</em></p>
+
+<p>This generates an instruction that directs AI agents to generate C# code that strictly separates command handling from query handling, using MediatR for mediation and EventStoreDB for persistence. When creating commands, agents must structure them so handlers validate inputs, load aggregates by replaying events, execute domain logic that returns new events without mutating state, and append those events using optimistic concurrency checks. Agents are instructed to never allow aggregates to directly modify their internal state; instead, all state changes must flow through Apply() methods that process events.</p>
+
+<p>For queries, agents must create handlers that read exclusively from denormalized read models stored in a separate database schema, never directly accessing the event store. The file mandates inline projections that update read models synchronously within the same transaction as event appends, ensuring immediate consistency. Agents must implement projection classes with event handler methods that transform events into read model updates.</p>
+
+<p>When building aggregates, agents are directed to implement Apply() methods for rebuilding state from event streams and command methods that validate business rules then yield new events. The file prohibits direct property setters and requires immutable event types, preferably using C# records. Agents must name event streams following the “{aggregate}-{id}” pattern and include full metadata with each event.</p>
+
+<p>For performance optimization, agents are instructed to implement snapshot stores that cache aggregate state when streams exceed 50-100 events, loading aggregates from the latest snapshot plus subsequent events rather than replaying entire streams. The file directs agents to handle event versioning through upcaster classes that transform old event formats during reads.</p>
+
+<p>Agents must implement idempotency through MediatR pipeline behaviors that track command identifiers and prevent duplicate processing. Testing code should follow Given-When-Then patterns, verifying events produced by commands, read model updates from projections, and state transitions in aggregates.</p>
+
+<p>The instruction file explicitly prohibits several patterns: querying event stores for reads, mutating aggregate state outside event application, deleting events, sharing events between aggregates, and loading multiple aggregates in command handlers. It enforces a strict project structure segregating commands, queries, projections, aggregates, events, and infrastructure concerns into designated directories.</p>
+
+<p>Throughout, agents are directed to use MediatR’s IRequestHandler interface for all command and query handlers, EventStoreDB’s AppendAsync with ExpectedVersion for writes, and dedicated read database contexts for queries. The file provides code templates showing exactly how to structure each component, ensuring agents generate consistent, pattern-compliant implementations.</p>
+
+<p>At this point, the AI has:</p>
+
+<ul>
+  <li>Business requirements</li>
+  <li>Project‑level instructions</li>
+  <li>Architecture‑level instructions</li>
+</ul>
+
+<p>To complete the foundation we need technology specific instructions and project implementation guidance.</p>
+
+<hr />
+
+<h2 id="checking-the-context">Checking the Context</h2>
+
+<p>Before moving on, it’s a good idea to review the .github governance (prompts, instructions, etc.) as whole to make sure there aren’t conflicting governance that could confuse Copilot. In <a href="https://blog.pdata.com/AIAGSD2/">Part 2</a> I introduced the check-context.prompt.md file that examines the current context and reports any anomalies that should be addressed.</p>
+
+<p>Here is the Quality Assessment portion of the analysis:</p>
+
+<p>✅ Complete AI provenance metadata (all required fields)
+✅ Copilot prompt metadata (description, context, expected_output)
+✅ Optional fields included (tools, mode) for enhanced functionality
+✅ Token-optimized content (~200 tokens core content)
+✅ Clear structured output format (YAML for parseability)
+✅ Actionable 6-step validation workflow
+✅ Comprehensive 7-category conflict detection
+✅ Conversation and summary logs complete</p>
+
+<p>This is a prompt that should be submitted any time the .github governance changes. Copilot didn’t find any issues to address, so we are good to proceed.</p>
+
+<hr />
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>In Part 5, I’ll add instruction files for the technologies we’re implementing. These instructions will guide Copilot in the details for implementing specific technologies. We’ll cover naming conventions, patterns, namespaces, standards, and templates for implementing the classes that will be implemented.</p>
+
+<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the Academia GitHub repository. Fork it, experiment, and adapt it to your own workflow.</p>
+
+<hr />
+
+<h2 id="feedback-loop">Feedback Loop</h2>
+
+<p>Feedback is always welcome. Send your thoughts to <strong>AIP@pdata.com</strong>.</p>
+
+<hr />
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<p>Prompts:</p>
+
+<ul>
+  <li>Rephrase these points as prose:
+    <ul>
+      <li>Traditional: In a typical <code class="language-plaintext highlighter-rouge">CRUD</code> application, one model handles both reads and writes</li>
+      <li><code class="language-plaintext highlighter-rouge">CQRS</code>: With <code class="language-plaintext highlighter-rouge">CQRS</code>, there are two models—one for commands, one for queries</li>
+    </ul>
+  </li>
+  <li>Summarize <code class="language-plaintext highlighter-rouge">generate-csharp-implementation-instructions.prompt.md</code> in prose. Don’t explain CQRS or Event Sourcing. Describe what the file instructs an AI agent to do.</li>
+  <li>Summarize <code class="language-plaintext highlighter-rouge">generate-cqrs-eventsourcing-instructions.prompt.md</code> in prose. don’t explain CQRS or Event Sourcing. Describe what the file instructs an AI agent to do.</li>
+  <li>Write a paragraph defining Event Sourcing</li>
+  <li>Explain the <code class="language-plaintext highlighter-rouge">CQRS</code> architecture pattern</li>
+  <li></li>
+</ul>
+</div>
+        </div>
+      </li><li><div class="post-item"><a href="/WTAIP/" class="post-image-link">
               <img src="/assets/images/2026-01-20/header-WTAIP.jpg" alt="Welcome to the AI Practitioner&#39;s Blog" class="post-thumbnail" />
             </a><div class="post-content">
             <span class="post-meta">Jan 20, 2026</span>
@@ -107,12 +291,12 @@
 
 </div>
         </div>
-      </li><li><div class="post-item"><a href="/AIAGSD01/" class="post-image-link">
+      </li><li><div class="post-item"><a href="/AIAGSD1/" class="post-image-link">
               <img src="/assets/images/2025-08-30/header-AIAGSD01.jpg" alt="AI-Assisted Greenfield Software Development, Part 1: Business Requirements" class="post-thumbnail" />
             </a><div class="post-content">
             <span class="post-meta">Aug 30, 2025</span>
             <h3>
-              <a class="post-link" href="/AIAGSD01/">
+              <a class="post-link" href="/AIAGSD1/">
                 AI-Assisted Greenfield Software Development, Part 1: Business Requirements
               </a>
             </h3><p>This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot.</p>

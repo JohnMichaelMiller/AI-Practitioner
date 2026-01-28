@@ -1,4 +1,179 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-01-21T20:35:59-08:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">Welcome to the AI Practitioner’s Blog</title><link href="https://blog.pdata.com/WTAIP/" rel="alternate" type="text/html" title="Welcome to the AI Practitioner’s Blog" /><published>2026-01-20T07:00:00-08:00</published><updated>2026-01-20T07:00:00-08:00</updated><id>https://blog.pdata.com/WTAIP</id><content type="html" xml:base="https://blog.pdata.com/WTAIP/"><![CDATA[<p>This is the retro-inaugural post of the AI Practitioner’s Blog. When I started the blog I jumped right into the content without a proper introduction. While I been in software development for many years, my only qualifications for writing a blog about AI is my experiences using the technology in anger creating real-world applications.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-01-27T18:08:50-08:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files</title><link href="https://blog.pdata.com/AIAGSD4/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files" /><published>2026-01-26T00:00:00-08:00</published><updated>2026-01-26T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD4</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD4/"><![CDATA[<h1 id="ai-assisted-greenfield-software-development-part-4-architecture-prompts-and-instructions">AI-Assisted Greenfield Software Development, Part 4: Architecture Prompts and Instructions</h1>
+
+<p>This is the fourth post in the series on AI‑assisted greenfield software development. If you’re joining mid‑stream, you may want to begin with <a href="https://blog.pdata.com/AIAGSD1/">Part 1: Business Requirements</a>, where we established the foundation for an AI‑driven development workflow. Parts 2 and 3 expanded that foundation with scaffolding, project‑level instructions, and Git workflow guidance.</p>
+
+<p>In this post, we shift from <em>project‑level</em> instructions to <em>architecture‑level</em> instructions. This is where we define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
+
+<hr />
+
+<h2 id="why-architecture-instruction-files-matter">Why Architecture Instruction Files Matter</h2>
+
+<p>When humans build software, architecture is often implicit—shared understanding, tribal knowledge, and experience fill in the gaps. AI doesn’t have that luxury. Without explicit architectural rules, AI agents tend to optimize for convenience rather than coherence.</p>
+
+<p>Architecture instruction files solve this by providing:</p>
+
+<ul>
+  <li>A clear architectural pattern</li>
+  <li>Implementation rules and constraints</li>
+  <li>Folder and feature structure</li>
+  <li>Cross‑cutting concerns</li>
+  <li>Anti‑patterns to avoid</li>
+  <li>Testing expectations</li>
+  <li>Success criteria for generated code</li>
+</ul>
+
+<p>These files become the “rails” that keep AI‑generated code aligned with the intended system design.</p>
+
+<p>In <a href="https://blog.pdata.com/AIAGSD4/">Part 4</a>, we focus on one of the most widely used architectural patterns in modern backend systems: <code class="language-plaintext highlighter-rouge">CQRS</code>. I’ve chosen <code class="language-plaintext highlighter-rouge">CQRS</code> because it is not a trivial architecture and is a good test of AI’s ability to create architectural instructions and implement in accordance with those instructions.</p>
+
+<hr />
+
+<h2 id="what-is-cqrs">What Is CQRS?</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">CQRS</code> (Command Query Responsibility Segregation) architectural pattern separates read operations (queries) from write operations (commands). Instead of a single model handling everything, <code class="language-plaintext highlighter-rouge">CQRS</code> splits responsibilities so each side can be optimized independently.</p>
+
+<h3 id="core-principle">Core Principle</h3>
+
+<p>Traditional <code class="language-plaintext highlighter-rouge">CRUD</code> applications use a single model to handle both read and write operations. <code class="language-plaintext highlighter-rouge">CQRS</code> separates these concerns by introducing two distinct models: one dedicated to commands (writes) and another focused on queries (reads).</p>
+
+<p><strong>Commands</strong></p>
+
+<p>A command is responsible for modifying the system’s state and carrying out the necessary business logic to make that change meaningful. Its job ends there—it does not return any domain‑level data, only an acknowledgment that the operation completed. Command examples are <code class="language-plaintext highlighter-rouge">CreateOrderCommand</code> and <code class="language-plaintext highlighter-rouge">ChangePasswordCommand</code></p>
+
+<p><strong>Queries</strong></p>
+
+<p>A query’s sole responsibility is to retrieve information from the system. It provides data back to the caller but never alters application state or triggers any side effects</p>
+
+<h3 id="key-benefits">Key Benefits</h3>
+
+<p><code class="language-plaintext highlighter-rouge">CQRS</code> makes it possible to scale the read and write sides of the system independently, allowing each to grow according to its own demands. Because the two responsibilities are separated, each side can use models tailored to its specific purpose, with the read side often taking advantage of denormalized structures to maximize performance. This separation also creates cleaner security boundaries, making it easier to control who can read or modify data. And since the two sides operate independently, each can use the storage technology best suited to its workload, giving the architecture far more flexibility overall</p>
+
+<h3 id="common-implementation-pattern">Common Implementation Pattern</h3>
+
+<p>Write operations trigger events that update read models. This creates an <em>eventually consistent</em> system—an intentional tradeoff that unlocks performance and scalability.</p>
+
+<h3 id="when-cqrs-is-a-good-fit">When <code class="language-plaintext highlighter-rouge">CQRS</code> Is a Good Fit</h3>
+
+<p><code class="language-plaintext highlighter-rouge">CQRS</code> is especially effective in environments where read operations vastly outnumber writes, allowing the system to optimize each side independently. It also shines in domains with intricate business rules, where separating commands and queries helps keep complexity manageable. Architectures built around event sourcing benefit naturally from <code class="language-plaintext highlighter-rouge">CQRS</code>, as do multi‑tenant applications that must serve diverse read patterns. And in systems where auditability is essential, the clear separation of responsibilities makes tracking and verifying changes far more straightforward.</p>
+
+<h3 id="when-to-avoid-it">When to Avoid It</h3>
+
+<p>If your application is simple <code class="language-plaintext highlighter-rouge">CRUD</code>, <code class="language-plaintext highlighter-rouge">CQRS</code> adds complexity without meaningful benefit.</p>
+
+<hr />
+
+<h2 id="creating-the-architecture-prompt-file">Creating the Architecture Prompt File</h2>
+
+<p>Prior to creating CQRS instructions, I created a prompt file to guide the creation of the instructions. By asking Copilot to create a prompt file, you give Copilot a chance to add relevant context to the which improves the prompt, which in turn will improve the instructions generated by the prompt.</p>
+
+<p>When generating GitHub AI guidance I used the custom <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/chatmodes/prompt-engineer.chatmode.md">prompt-engineer.chatmode.md</a> chat mode, introduced in <a href="https://blog.pdata.com/AIAGSD2/">Part 2</a>, which focuses Copilot on the skills needed to generate effective prompts.</p>
+
+<p>When working with GitHub AI guidance there is always a chicken-and-egg problem. For Copilot to generate an artifact, you need a prompt. In this case we want Copilot to generate a prompt file. We could create a prompt file that would generate the prompt file we need to generate the instruction file. This is a recursive process with diminishing returns. At some point we’d need to manually prompt Copilot to bootstrap the artifact generation.</p>
+
+<p>Here is the manual prompt I used to generate the prompt file: <em>Create a prompt file that generates instruction files for a CQRS architecture. The prompt file should target AI agents and be optimized to reduce token consumption.</em></p>
+
+<p>By asking Copilot to generate a prompt file, Copilot will use the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/instructions/ai-assisted-output.instructions.md">ai-assisted-output.instructions.md</a> and the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/instructions/prompt-file-generation.instructions.md">prompt-file-generation.instructions.md</a> to guide the generation of the prompt file. This ensures the prompt file conforms to the AI output instructions and the instructions for generating prompts.</p>
+
+<p>All of this meta guidance (prompts that generate prompts which create instructions that govern the generation of code) can get confusing. Take a close look at the files I’ve referenced in this post and have Copilot explain anything you don’t quite understand.</p>
+
+<hr />
+
+<h3 id="understanding-the-generate-cqrs-eventsourcing-instructionspromptmd-prompt-file">Understanding the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/13fc7e8eb6fa47a5f933cd0e427dc7c65642f5c0/.github/prompts/generate-cqrs-eventsourcing-instructions.prompt.md">generate-cqrs-eventsourcing-instructions.prompt.md</a> prompt file.</h3>
+
+<p>The <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/13fc7e8eb6fa47a5f933cd0e427dc7c65642f5c0/.github/prompts/generate-cqrs-eventsourcing-instructions.prompt.md">generate-cqrs-eventsourcing-instructions.prompt.md</a> prompt file instructs an AI agent to generate a complete instruction file for implementing CQRS with Event Sourcing patterns in a specific programming language and technology stack. The agent takes four parameters, the programming language, mediator framework, event store implementation, and projection strategy, and produces a comprehensive .instructions.md file that will guide future AI-assisted code generation.</p>
+
+<p>The instruction file content follows a rigid 15-section structure. The agent begins with a brief overview, then creates a reference table defining core concepts like events, aggregates, event stores, projections, and snapshots. It documents three main implementation patterns, command handling with event-sourced aggregates, event store operations for writing and reading event streams, and query handling using projections rather than direct event store access.</p>
+
+<p>For each pattern, the agent provides structure tables showing components, their purposes, and file locations, followed by implementation rules written as imperative directives. It includes minimal code templates demonstrating aggregate event application, command handlers that append events with optimistic concurrency, and projection subscribers that update read models. The agent specifies snapshot strategies for performance optimization when aggregates accumulate many events, and documents the chosen projection approach (inline, background worker, or separate service).</p>
+
+<p>Additional sections cover event schema design with versioning strategies, aggregate reconstruction patterns, idempotency handling, anti-patterns to avoid, event schema evolution techniques using upcasters, and testing approaches. The agent concludes with a validation checklist ensuring all critical patterns are documented.</p>
+
+<hr />
+
+<h2 id="creating-the-architecture-instruction-file">Creating the Architecture Instruction File</h2>
+
+<p>With the prompt file in place, I generated a concrete instruction file. Using the prompt:</p>
+
+<p><em>Submit the prompt <code class="language-plaintext highlighter-rouge">generate-cqrs-eventsourcing-instructions.prompt.md</code> in the C# language, the MediatR framework, the EventStoreDB event_store and inline projections</em></p>
+
+<p>This generates an instruction that directs AI agents to generate C# code that strictly separates command handling from query handling, using MediatR for mediation and EventStoreDB for persistence. When creating commands, agents must structure them so handlers validate inputs, load aggregates by replaying events, execute domain logic that returns new events without mutating state, and append those events using optimistic concurrency checks. Agents are instructed to never allow aggregates to directly modify their internal state; instead, all state changes must flow through Apply() methods that process events.</p>
+
+<p>For queries, agents must create handlers that read exclusively from denormalized read models stored in a separate database schema, never directly accessing the event store. The file mandates inline projections that update read models synchronously within the same transaction as event appends, ensuring immediate consistency. Agents must implement projection classes with event handler methods that transform events into read model updates.</p>
+
+<p>When building aggregates, agents are directed to implement Apply() methods for rebuilding state from event streams and command methods that validate business rules then yield new events. The file prohibits direct property setters and requires immutable event types, preferably using C# records. Agents must name event streams following the “{aggregate}-{id}” pattern and include full metadata with each event.</p>
+
+<p>For performance optimization, agents are instructed to implement snapshot stores that cache aggregate state when streams exceed 50-100 events, loading aggregates from the latest snapshot plus subsequent events rather than replaying entire streams. The file directs agents to handle event versioning through upcaster classes that transform old event formats during reads.</p>
+
+<p>Agents must implement idempotency through MediatR pipeline behaviors that track command identifiers and prevent duplicate processing. Testing code should follow Given-When-Then patterns, verifying events produced by commands, read model updates from projections, and state transitions in aggregates.</p>
+
+<p>The instruction file explicitly prohibits several patterns: querying event stores for reads, mutating aggregate state outside event application, deleting events, sharing events between aggregates, and loading multiple aggregates in command handlers. It enforces a strict project structure segregating commands, queries, projections, aggregates, events, and infrastructure concerns into designated directories.</p>
+
+<p>Throughout, agents are directed to use MediatR’s IRequestHandler interface for all command and query handlers, EventStoreDB’s AppendAsync with ExpectedVersion for writes, and dedicated read database contexts for queries. The file provides code templates showing exactly how to structure each component, ensuring agents generate consistent, pattern-compliant implementations.</p>
+
+<p>At this point, the AI has:</p>
+
+<ul>
+  <li>Business requirements</li>
+  <li>Project‑level instructions</li>
+  <li>Architecture‑level instructions</li>
+</ul>
+
+<p>To complete the foundation we need technology specific instructions and project implementation guidance.</p>
+
+<hr />
+
+<h2 id="checking-the-context">Checking the Context</h2>
+
+<p>Before moving on, it’s a good idea to review the .github governance (prompts, instructions, etc.) as whole to make sure there aren’t conflicting governance that could confuse Copilot. In <a href="https://blog.pdata.com/AIAGSD2/">Part 2</a> I introduced the check-context.prompt.md file that examines the current context and reports any anomalies that should be addressed.</p>
+
+<p>Here is the Quality Assessment portion of the analysis:</p>
+
+<p>✅ Complete AI provenance metadata (all required fields)
+✅ Copilot prompt metadata (description, context, expected_output)
+✅ Optional fields included (tools, mode) for enhanced functionality
+✅ Token-optimized content (~200 tokens core content)
+✅ Clear structured output format (YAML for parseability)
+✅ Actionable 6-step validation workflow
+✅ Comprehensive 7-category conflict detection
+✅ Conversation and summary logs complete</p>
+
+<p>This is a prompt that should be submitted any time the .github governance changes. Copilot didn’t find any issues to address, so we are good to proceed.</p>
+
+<hr />
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>In Part 5, I’ll add instruction files for the technologies we’re implementing. These instructions will guide Copilot in the details for implementing specific technologies. We’ll cover naming conventions, patterns, namespaces, standards, and templates for implementing the classes that will be implemented.</p>
+
+<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the Academia GitHub repository. Fork it, experiment, and adapt it to your own workflow.</p>
+
+<hr />
+
+<h2 id="feedback-loop">Feedback Loop</h2>
+
+<p>Feedback is always welcome. Send your thoughts to <strong>AIP@pdata.com</strong>.</p>
+
+<hr />
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<p>Prompts:</p>
+
+<ul>
+  <li>Rephrase these points as prose:
+    <ul>
+      <li>Traditional: In a typical <code class="language-plaintext highlighter-rouge">CRUD</code> application, one model handles both reads and writes</li>
+      <li><code class="language-plaintext highlighter-rouge">CQRS</code>: With <code class="language-plaintext highlighter-rouge">CQRS</code>, there are two models—one for commands, one for queries</li>
+    </ul>
+  </li>
+  <li>Summarize <code class="language-plaintext highlighter-rouge">generate-csharp-implementation-instructions.prompt.md</code> in prose. Don’t explain CQRS or Event Sourcing. Describe what the file instructs an AI agent to do.</li>
+  <li>Summarize <code class="language-plaintext highlighter-rouge">generate-cqrs-eventsourcing-instructions.prompt.md</code> in prose. don’t explain CQRS or Event Sourcing. Describe what the file instructs an AI agent to do.</li>
+  <li>Write a paragraph defining Event Sourcing</li>
+  <li>Explain the <code class="language-plaintext highlighter-rouge">CQRS</code> architecture pattern</li>
+  <li></li>
+</ul>]]></content><author><name>John Michael Miller</name></author><summary type="html"><![CDATA[AI-Assisted Greenfield Software Development, Part 4: Architecture Prompts and Instructions This is the fourth post in the series on AI‑assisted greenfield software development. If you’re joining mid‑stream, you may want to begin with Part 1: Business Requirements, where we established the foundation for an AI‑driven development workflow. Parts 2 and 3 expanded that foundation with scaffolding, project‑level instructions, and Git workflow guidance. In this post, we shift from project‑level instructions to architecture‑level instructions. This is where we define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution. Why Architecture Instruction Files Matter When humans build software, architecture is often implicit—shared understanding, tribal knowledge, and experience fill in the gaps. AI doesn’t have that luxury. Without explicit architectural rules, AI agents tend to optimize for convenience rather than coherence. Architecture instruction files solve this by providing: A clear architectural pattern Implementation rules and constraints Folder and feature structure Cross‑cutting concerns Anti‑patterns to avoid Testing expectations Success criteria for generated code These files become the “rails” that keep AI‑generated code aligned with the intended system design. In Part 4, we focus on one of the most widely used architectural patterns in modern backend systems: CQRS. I’ve chosen CQRS because it is not a trivial architecture and is a good test of AI’s ability to create architectural instructions and implement in accordance with those instructions. What Is CQRS? The CQRS (Command Query Responsibility Segregation) architectural pattern separates read operations (queries) from write operations (commands). Instead of a single model handling everything, CQRS splits responsibilities so each side can be optimized independently. Core Principle Traditional CRUD applications use a single model to handle both read and write operations. CQRS separates these concerns by introducing two distinct models: one dedicated to commands (writes) and another focused on queries (reads). Commands A command is responsible for modifying the system’s state and carrying out the necessary business logic to make that change meaningful. Its job ends there—it does not return any domain‑level data, only an acknowledgment that the operation completed. Command examples are CreateOrderCommand and ChangePasswordCommand Queries A query’s sole responsibility is to retrieve information from the system. It provides data back to the caller but never alters application state or triggers any side effects Key Benefits CQRS makes it possible to scale the read and write sides of the system independently, allowing each to grow according to its own demands. Because the two responsibilities are separated, each side can use models tailored to its specific purpose, with the read side often taking advantage of denormalized structures to maximize performance. This separation also creates cleaner security boundaries, making it easier to control who can read or modify data. And since the two sides operate independently, each can use the storage technology best suited to its workload, giving the architecture far more flexibility overall Common Implementation Pattern Write operations trigger events that update read models. This creates an eventually consistent system—an intentional tradeoff that unlocks performance and scalability. When CQRS Is a Good Fit CQRS is especially effective in environments where read operations vastly outnumber writes, allowing the system to optimize each side independently. It also shines in domains with intricate business rules, where separating commands and queries helps keep complexity manageable. Architectures built around event sourcing benefit naturally from CQRS, as do multi‑tenant applications that must serve diverse read patterns. And in systems where auditability is essential, the clear separation of responsibilities makes tracking and verifying changes far more straightforward. When to Avoid It If your application is simple CRUD, CQRS adds complexity without meaningful benefit. Creating the Architecture Prompt File Prior to creating CQRS instructions, I created a prompt file to guide the creation of the instructions. By asking Copilot to create a prompt file, you give Copilot a chance to add relevant context to the which improves the prompt, which in turn will improve the instructions generated by the prompt. When generating GitHub AI guidance I used the custom prompt-engineer.chatmode.md chat mode, introduced in Part 2, which focuses Copilot on the skills needed to generate effective prompts. When working with GitHub AI guidance there is always a chicken-and-egg problem. For Copilot to generate an artifact, you need a prompt. In this case we want Copilot to generate a prompt file. We could create a prompt file that would generate the prompt file we need to generate the instruction file. This is a recursive process with diminishing returns. At some point we’d need to manually prompt Copilot to bootstrap the artifact generation. Here is the manual prompt I used to generate the prompt file: Create a prompt file that generates instruction files for a CQRS architecture. The prompt file should target AI agents and be optimized to reduce token consumption. By asking Copilot to generate a prompt file, Copilot will use the ai-assisted-output.instructions.md and the prompt-file-generation.instructions.md to guide the generation of the prompt file. This ensures the prompt file conforms to the AI output instructions and the instructions for generating prompts. All of this meta guidance (prompts that generate prompts which create instructions that govern the generation of code) can get confusing. Take a close look at the files I’ve referenced in this post and have Copilot explain anything you don’t quite understand. Understanding the generate-cqrs-eventsourcing-instructions.prompt.md prompt file. The generate-cqrs-eventsourcing-instructions.prompt.md prompt file instructs an AI agent to generate a complete instruction file for implementing CQRS with Event Sourcing patterns in a specific programming language and technology stack. The agent takes four parameters, the programming language, mediator framework, event store implementation, and projection strategy, and produces a comprehensive .instructions.md file that will guide future AI-assisted code generation. The instruction file content follows a rigid 15-section structure. The agent begins with a brief overview, then creates a reference table defining core concepts like events, aggregates, event stores, projections, and snapshots. It documents three main implementation patterns, command handling with event-sourced aggregates, event store operations for writing and reading event streams, and query handling using projections rather than direct event store access. For each pattern, the agent provides structure tables showing components, their purposes, and file locations, followed by implementation rules written as imperative directives. It includes minimal code templates demonstrating aggregate event application, command handlers that append events with optimistic concurrency, and projection subscribers that update read models. The agent specifies snapshot strategies for performance optimization when aggregates accumulate many events, and documents the chosen projection approach (inline, background worker, or separate service). Additional sections cover event schema design with versioning strategies, aggregate reconstruction patterns, idempotency handling, anti-patterns to avoid, event schema evolution techniques using upcasters, and testing approaches. The agent concludes with a validation checklist ensuring all critical patterns are documented. Creating the Architecture Instruction File With the prompt file in place, I generated a concrete instruction file. Using the prompt: Submit the prompt generate-cqrs-eventsourcing-instructions.prompt.md in the C# language, the MediatR framework, the EventStoreDB event_store and inline projections This generates an instruction that directs AI agents to generate C# code that strictly separates command handling from query handling, using MediatR for mediation and EventStoreDB for persistence. When creating commands, agents must structure them so handlers validate inputs, load aggregates by replaying events, execute domain logic that returns new events without mutating state, and append those events using optimistic concurrency checks. Agents are instructed to never allow aggregates to directly modify their internal state; instead, all state changes must flow through Apply() methods that process events. For queries, agents must create handlers that read exclusively from denormalized read models stored in a separate database schema, never directly accessing the event store. The file mandates inline projections that update read models synchronously within the same transaction as event appends, ensuring immediate consistency. Agents must implement projection classes with event handler methods that transform events into read model updates. When building aggregates, agents are directed to implement Apply() methods for rebuilding state from event streams and command methods that validate business rules then yield new events. The file prohibits direct property setters and requires immutable event types, preferably using C# records. Agents must name event streams following the “{aggregate}-{id}” pattern and include full metadata with each event. For performance optimization, agents are instructed to implement snapshot stores that cache aggregate state when streams exceed 50-100 events, loading aggregates from the latest snapshot plus subsequent events rather than replaying entire streams. The file directs agents to handle event versioning through upcaster classes that transform old event formats during reads. Agents must implement idempotency through MediatR pipeline behaviors that track command identifiers and prevent duplicate processing. Testing code should follow Given-When-Then patterns, verifying events produced by commands, read model updates from projections, and state transitions in aggregates. The instruction file explicitly prohibits several patterns: querying event stores for reads, mutating aggregate state outside event application, deleting events, sharing events between aggregates, and loading multiple aggregates in command handlers. It enforces a strict project structure segregating commands, queries, projections, aggregates, events, and infrastructure concerns into designated directories. Throughout, agents are directed to use MediatR’s IRequestHandler interface for all command and query handlers, EventStoreDB’s AppendAsync with ExpectedVersion for writes, and dedicated read database contexts for queries. The file provides code templates showing exactly how to structure each component, ensuring agents generate consistent, pattern-compliant implementations. At this point, the AI has: Business requirements Project‑level instructions Architecture‑level instructions To complete the foundation we need technology specific instructions and project implementation guidance. Checking the Context Before moving on, it’s a good idea to review the .github governance (prompts, instructions, etc.) as whole to make sure there aren’t conflicting governance that could confuse Copilot. In Part 2 I introduced the check-context.prompt.md file that examines the current context and reports any anomalies that should be addressed. Here is the Quality Assessment portion of the analysis: ✅ Complete AI provenance metadata (all required fields) ✅ Copilot prompt metadata (description, context, expected_output) ✅ Optional fields included (tools, mode) for enhanced functionality ✅ Token-optimized content (~200 tokens core content) ✅ Clear structured output format (YAML for parseability) ✅ Actionable 6-step validation workflow ✅ Comprehensive 7-category conflict detection ✅ Conversation and summary logs complete This is a prompt that should be submitted any time the .github governance changes. Copilot didn’t find any issues to address, so we are good to proceed. What’s Next? In Part 5, I’ll add instruction files for the technologies we’re implementing. These instructions will guide Copilot in the details for implementing specific technologies. We’ll cover naming conventions, patterns, namespaces, standards, and templates for implementing the classes that will be implemented. If you’d like to explore the files or follow along with your own implementation, everything is available in the Academia GitHub repository. Fork it, experiment, and adapt it to your own workflow. Feedback Loop Feedback is always welcome. Send your thoughts to AIP@pdata.com. Disclaimer AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul. Prompts: Rephrase these points as prose: Traditional: In a typical CRUD application, one model handles both reads and writes CQRS: With CQRS, there are two models—one for commands, one for queries Summarize generate-csharp-implementation-instructions.prompt.md in prose. Don’t explain CQRS or Event Sourcing. Describe what the file instructs an AI agent to do. Summarize generate-cqrs-eventsourcing-instructions.prompt.md in prose. don’t explain CQRS or Event Sourcing. Describe what the file instructs an AI agent to do. Write a paragraph defining Event Sourcing Explain the CQRS architecture pattern]]></summary></entry><entry><title type="html">Welcome to the AI Practitioner’s Blog</title><link href="https://blog.pdata.com/WTAIP/" rel="alternate" type="text/html" title="Welcome to the AI Practitioner’s Blog" /><published>2026-01-20T07:00:00-08:00</published><updated>2026-01-20T07:00:00-08:00</updated><id>https://blog.pdata.com/WTAIP</id><content type="html" xml:base="https://blog.pdata.com/WTAIP/"><![CDATA[<p>This is the retro-inaugural post of the AI Practitioner’s Blog. When I started the blog I jumped right into the content without a proper introduction. While I been in software development for many years, my only qualifications for writing a blog about AI is my experiences using the technology in anger creating real-world applications.</p>
 
 <p>When I started the blog, my goal was to create a resource for professionals interested in the practical applications of artificial intelligence. By sharing my experences I hoped to provide insights and guidance to those looking to leverage AI in their own projects and organizations.</p>
 
@@ -6,15 +181,11 @@
 
 <p><img src="/assets/images/2026-01-20/header-WTAIP.jpg" alt="Header Image" /></p>
 
-<p><img src="/assets/images/2026-01-20/header-WTAIP.png" alt="Header Image" /></p>
-
 <p>Feel free to share your thoughts and experiences on AI Assisted Software Development.</p>]]></content><author><name>John Michael Miller</name></author><category term="blog" /><summary type="html"><![CDATA[This is the retro-inaugural post of the AI Practitioner’s Blog. When I started the blog I jumped right into the content without a proper introduction. While I been in software development for many years, my only qualifications for writing a blog about AI is my experiences using the technology in anger creating real-world applications. When I started the blog, my goal was to create a resource for professionals interested in the practical applications of artificial intelligence. By sharing my experences I hoped to provide insights and guidance to those looking to leverage AI in their own projects and organizations.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-01-20/header-WTAIP.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-01-20/header-WTAIP.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI Assisted Greenfield Software Development, Part 3: Generating the Process Instruction Files</title><link href="https://blog.pdata.com/AIAGSD3/" rel="alternate" type="text/html" title="AI Assisted Greenfield Software Development, Part 3: Generating the Process Instruction Files" /><published>2025-12-30T00:00:00-08:00</published><updated>2025-12-30T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD3</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD3/"><![CDATA[<p>This is the 3rd post in the series on AI assisted greenfield software development. This post builds on the first <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1" target="_blank">AI-Assisted Greenfield Software Development, Part 1: Business Requirements</a> and subsequent posts. If you haven’t read these posts, you might consider starting there.</p>
 
 <p>In Part 1 we defined the high-level business requirements and in Part 2 we started building out the scaffolding supporting AI code generation. In part 3, we’ll continue to add guidance for AI code generation. Starting with project guidance and process definitions, we’ll create prompts that create project overview instructions, AI code generation guidance, and Git workflow instructions.</p>
 
 <!--more-->
-
-<p><img src="/assets/images/2025-12-30/header-AIAGSD3.jpg" alt="Header Image" /></p>
 
 <p><img src="/assets/images/2025-12-30/header-AIAGSD3.png" alt="Header Image" /> We’ll use these prompt’s to create instruction files and then check the guidance for errors and redundancies.</p>
 
@@ -142,8 +313,6 @@
 
 <!--more-->
 
-<p><img src="/assets/images/2025-12-01/header-WTBD.jpg" alt="Header Image" /></p>
-
 <p><img src="/assets/images/2025-12-01/header-WTBD.png" alt="Header Image" /></p>
 
 <p>I’ve been reading posts describing AI-assisted software development as revolutionary. As if something fundamental has changed. While this take is understandable, in my view, it misses the mark. In my opinion programming hasn’t changed, but how we go about it has changed, again. In this post I’ll compare programming’s past, present and future and talk about what has changed and what hasn’t. Let’s first look at the past.</p>
@@ -252,8 +421,6 @@
 <p>In this post I’ll cover the instructions, prompts, and chat modes I used to start to lay down the guidance for turning requirements into code. These files are critical for controlling the AI output and having a comprehensive set of instructions, prompts, and chat modes greatly increase the chances of getting AI to produce something usable.</p>
 
 <!--more-->
-
-<p><img src="/assets/images/2025-09-24/header-AIAGSD2.jpg" alt="Header Image" /></p>
 
 <p><img src="/assets/images/2025-09-24/header-AIAGSD2.png" alt="Header Image" /></p>
 
@@ -1216,13 +1383,11 @@
   <li>Insert the contents of the <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> file with an introductory paragraph, summary paragraphs, and a transition to the conclusion.</li>
 </ul>
 
-<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD2">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="copilot" /><category term="best-practices" /><category term="instruction-files" /><summary type="html"><![CDATA[This is the second post in the series on AI assisted greenfield software development. This post builds on the first post AI-Assisted Greenfield Software Development - Part 1 Business Requirements. If you haven’t read that post, you might want to start there. In this post I’ll cover the instructions, prompts, and chat modes I used to start to lay down the guidance for turning requirements into code. These files are critical for controlling the AI output and having a comprehensive set of instructions, prompts, and chat modes greatly increase the chances of getting AI to produce something usable.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-09-24/header-AIAGSD2.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-09-24/header-AIAGSD2.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 1: Business Requirements</title><link href="https://blog.pdata.com/AIAGSD01/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 1: Business Requirements" /><published>2025-08-30T00:00:00-07:00</published><updated>2025-08-30T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD01</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD01/"><![CDATA[<p>This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot.</p>
+<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD2">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="copilot" /><category term="best-practices" /><category term="instruction-files" /><summary type="html"><![CDATA[This is the second post in the series on AI assisted greenfield software development. This post builds on the first post AI-Assisted Greenfield Software Development - Part 1 Business Requirements. If you haven’t read that post, you might want to start there. In this post I’ll cover the instructions, prompts, and chat modes I used to start to lay down the guidance for turning requirements into code. These files are critical for controlling the AI output and having a comprehensive set of instructions, prompts, and chat modes greatly increase the chances of getting AI to produce something usable.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-09-24/header-AIAGSD2.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-09-24/header-AIAGSD2.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 1: Business Requirements</title><link href="https://blog.pdata.com/AIAGSD1/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 1: Business Requirements" /><published>2025-08-30T00:00:00-07:00</published><updated>2025-08-30T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD1</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD1/"><![CDATA[<p>This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot.</p>
 
 <p>In this first installment we’ll look at the initial context provided to Copilot. This will include the initial instructions and the first prompts submitted to Copilot.</p>
 
 <!--more-->
-
-<p><img src="/assets/images/2025-08-30/header-AIAGSD01.jpg" alt="Header Image" /></p>
 
 <p><img src="/assets/images/2025-08-30/header-AIAGSD01.png" alt="Header Image" /></p>
 
@@ -1357,8 +1522,6 @@ Assign administrative roles (e.g., Head of Department) to eligible Academics.
 <p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="Software Development" /><category term="AI-Assisted Development" /><category term="Object Role Modeling" /><category term="Requirements Engineering" /><category term="Enterprise Architecture" /><summary type="html"><![CDATA[This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot. In this first installment we’ll look at the initial context provided to Copilot. This will include the initial instructions and the first prompts submitted to Copilot.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-08-30/header-AIAGSD01.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-08-30/header-AIAGSD01.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Sharing Instructions with the Team</title><link href="https://blog.pdata.com/SIWT/" rel="alternate" type="text/html" title="Sharing Instructions with the Team" /><published>2025-08-30T00:00:00-07:00</published><updated>2025-08-30T00:00:00-07:00</updated><id>https://blog.pdata.com/SIWT</id><content type="html" xml:base="https://blog.pdata.com/SIWT/"><![CDATA[<p>When working with GitHub Copilot across multiple projects, you’ll quickly face a common challenge: how do you share generic instructions (ie. coding standards and best practices) with team members working on different projects without duplicating instruction files in every repository? This post walks you through prompting Copilot to implement a solution leveraging symlinks and junction points.</p>
 
 <!--more-->
-
-<p><img src="/assets/images/2025-08-30/header-SIWT.jpg" alt="Header Image" /></p>
 
 <p><img src="/assets/images/2025-08-30/header-SIWT.png" alt="Header Image" /></p>
 
@@ -3667,12 +3830,22 @@ I’ll add the ability to sort the details table by implementing sort functional
       <span class="c">&lt;!-- Sales Funnel Visualization --&gt;</span>
       <span class="nt">&lt;h2&gt;</span>Sales Pipeline<span class="nt">&lt;/h2&gt;</span>
       <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"funnel-container"</span><span class="nt">&gt;</span>
-        <span class="nt">&lt;div</span> <span class="na">v-for=</span><span class="s">"stage in funnelStages"</span> <span class="na">:key=</span><span class="s">"stage.dealStatus"</span>
-             <span class="na">class=</span><span class="s">"funnel-stage"</span> <span class="na">:style=</span><span class="s">"{ width: getStageWidth(stage) + '%' }"</span><span class="nt">&gt;</span>
-          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-header"</span><span class="nt">&gt;</span>{{ getDealStatusDescription(stage.dealStatus) }}<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;div</span>
+          <span class="na">v-for=</span><span class="s">"stage in funnelStages"</span>
+          <span class="na">:key=</span><span class="s">"stage.dealStatus"</span>
+          <span class="na">class=</span><span class="s">"funnel-stage"</span>
+          <span class="na">:style=</span><span class="s">"{ width: getStageWidth(stage) + '%' }"</span>
+        <span class="nt">&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-header"</span><span class="nt">&gt;</span>
+            {{ getDealStatusDescription(stage.dealStatus) }}
+          <span class="nt">&lt;/div&gt;</span>
           <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-count"</span><span class="nt">&gt;</span>{{ stage.count }} deals<span class="nt">&lt;/div&gt;</span>
-          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-value"</span><span class="nt">&gt;</span>Total: {{ formatCurrency(stage.totalDealValue) }}<span class="nt">&lt;/div&gt;</span>
-          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-age"</span><span class="nt">&gt;</span>Avg Age: {{ stage.averageAge.toFixed(1) }} days<span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-value"</span><span class="nt">&gt;</span>
+            Total: {{ formatCurrency(stage.totalDealValue) }}
+          <span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-age"</span><span class="nt">&gt;</span>
+            Avg Age: {{ stage.averageAge.toFixed(1) }} days
+          <span class="nt">&lt;/div&gt;</span>
         <span class="nt">&lt;/div&gt;</span>
       <span class="nt">&lt;/div&gt;</span>
 
@@ -3685,132 +3858,142 @@ I’ll add the ability to sort the details table by implementing sort functional
 <span class="nt">&lt;/template&gt;</span>
 
 <span class="nt">&lt;script&gt;</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span><span class="p">,</span> <span class="nx">onMounted</span><span class="p">,</span> <span class="nx">computed</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">getSalesFunnelSummary</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
+  <span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span><span class="p">,</span> <span class="nx">onMounted</span><span class="p">,</span> <span class="nx">computed</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
+  <span class="k">import</span> <span class="p">{</span> <span class="nx">getSalesFunnelSummary</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
 
-<span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
-  <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SalesFunnelSummary</span><span class="dl">"</span><span class="p">,</span>
-  <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
-    <span class="kd">const</span> <span class="nx">summary</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
-    <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-    <span class="kd">const</span> <span class="nx">error</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SalesFunnelSummary</span><span class="dl">"</span><span class="p">,</span>
+    <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">summary</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+      <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+      <span class="kd">const</span> <span class="nx">error</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
 
-    <span class="c1">// ...existing functions...</span>
+      <span class="c1">// ...existing functions...</span>
 
-    <span class="c1">// Computed property for funnel stages (filtered and sorted)</span>
-    <span class="kd">const</span> <span class="nx">funnelStages</span> <span class="o">=</span> <span class="nf">computed</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span> <span class="o">||</span> <span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span><span class="p">)</span> <span class="k">return</span> <span class="p">[];</span>
+      <span class="c1">// Computed property for funnel stages (filtered and sorted)</span>
+      <span class="kd">const</span> <span class="nx">funnelStages</span> <span class="o">=</span> <span class="nf">computed</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span> <span class="o">||</span> <span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span><span class="p">)</span> <span class="k">return</span> <span class="p">[];</span>
 
-      <span class="c1">// Filter out "Unknown" (0) and "Closed Lost" (5)</span>
-      <span class="k">return</span> <span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span>
-        <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="nx">status</span> <span class="o">=&gt;</span> <span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">].</span><span class="nf">includes</span><span class="p">(</span><span class="nx">status</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">))</span>
-        <span class="p">.</span><span class="nf">sort</span><span class="p">((</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">a</span><span class="p">.</span><span class="nx">dealStatus</span> <span class="o">-</span> <span class="nx">b</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">);</span> <span class="c1">// Sort by deal status</span>
-    <span class="p">});</span>
+        <span class="c1">// Filter out "Unknown" (0) and "Closed Lost" (5)</span>
+        <span class="k">return</span> <span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span>
+          <span class="p">.</span><span class="nf">filter</span><span class="p">((</span><span class="nx">status</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">].</span><span class="nf">includes</span><span class="p">(</span><span class="nx">status</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">))</span>
+          <span class="p">.</span><span class="nf">sort</span><span class="p">((</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">a</span><span class="p">.</span><span class="nx">dealStatus</span> <span class="o">-</span> <span class="nx">b</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">);</span> <span class="c1">// Sort by deal status</span>
+      <span class="p">});</span>
 
-    <span class="c1">// Calculate the width for each stage based on count</span>
-    <span class="kd">const</span> <span class="nx">getStageWidth</span> <span class="o">=</span> <span class="p">(</span><span class="nx">stage</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
-      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+      <span class="c1">// Calculate the width for each stage based on count</span>
+      <span class="kd">const</span> <span class="nx">getStageWidth</span> <span class="o">=</span> <span class="p">(</span><span class="nx">stage</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 
-      <span class="kd">const</span> <span class="nx">maxCount</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nf">max</span><span class="p">(...</span><span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">s</span> <span class="o">=&gt;</span> <span class="nx">s</span><span class="p">.</span><span class="nx">count</span><span class="p">));</span>
-      <span class="c1">// Scale width from 40% to 90% for better visibility</span>
-      <span class="k">return</span> <span class="mi">40</span> <span class="o">+</span> <span class="p">((</span><span class="nx">stage</span><span class="p">.</span><span class="nx">count</span> <span class="o">/</span> <span class="nx">maxCount</span><span class="p">)</span> <span class="o">*</span> <span class="mi">50</span><span class="p">);</span>
-    <span class="p">};</span>
+        <span class="kd">const</span> <span class="nx">maxCount</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nf">max</span><span class="p">(...</span><span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nf">map</span><span class="p">((</span><span class="nx">s</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">s</span><span class="p">.</span><span class="nx">count</span><span class="p">));</span>
+        <span class="c1">// Scale width from 40% to 90% for better visibility</span>
+        <span class="k">return</span> <span class="mi">40</span> <span class="o">+</span> <span class="p">(</span><span class="nx">stage</span><span class="p">.</span><span class="nx">count</span> <span class="o">/</span> <span class="nx">maxCount</span><span class="p">)</span> <span class="o">*</span> <span class="mi">50</span><span class="p">;</span>
+      <span class="p">};</span>
 
-    <span class="nf">onMounted</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-      <span class="nf">fetchSalesFunnelSummary</span><span class="p">();</span>
-    <span class="p">});</span>
+      <span class="nf">onMounted</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nf">fetchSalesFunnelSummary</span><span class="p">();</span>
+      <span class="p">});</span>
 
-    <span class="k">return</span> <span class="p">{</span>
-      <span class="nx">summary</span><span class="p">,</span>
-      <span class="nx">loading</span><span class="p">,</span>
-      <span class="nx">error</span><span class="p">,</span>
-      <span class="nx">funnelStages</span><span class="p">,</span>
-      <span class="nx">getStageWidth</span><span class="p">,</span>
-      <span class="nx">getDealStatusDescription</span><span class="p">,</span>
-      <span class="nx">formatCurrency</span><span class="p">,</span>
-    <span class="p">};</span>
-  <span class="p">},</span>
-<span class="p">};</span>
+      <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">summary</span><span class="p">,</span>
+        <span class="nx">loading</span><span class="p">,</span>
+        <span class="nx">error</span><span class="p">,</span>
+        <span class="nx">funnelStages</span><span class="p">,</span>
+        <span class="nx">getStageWidth</span><span class="p">,</span>
+        <span class="nx">getDealStatusDescription</span><span class="p">,</span>
+        <span class="nx">formatCurrency</span><span class="p">,</span>
+      <span class="p">};</span>
+    <span class="p">},</span>
+  <span class="p">};</span>
 <span class="nt">&lt;/script&gt;</span>
 
 <span class="nt">&lt;style </span><span class="na">scoped</span><span class="nt">&gt;</span>
-<span class="c">/* ...existing styles... */</span>
+  <span class="c">/* ...existing styles... */</span>
 
-<span class="c">/* Funnel Visualization */</span>
-<span class="nc">.funnel-container</span> <span class="p">{</span>
-  <span class="nl">display</span><span class="p">:</span> <span class="nb">flex</span><span class="p">;</span>
-  <span class="nl">flex-direction</span><span class="p">:</span> <span class="nb">column</span><span class="p">;</span>
-  <span class="nl">align-items</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
-  <span class="nl">gap</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
-  <span class="nl">max-width</span><span class="p">:</span> <span class="m">900px</span><span class="p">;</span>
-  <span class="nl">margin</span><span class="p">:</span> <span class="m">25px</span> <span class="nb">auto</span><span class="p">;</span>
-  <span class="nl">padding</span><span class="p">:</span> <span class="m">15px</span><span class="p">;</span>
-  <span class="nl">background-color</span><span class="p">:</span> <span class="nx">#f8f9fa</span><span class="p">;</span>
-  <span class="nl">border-radius</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
-  <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">2px</span> <span class="m">4px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.05</span><span class="p">);</span>
-<span class="p">}</span>
+  <span class="c">/* Funnel Visualization */</span>
+  <span class="nc">.funnel-container</span> <span class="p">{</span>
+    <span class="nl">display</span><span class="p">:</span> <span class="nb">flex</span><span class="p">;</span>
+    <span class="nl">flex-direction</span><span class="p">:</span> <span class="nb">column</span><span class="p">;</span>
+    <span class="nl">align-items</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+    <span class="nl">gap</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
+    <span class="nl">max-width</span><span class="p">:</span> <span class="m">900px</span><span class="p">;</span>
+    <span class="nl">margin</span><span class="p">:</span> <span class="m">25px</span> <span class="nb">auto</span><span class="p">;</span>
+    <span class="nl">padding</span><span class="p">:</span> <span class="m">15px</span><span class="p">;</span>
+    <span class="nl">background-color</span><span class="p">:</span> <span class="nx">#f8f9fa</span><span class="p">;</span>
+    <span class="nl">border-radius</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
+    <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">2px</span> <span class="m">4px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.05</span><span class="p">);</span>
+  <span class="p">}</span>
 
-<span class="nc">.funnel-stage</span> <span class="p">{</span>
-  <span class="nl">height</span><span class="p">:</span> <span class="nb">auto</span><span class="p">;</span>
-  <span class="nl">min-height</span><span class="p">:</span> <span class="m">80px</span><span class="p">;</span>
-  <span class="nl">padding</span><span class="p">:</span> <span class="m">12px</span> <span class="m">20px</span><span class="p">;</span>
-  <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#3498db</span><span class="p">,</span> <span class="nx">#5dade2</span><span class="p">);</span>
-  <span class="nl">color</span><span class="p">:</span> <span class="nx">white</span><span class="p">;</span>
-  <span class="nl">border-radius</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span>
-  <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">2px</span> <span class="m">5px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.1</span><span class="p">);</span>
-  <span class="nl">transition</span><span class="p">:</span> <span class="nb">all</span> <span class="m">0.3s</span> <span class="nb">ease</span><span class="p">;</span>
-  <span class="nl">display</span><span class="p">:</span> <span class="nb">flex</span><span class="p">;</span>
-  <span class="nl">flex-direction</span><span class="p">:</span> <span class="nb">column</span><span class="p">;</span>
-  <span class="nl">justify-content</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
-  <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nc">.funnel-stage</span> <span class="p">{</span>
+    <span class="nl">height</span><span class="p">:</span> <span class="nb">auto</span><span class="p">;</span>
+    <span class="nl">min-height</span><span class="p">:</span> <span class="m">80px</span><span class="p">;</span>
+    <span class="nl">padding</span><span class="p">:</span> <span class="m">12px</span> <span class="m">20px</span><span class="p">;</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#3498db</span><span class="p">,</span> <span class="nx">#5dade2</span><span class="p">);</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="nx">white</span><span class="p">;</span>
+    <span class="nl">border-radius</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span>
+    <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">2px</span> <span class="m">5px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.1</span><span class="p">);</span>
+    <span class="nl">transition</span><span class="p">:</span> <span class="nb">all</span> <span class="m">0.3s</span> <span class="nb">ease</span><span class="p">;</span>
+    <span class="nl">display</span><span class="p">:</span> <span class="nb">flex</span><span class="p">;</span>
+    <span class="nl">flex-direction</span><span class="p">:</span> <span class="nb">column</span><span class="p">;</span>
+    <span class="nl">justify-content</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+    <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="nc">.funnel-stage</span><span class="nd">:hover</span> <span class="p">{</span>
-  <span class="nl">transform</span><span class="p">:</span> <span class="nf">translateX</span><span class="p">(</span><span class="m">5px</span><span class="p">);</span>
-  <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">4px</span> <span class="m">8px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.15</span><span class="p">);</span>
-<span class="p">}</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:hover</span> <span class="p">{</span>
+    <span class="nl">transform</span><span class="p">:</span> <span class="nf">translateX</span><span class="p">(</span><span class="m">5px</span><span class="p">);</span>
+    <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">4px</span> <span class="m">8px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.15</span><span class="p">);</span>
+  <span class="p">}</span>
 
-<span class="nc">.stage-header</span> <span class="p">{</span>
-  <span class="nl">font-weight</span><span class="p">:</span> <span class="nb">bold</span><span class="p">;</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">1.1em</span><span class="p">;</span>
-  <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nc">.stage-header</span> <span class="p">{</span>
+    <span class="nl">font-weight</span><span class="p">:</span> <span class="nb">bold</span><span class="p">;</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">1.1em</span><span class="p">;</span>
+    <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="nc">.stage-count</span> <span class="p">{</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.95em</span><span class="p">;</span>
-  <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nc">.stage-count</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.95em</span><span class="p">;</span>
+    <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="nc">.stage-value</span> <span class="p">{</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.9em</span><span class="p">;</span>
-  <span class="nl">font-weight</span><span class="p">:</span> <span class="m">500</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nc">.stage-value</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.9em</span><span class="p">;</span>
+    <span class="nl">font-weight</span><span class="p">:</span> <span class="m">500</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="nc">.stage-age</span> <span class="p">{</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.9em</span><span class="p">;</span>
-  <span class="nl">margin-top</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
-  <span class="nl">opacity</span><span class="p">:</span> <span class="m">0.9</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nc">.stage-age</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.9em</span><span class="p">;</span>
+    <span class="nl">margin-top</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
+    <span class="nl">opacity</span><span class="p">:</span> <span class="m">0.9</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="c">/* Create color variations based on the stage */</span>
-<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">1</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#3498db</span><span class="p">,</span> <span class="nx">#5dade2</span><span class="p">);</span> <span class="p">}</span>
-<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">2</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#2e86c1</span><span class="p">,</span> <span class="nx">#5499c7</span><span class="p">);</span> <span class="p">}</span>
-<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">3</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#2874a6</span><span class="p">,</span> <span class="nx">#4a87af</span><span class="p">);</span> <span class="p">}</span>
-<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">4</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#21618c</span><span class="p">,</span> <span class="nx">#417699</span><span class="p">);</span> <span class="p">}</span>
-<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">5</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#1a5276</span><span class="p">,</span> <span class="nx">#386288</span><span class="p">);</span> <span class="p">}</span>
+  <span class="c">/* Create color variations based on the stage */</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">1</span><span class="o">)</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#3498db</span><span class="p">,</span> <span class="nx">#5dade2</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">2</span><span class="o">)</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#2e86c1</span><span class="p">,</span> <span class="nx">#5499c7</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">3</span><span class="o">)</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#2874a6</span><span class="p">,</span> <span class="nx">#4a87af</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">4</span><span class="o">)</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#21618c</span><span class="p">,</span> <span class="nx">#417699</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">5</span><span class="o">)</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#1a5276</span><span class="p">,</span> <span class="nx">#386288</span><span class="p">);</span>
+  <span class="p">}</span>
 
-<span class="nt">h2</span> <span class="p">{</span>
-  <span class="nl">margin-top</span><span class="p">:</span> <span class="m">30px</span><span class="p">;</span>
-  <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">15px</span><span class="p">;</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">150%</span><span class="p">;</span>
-  <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nt">h2</span> <span class="p">{</span>
+    <span class="nl">margin-top</span><span class="p">:</span> <span class="m">30px</span><span class="p">;</span>
+    <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">15px</span><span class="p">;</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">150%</span><span class="p">;</span>
+    <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="nt">h1</span> <span class="p">{</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">175%</span><span class="p">;</span>
-  <span class="nl">padding-top</span><span class="p">:</span> <span class="m">2%</span><span class="p">;</span>
-  <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nt">h1</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">175%</span><span class="p">;</span>
+    <span class="nl">padding-top</span><span class="p">:</span> <span class="m">2%</span><span class="p">;</span>
+    <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+  <span class="p">}</span>
 <span class="nt">&lt;/style&gt;</span>
 </code></pre></div></div>
 
@@ -4244,523 +4427,4 @@ I’ll add the ability to sort the details table by implementing sort functional
   <li><strong>Prompts:</strong> Give a one paragraph description of the chart.js library.</li>
 </ul>
 
-<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/UIAI3">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="AI" /><category term="UI Development" /><category term="GitHub Copilot" /><summary type="html"><![CDATA[This post is the third installment in the series on AI assisted UI development. While this post is largely stand-alone, consider reading parts 1 and 2 before reading this post. We’ve looked at using AI to create and add UI components in prior posts. In this post I’ll add a data visualization to a page.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-04-30/header-UIAI3.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-04-30/header-UIAI3.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Developing User Interfaces with GitHub Copilot, Part 2</title><link href="https://blog.pdata.com/UIAI2/" rel="alternate" type="text/html" title="Developing User Interfaces with GitHub Copilot, Part 2" /><published>2025-03-29T00:00:00-07:00</published><updated>2025-03-29T00:00:00-07:00</updated><id>https://blog.pdata.com/UIAI2</id><content type="html" xml:base="https://blog.pdata.com/UIAI2/"><![CDATA[<p>This is the second installment of my series on using Copilot to implement user interfaces. It does build on the topics discussed in part one, so if you missed it you can check it out <a href="https://www.codemag.com/blog/AIPractitioner/UIAI">here</a>.</p>
-
-<p>In this article, I (well, Copilot) will expand on the implementation of the <code class="language-plaintext highlighter-rouge">owner-select</code> drop-down by encapsulating the drop-down logic into a new vue component and then replacing the implementation on the <code class="language-plaintext highlighter-rouge">Active Leads by Owner</code> vue with the new component.</p>
-
-<!--more-->
-
-<p><img src="/assets/images/2025-03-29/header-UIAI2.jpg" alt="Header Image" /></p>
-
-<p><img src="/assets/images/2025-03-29/header-UIAI2.png" alt="Header Image" /> I’ll also add the new component to a different vue that could benefit from this feature.</p>
-
-<p>The two vues will share the same component and any changes to the component will be reflected in both vues.</p>
-
-<h2 id="copilot-edits">Copilot Edits</h2>
-
-<p>I’ll use the new <strong>Copilot Edits</strong> multi-file feature that allows developers to apply AI-powered suggestions across multiple files within a project, streamlining workflows for large-scale changes and refactoring. Edits can identify patterns and dependencies across files, enabling consistent updates such as renaming variables, restructuring code, or updating logic across related files.</p>
-
-<p>Copilot Edits is a separate interface from Copilot Chat and while the interfaces are similar, there are some notable differences. For example, in Chat the <code class="language-plaintext highlighter-rouge">@</code> brings up a list of extensions while Edits does not.</p>
-
-<p>I’m using Edits because I want to make changes to multiple files in a consistent manner. Here is the <code class="language-plaintext highlighter-rouge">Claude 3.7 Sonnet</code> prompt I used:</p>
-
-<ol>
-  <li><strong>Create a component from the owner select drop-down on the Active Leads by Owners vue, so that it can be used by other vues. Include the data fetching logic in the new component.</strong></li>
-  <li><strong>Update the Active Leads by Owners vue to use the new component. Remove the data fetching logic from the Active Leads vue as it is redundant.</strong></li>
-  <li><strong>Add the new component to the Sales Funnel Detail vue and filter the data in Leads tables by the selected owners OwnerNameId.</strong></li>
-</ol>
-
-<p>This is a complicated multi-step action that I’m requesting. Edits is designed to handle these kinds of prompts.</p>
-
-<p>Here is the response, my comments are in italics:</p>
-
-<h2 id="solution-create-owner-select-drop-down-component-and-update-views">Solution: Create Owner Select drop-down Component and Update Views</h2>
-
-<p>I’ll create a reusable OwnerSelectdrop-down component, update both views to use it, and add filtering to the Sales Funnel Detail view.</p>
-
-<h3 id="step-1-create-the-owner-select-drop-down-component">Step 1: Create the Owner Select drop-down Component</h3>
-
-<h4 id="ownerselectdrop-downvue">OwnerSelectdrop-down.vue</h4>
-
-<p><em>This is the new component created from the original drop-down. It contains all of the presentation and functional logic from the original implementation. A small nit is that Edits didn’t pickup on the convention that vue components in this project all begin with a lower case ‘c’.</em></p>
-
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;template&gt;</span>
-  <span class="nt">&lt;div&gt;</span>
-    <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"owner-select"</span><span class="nt">&gt;</span>Select Owner:<span class="nt">&lt;/label&gt;</span>
-    <span class="nt">&lt;select</span>
-      <span class="na">id=</span><span class="s">"owner-select"</span>
-      <span class="na">v-model=</span><span class="s">"selectedOwnerId"</span>
-      <span class="err">@</span><span class="na">change=</span><span class="s">"handleOwnerChange"</span>
-    <span class="nt">&gt;</span>
-      <span class="nt">&lt;option</span> <span class="na">v-if=</span><span class="s">"includeAllOption"</span> <span class="na">value=</span><span class="s">"all"</span><span class="nt">&gt;</span>All Owners<span class="nt">&lt;/option&gt;</span>
-      <span class="nt">&lt;option</span>
-        <span class="na">v-for=</span><span class="s">"owner in leadOwners"</span>
-        <span class="na">:key=</span><span class="s">"owner.nameId"</span>
-        <span class="na">:value=</span><span class="s">"owner.nameId"</span>
-      <span class="nt">&gt;</span>
-        {{ owner.name }}
-      <span class="nt">&lt;/option&gt;</span>
-    <span class="nt">&lt;/select&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"loading"</span><span class="nt">&gt;</span>Loading owners...<span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-<span class="nt">&lt;/template&gt;</span>
-
-<span class="nt">&lt;script&gt;</span>
-  <span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span><span class="p">,</span> <span class="nx">onMounted</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
-  <span class="k">import</span> <span class="p">{</span> <span class="nx">getAllLeadOwners</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
-
-  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
-    <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">OwnerSelectdrop-down</span><span class="dl">"</span><span class="p">,</span>
-    <span class="na">props</span><span class="p">:</span> <span class="p">{</span>
-      <span class="na">includeAllOption</span><span class="p">:</span> <span class="p">{</span>
-        <span class="na">type</span><span class="p">:</span> <span class="nb">Boolean</span><span class="p">,</span>
-        <span class="na">default</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-      <span class="p">},</span>
-    <span class="p">},</span>
-    <span class="na">emits</span><span class="p">:</span> <span class="p">[</span><span class="dl">"</span><span class="s2">owner-changed</span><span class="dl">"</span><span class="p">],</span>
-    <span class="nf">setup</span><span class="p">(</span><span class="nx">props</span><span class="p">,</span> <span class="p">{</span> <span class="nx">emit</span> <span class="p">})</span> <span class="p">{</span>
-      <span class="kd">const</span> <span class="nx">leadOwners</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">([]);</span>
-      <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-      <span class="kd">const</span> <span class="nx">selectedOwnerId</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="dl">""</span><span class="p">);</span>
-
-      <span class="kd">const</span> <span class="nx">fetchLeadOwners</span> <span class="o">=</span> <span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="k">try</span> <span class="p">{</span>
-          <span class="nx">loading</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-          <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getAllLeadOwners</span><span class="p">();</span>
-          <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">leadOwners</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">people</span><span class="p">;</span>
-            <span class="k">if </span><span class="p">(</span><span class="nx">leadOwners</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-              <span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">props</span><span class="p">.</span><span class="nx">includeAllOption</span>
-                <span class="p">?</span> <span class="dl">"</span><span class="s2">all</span><span class="dl">"</span>
-                <span class="p">:</span> <span class="nx">leadOwners</span><span class="p">.</span><span class="nx">value</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">nameId</span><span class="p">;</span>
-              <span class="nf">emit</span><span class="p">(</span><span class="dl">"</span><span class="s2">owner-changed</span><span class="dl">"</span><span class="p">,</span> <span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
-            <span class="p">}</span>
-          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span>
-              <span class="dl">"</span><span class="s2">Failed to fetch lead owners:</span><span class="dl">"</span><span class="p">,</span>
-              <span class="nx">response</span><span class="p">.</span><span class="nx">failureInformation</span><span class="p">,</span>
-            <span class="p">);</span>
-          <span class="p">}</span>
-        <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
-          <span class="nx">console</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="dl">"</span><span class="s2">Error fetching lead owners:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
-          <span class="nx">loading</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
-        <span class="p">}</span>
-      <span class="p">};</span>
-
-      <span class="kd">const</span> <span class="nx">handleOwnerChange</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="nf">emit</span><span class="p">(</span><span class="dl">"</span><span class="s2">owner-changed</span><span class="dl">"</span><span class="p">,</span> <span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
-      <span class="p">};</span>
-
-      <span class="nf">onMounted</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="nf">fetchLeadOwners</span><span class="p">();</span>
-      <span class="p">});</span>
-
-      <span class="k">return</span> <span class="p">{</span>
-        <span class="nx">leadOwners</span><span class="p">,</span>
-        <span class="nx">loading</span><span class="p">,</span>
-        <span class="nx">selectedOwnerId</span><span class="p">,</span>
-        <span class="nx">handleOwnerChange</span><span class="p">,</span>
-      <span class="p">};</span>
-    <span class="p">},</span>
-  <span class="p">};</span>
-<span class="nt">&lt;/script&gt;</span>
-
-<span class="nt">&lt;style </span><span class="na">scoped</span><span class="nt">&gt;</span>
-  <span class="nt">select</span> <span class="p">{</span>
-    <span class="nl">margin-left</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
-    <span class="nl">padding</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
-    <span class="nl">border-radius</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
-    <span class="nl">border</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="nx">#ddd</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="nt">&lt;/style&gt;</span>
-</code></pre></div></div>
-
-<p><em>Looking Good!</em></p>
-
-<h3 id="step-2-update-active-leads-by-owner-vue">Step 2: Update Active Leads by Owner Vue</h3>
-
-<h4 id="vactiveleadsbyownervue">vActiveLeadsByOwner.vue</h4>
-
-<p>Made changes.</p>
-
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;template&gt;</span>
-  <span class="nt">&lt;div&gt;</span>
-    <span class="nt">&lt;h1&gt;</span>Active Leads By Owner<span class="nt">&lt;/h1&gt;</span>
-    <span class="nt">&lt;owner-select-drop-down</span> <span class="err">@</span><span class="na">owner-changed=</span><span class="s">"handleOwnerChange"</span> <span class="nt">/&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"loading"</span><span class="nt">&gt;</span>Loading...<span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">v-else-if=</span><span class="s">"error"</span><span class="nt">&gt;</span>{{ error }}<span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">v-else</span><span class="nt">&gt;</span>
-      <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"activeleads.success"</span><span class="nt">&gt;</span>
-        <span class="nt">&lt;p&gt;</span>Total Count: {{ activeleads.totalCount }}<span class="nt">&lt;/p&gt;</span>
-      <span class="nt">&lt;/div&gt;</span>
-      <span class="nt">&lt;div</span> <span class="na">v-else</span><span class="nt">&gt;</span>
-        <span class="nt">&lt;p&gt;</span>
-          Error: {{ activeleads ? activeleads.failureInformation : "No data
-          available" }}
-        <span class="nt">&lt;/p&gt;</span>
-      <span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-<span class="nt">&lt;/template&gt;</span>
-
-<span class="nt">&lt;script&gt;</span>
-  <span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
-  <span class="k">import</span> <span class="p">{</span> <span class="nx">getActiveLeadsByOwner</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
-  <span class="k">import</span> <span class="nx">OwnerSelectdrop</span><span class="o">-</span><span class="nx">down</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/components/lead/OwnerSelectdrop-down.vue</span><span class="dl">"</span><span class="p">;</span>
-
-  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
-    <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ActiveLeadsByOwner</span><span class="dl">"</span><span class="p">,</span>
-    <span class="na">components</span><span class="p">:</span> <span class="p">{</span>
-      <span class="nx">OwnerSelectdrop</span><span class="o">-</span><span class="nx">down</span>
-    <span class="p">},</span>
-    <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
-      <span class="kd">const</span> <span class="nx">activeleads</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
-      <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
-      <span class="kd">const</span> <span class="nx">error</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
-
-      <span class="kd">const</span> <span class="nx">fetchActiveLeadsByOwner</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span><span class="nx">ownerId</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">ownerId</span> <span class="o">||</span> <span class="nx">ownerId</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">all</span><span class="dl">"</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-
-        <span class="k">try</span> <span class="p">{</span>
-          <span class="nx">loading</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-          <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-          <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getActiveLeadsByOwner</span><span class="p">(</span><span class="nx">ownerId</span><span class="p">);</span>
-          <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">activeleads</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">response</span><span class="p">;</span>
-          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-            <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">failureInformation</span> <span class="o">||</span> <span class="dl">"</span><span class="s2">Failed to fetch active leads by owner</span><span class="dl">"</span><span class="p">;</span>
-          <span class="p">}</span>
-        <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
-          <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Failed to fetch active leads by owner</span><span class="dl">"</span><span class="p">;</span>
-        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
-          <span class="nx">loading</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
-        <span class="p">}</span>
-      <span class="p">};</span>
-
-      <span class="kd">const</span> <span class="nx">handleOwnerChange</span> <span class="o">=</span> <span class="p">(</span><span class="nx">ownerId</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="nf">fetchActiveLeadsByOwner</span><span class="p">(</span><span class="nx">ownerId</span><span class="p">);</span>
-      <span class="p">};</span>
-
-      <span class="k">return</span> <span class="p">{</span>
-        <span class="nx">activeleads</span><span class="p">,</span>
-        <span class="nx">loading</span><span class="p">,</span>
-        <span class="nx">error</span><span class="p">,</span>
-        <span class="nx">handleOwnerChange</span>
-      <span class="p">};</span>
-    <span class="p">},</span>
-  <span class="p">};</span>
-<span class="nt">&lt;/script&gt;</span>
-
-<span class="nt">&lt;style </span><span class="na">scoped</span><span class="nt">&gt;</span>
-  <span class="nt">h1</span> <span class="p">{</span>
-    <span class="nl">font-size</span><span class="p">:</span> <span class="m">24px</span><span class="p">;</span>
-    <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">20px</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="nt">&lt;/style&gt;</span>
-</code></pre></div></div>
-
-<p>Below you can see that the <code class="language-plaintext highlighter-rouge">div</code> containing the owner drop-down and it’s label are gone along with an error message. Copilot deleted the imports related to the drop-down as well as the code related to fetching the data.</p>
-
-<p><img src="../assets/images/2025-03-29/ActiveLeadsByOwner.vue.2a.deletions.png" alt="Active leads by Owner Deletetions" />
-“C:\git\ai-practitioner\ai-practitioner-blog\jekyll-src\assets\images\2025-03-29\Active-Leads-By-Owner-1.png</p>
-<h5 id="active-leads-by-owner-deletetions">Active Leads by Owner Deletetions</h5>
-
-<p>Copilot added the new owner drop-down component and refactored the fetch logic to not fetch Owners. The <code class="language-plaintext highlighter-rouge">newOwnerId</code> renamed simply ownerId. Which is a nice bit of craftmansship.</p>
-
-<p><img src="../assets/images/2025-03-29/ActiveLeadsByOwner.vue.2a.additions.png" alt="Active Leads by Owner Additions" /></p>
-
-<h5 id="active-leads-by-owner-additions">Active Leads by Owner Additions</h5>
-
-<h3 id="step-3-update-sales-funnel-detail-vue">Step 3: Update Sales Funnel Detail Vue</h3>
-
-<p>I asked that the new drop-down component be added to the Sales Funnel Detail vue. This makes sense as users often want to focus on their leads, or the leads of others.</p>
-
-<h4 id="vsalesfunneldetailvue">vSalesFunnelDetail.vue</h4>
-
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;template&gt;</span>
-  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"sales-funnel-detail"</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;h1&gt;</span>Sales Funnel Detail<span class="nt">&lt;/h1&gt;</span>
-    <span class="nt">&lt;owner-select-drop-down</span>
-      <span class="na">:includeAllOption=</span><span class="s">"true"</span>
-      <span class="err">@</span><span class="na">owner-changed=</span><span class="s">"handleOwnerChange"</span>
-    <span class="nt">/&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"loading"</span><span class="nt">&gt;</span>Loading...<span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"error"</span><span class="nt">&gt;</span>{{ error }}<span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"summary"</span><span class="nt">&gt;</span>
-      <span class="nt">&lt;table</span> <span class="na">class=</span><span class="s">"summary-table"</span><span class="nt">&gt;</span>
-        // ...existing code...
-      <span class="nt">&lt;/table&gt;</span>
-      <span class="nt">&lt;h2&gt;</span>Deals by Status<span class="nt">&lt;/h2&gt;</span>
-      <span class="nt">&lt;div</span>
-        <span class="na">v-for=</span><span class="s">"detail in filteredDealsByStatus"</span>
-        <span class="na">:key=</span><span class="s">"detail.dealStatus"</span>
-        <span class="na">class=</span><span class="s">"status-section"</span>
-      <span class="nt">&gt;</span>
-        <span class="nt">&lt;h3&gt;</span>
-          {{ getDealStatusDescription(detail.dealStatus) }}: {{
-          detail.leads.length }} Leads
-        <span class="nt">&lt;/h3&gt;</span>
-        <span class="nt">&lt;table</span> <span class="na">class=</span><span class="s">"leads-table"</span><span class="nt">&gt;</span>
-          <span class="nt">&lt;thead&gt;</span>
-            <span class="nt">&lt;tr&gt;</span>
-              // ...existing code...
-            <span class="nt">&lt;/tr&gt;</span>
-          <span class="nt">&lt;/thead&gt;</span>
-          <span class="nt">&lt;tbody&gt;</span>
-            <span class="nt">&lt;tr</span> <span class="na">v-for=</span><span class="s">"lead in detail.leads"</span> <span class="na">:key=</span><span class="s">"lead.id"</span><span class="nt">&gt;</span>
-              // ...existing code...
-            <span class="nt">&lt;/tr&gt;</span>
-          <span class="nt">&lt;/tbody&gt;</span>
-        <span class="nt">&lt;/table&gt;</span>
-      <span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-<span class="nt">&lt;/template&gt;</span>
-
-<span class="nt">&lt;script&gt;</span>
-  <span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span><span class="p">,</span> <span class="nx">onMounted</span><span class="p">,</span> <span class="nx">computed</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
-  <span class="k">import</span> <span class="p">{</span> <span class="nx">getSalesFunnelDetail</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
-  <span class="k">import</span> <span class="nx">OwnerSelectdrop</span><span class="o">-</span><span class="nx">down</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/components/lead/OwnerSelectdrop-down.vue</span><span class="dl">"</span><span class="p">;</span>
-
-  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
-    <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SalesFunnelDetail</span><span class="dl">"</span><span class="p">,</span>
-    <span class="na">components</span><span class="p">:</span> <span class="p">{</span>
-      <span class="nx">OwnerSelectdrop</span><span class="o">-</span><span class="nx">down</span>
-    <span class="p">},</span>
-    <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
-      <span class="kd">const</span> <span class="nx">summary</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
-      <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-      <span class="kd">const</span> <span class="nx">error</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
-      <span class="kd">const</span> <span class="nx">selectedOwnerId</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="dl">"</span><span class="s2">all</span><span class="dl">"</span><span class="p">);</span>
-
-      <span class="kd">const</span> <span class="nx">fetchSalesFunnelDetail</span> <span class="o">=</span> <span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="c1">// ...existing code...</span>
-      <span class="p">};</span>
-
-      <span class="kd">const</span> <span class="nx">handleOwnerChange</span> <span class="o">=</span> <span class="p">(</span><span class="nx">ownerId</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">ownerId</span><span class="p">;</span>
-      <span class="p">};</span>
-
-      <span class="c1">// Filter deals by selected owner</span>
-      <span class="kd">const</span> <span class="nx">filteredDealsByStatus</span> <span class="o">=</span> <span class="nf">computed</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span> <span class="o">||</span> <span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span><span class="p">)</span> <span class="k">return</span> <span class="p">[];</span>
-
-        <span class="k">if </span><span class="p">(</span><span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">all</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
-          <span class="k">return</span> <span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span><span class="p">;</span>
-        <span class="p">}</span>
-
-        <span class="k">return</span> <span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span>
-          <span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">statusGroup</span> <span class="o">=&gt;</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="p">{</span>
-              <span class="p">...</span><span class="nx">statusGroup</span><span class="p">,</span>
-              <span class="na">leads</span><span class="p">:</span> <span class="nx">statusGroup</span><span class="p">.</span><span class="nx">leads</span><span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="nx">lead</span> <span class="o">=&gt;</span>
-                <span class="nx">lead</span><span class="p">.</span><span class="nx">ownerNameId</span> <span class="o">===</span> <span class="nx">selectedOwnerId</span><span class="p">.</span><span class="nx">value</span>
-              <span class="p">)</span>
-            <span class="p">};</span>
-          <span class="p">})</span>
-          <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="nx">group</span> <span class="o">=&gt;</span> <span class="nx">group</span><span class="p">.</span><span class="nx">leads</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span> <span class="c1">// Only include groups with leads</span>
-      <span class="p">});</span>
-
-      <span class="c1">// ...existing code...</span>
-
-      <span class="nf">onMounted</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="nf">fetchSalesFunnelDetail</span><span class="p">();</span>
-      <span class="p">});</span>
-
-      <span class="k">return</span> <span class="p">{</span>
-        <span class="nx">summary</span><span class="p">,</span>
-        <span class="nx">loading</span><span class="p">,</span>
-        <span class="nx">error</span><span class="p">,</span>
-        <span class="nx">getDealStatusDescription</span><span class="p">,</span>
-        <span class="nx">formatCurrency</span><span class="p">,</span>
-        <span class="nx">getDealDivisionDescription</span><span class="p">,</span>
-        <span class="nx">getDealTemperatureDescription</span><span class="p">,</span>
-        <span class="nx">handleOwnerChange</span><span class="p">,</span>
-        <span class="nx">filteredDealsByStatus</span>
-      <span class="p">};</span>
-    <span class="p">},</span>
-  <span class="p">};</span>
-<span class="nt">&lt;/script&gt;</span>
-
-// ...existing style...
-</code></pre></div></div>
-
-<h5 id="sales-funnel-detail-deletions">Sales Funnel Detail Deletions</h5>
-
-<p><img src="../assets/images/2025-03-29/SalesFunnelDetail.vue.2a.deletions.png" alt="Sales Funnel Detail Deletions" /></p>
-
-<h5 id="sales-funnel-detail-additions">Sales Funnel Detail Additions</h5>
-
-<p><img src="../assets/images/2025-03-29/SalesFunnelDetail.vue.2a.additions.png" alt="Sales Funnel Details Additions" /></p>
-
-<h2 id="uh-oh">Uh oh…</h2>
-
-<p>While the refactored Sales Funnel Details vue worked great (Woohoo!), the refactored Active Leads by Owner vue showed this error immediately on rendering the vue:</p>
-
-<p><code class="language-plaintext highlighter-rouge">ERROR Cannot read properties of null (reading 'success') TypeError: Cannot read properties of null (reading 'success') </code></p>
-
-<p>Something was missed when the drop-down was remove from the view. A good first way to resolve an error like this is to use the error message as the next prompt to <code class="language-plaintext highlighter-rouge">Claude 3.7 Sonnet</code>. Copilot responded with this:</p>
-
-<h2 id="solution-fix-null-reference-error-in-active-leads-by-owner-vue">Solution: Fix Null Reference Error in Active Leads by Owner Vue</h2>
-
-<p>The error occurs because we’re trying to access the <code class="language-plaintext highlighter-rouge">success</code> property on <code class="language-plaintext highlighter-rouge">activeleads</code> when it might be null. Let’s fix the Active Leads by Owner Vue to properly handle the null case.</p>
-
-<h4 id="vactiveleadsbyownervue-1">vActiveLeadsByOwner.vue</h4>
-
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;template&gt;</span>
-  <span class="nt">&lt;div&gt;</span>
-    <span class="nt">&lt;h1&gt;</span>Active Leads By Owner<span class="nt">&lt;/h1&gt;</span>
-    <span class="nt">&lt;owner-select-drop-down</span> <span class="err">@</span><span class="na">owner-changed=</span><span class="s">"handleOwnerChange"</span> <span class="nt">/&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"loading"</span><span class="nt">&gt;</span>Loading...<span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">v-else-if=</span><span class="s">"error"</span><span class="nt">&gt;</span>{{ error }}<span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">v-else-if=</span><span class="s">"activeleads"</span><span class="nt">&gt;</span>
-      <span class="nt">&lt;div</span> <span class="na">v-if=</span><span class="s">"activeleads.success"</span><span class="nt">&gt;</span>
-        <span class="nt">&lt;p&gt;</span>Total Count: {{ activeleads.totalCount }}<span class="nt">&lt;/p&gt;</span>
-      <span class="nt">&lt;/div&gt;</span>
-      <span class="nt">&lt;div</span> <span class="na">v-else</span><span class="nt">&gt;</span>
-        <span class="nt">&lt;p&gt;</span>
-          Error: {{ activeleads.failureInformation || "No data available" }}
-        <span class="nt">&lt;/p&gt;</span>
-      <span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">v-else</span><span class="nt">&gt;</span>
-      <span class="nt">&lt;p&gt;</span>Select an owner to view their active leads<span class="nt">&lt;/p&gt;</span>
-    <span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-<span class="nt">&lt;/template&gt;</span>
-
-<span class="nt">&lt;script&gt;</span>
-  <span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
-  <span class="k">import</span> <span class="p">{</span> <span class="nx">getActiveLeadsByOwner</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
-  <span class="k">import</span> <span class="nx">OwnerSelectdrop</span><span class="o">-</span><span class="nx">down</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/components/lead/OwnerSelectdrop-down.vue</span><span class="dl">"</span><span class="p">;</span>
-
-  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
-    <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ActiveLeadsByOwner</span><span class="dl">"</span><span class="p">,</span>
-    <span class="na">components</span><span class="p">:</span> <span class="p">{</span>
-      <span class="nx">OwnerSelectdrop</span><span class="o">-</span><span class="nx">down</span><span class="p">,</span>
-    <span class="p">},</span>
-    <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
-      <span class="kd">const</span> <span class="nx">activeleads</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
-      <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
-      <span class="kd">const</span> <span class="nx">error</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
-
-      <span class="kd">const</span> <span class="nx">fetchActiveLeadsByOwner</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span><span class="nx">ownerId</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">ownerId</span> <span class="o">||</span> <span class="nx">ownerId</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">all</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
-          <span class="nx">activeleads</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-          <span class="k">return</span><span class="p">;</span>
-        <span class="p">}</span>
-
-        <span class="k">try</span> <span class="p">{</span>
-          <span class="nx">loading</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-          <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-          <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">getActiveLeadsByOwner</span><span class="p">(</span><span class="nx">ownerId</span><span class="p">);</span>
-          <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">activeleads</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">response</span><span class="p">;</span>
-          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-            <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">failureInformation</span> <span class="o">||</span> <span class="dl">"</span><span class="s2">Failed to fetch active leads by owner</span><span class="dl">"</span><span class="p">;</span>
-            <span class="nx">activeleads</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-          <span class="p">}</span>
-        <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
-          <span class="nx">error</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Failed to fetch active leads by owner</span><span class="dl">"</span><span class="p">;</span>
-          <span class="nx">activeleads</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
-          <span class="nx">loading</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
-        <span class="p">}</span>
-      <span class="p">};</span>
-
-      <span class="kd">const</span> <span class="nx">handleOwnerChange</span> <span class="o">=</span> <span class="p">(</span><span class="nx">ownerId</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="nf">fetchActiveLeadsByOwner</span><span class="p">(</span><span class="nx">ownerId</span><span class="p">);</span>
-      <span class="p">};</span>
-
-      <span class="k">return</span> <span class="p">{</span>
-        <span class="nx">activeleads</span><span class="p">,</span>
-        <span class="nx">loading</span><span class="p">,</span>
-        <span class="nx">error</span><span class="p">,</span>
-        <span class="nx">handleOwnerChange</span><span class="p">,</span>
-      <span class="p">};</span>
-    <span class="p">},</span>
-  <span class="p">};</span>
-<span class="nt">&lt;/script&gt;</span>
-
-<span class="nt">&lt;style </span><span class="na">scoped</span><span class="nt">&gt;</span>
-  <span class="nt">h1</span> <span class="p">{</span>
-    <span class="nl">font-size</span><span class="p">:</span> <span class="m">24px</span><span class="p">;</span>
-    <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">20px</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="nt">&lt;/style&gt;</span>
-</code></pre></div></div>
-
-<p>This update:</p>
-
-<ol>
-  <li>Adds a guard condition with <code class="language-plaintext highlighter-rouge">v-else-if="activeleads"</code> to avoid trying to access properties on a null object.</li>
-  <li>Adds a message to display when no owner is selected or “All” is selected.</li>
-  <li>Explicitly sets <code class="language-plaintext highlighter-rouge">activeleads.value = null</code> in error cases and when “All” is selected.</li>
-  <li>Improves error handling to make sure activeleads is null when there’s an error.</li>
-</ol>
-
-<p>These changes prevent the “Cannot read properties of null” error by ensuring we only try to access properties like <code class="language-plaintext highlighter-rouge">success</code> when <code class="language-plaintext highlighter-rouge">activeleads</code> actually exists.</p>
-
-<p><em>This ends the Copilot response.</em></p>
-
-<h3 id="active-leads-by-owner-vue-changes">Active Leads by Owner Vue Changes</h3>
-
-<p>As documented by Copilot at the end of the response, to fix the error, Copilot added code to handle the case when there are no active leads to show.</p>
-
-<p><img src="../assets/images/2025-03-29/ActiveLeadsByOwner.vue.3.changes.png" alt="Active Leads by Owner Vue Deletions" /></p>
-
-<h3 id="sales-funnel-details-vue-changes">Sales Funnel Details Vue Changes</h3>
-
-<p>Of interest is that Copilot also made some changes to the Sale Funnel Detail vue to tighten up the syntax.</p>
-
-<p><img src="../assets/images/2025-03-29/SalesFunnelDetail.vue.3.changes.png" alt="Sales Funnel Details Deletions" /></p>
-
-<h3 id="success">Success!</h3>
-
-<p>When running the revised version of the vues, the Active Leads by Owner and Sales Funnel Details vues are working as expected and are utilizing the new component which is working on both vues.</p>
-
-<p>A key point is that I did not change any of the code produced by Copilot. Copilot was able to determine what code needed to change in order to achieve the results and implemented the changes.</p>
-
-<p>You wouldn’t be wrong to think that if Copilot can implement features like these, what is the future for coders? Consider that I had to give clear and accurate context and direction to Copilot in order to get working results.</p>
-
-<p>Copilot is not a developer. It does not understand the code in the same way that a compiler or interpretor does. Copilot, more accurately the model you choose, is predicting what code might work, given it’s vast knowledge of previous code. It can’t run the code or test the code for errors. But given an error, it was able to correct the code.</p>
-
-<p>In fact, the prompt I used for this excersise was not my first attempt to implement this feature. It was an iterative process of adjusting the prompt, testing the results, undoing the changes and trying again. Once the prompt was close to producing fully working code, I switched tactics and chose to give Copilot the error and move forward.</p>
-
-<p>What Copilot does well is deal with the syntax. While this is coding, it’s not the most valuble, or enjoyable, part of coding. There has been a steady improvement in the tools to help coders deal with the syntax. Autocomplete, Intellisense, etc. The real value you and I add is in knowning what code is needed, how it should be implemented and verifying that code is up to our standards.</p>
-
-<p>Finally, the demand for software will likely continue to exceed our ability to produce it, even with AI assistance. AI is going to make it much more feasible to take on projects that have been often off the table. One example is legacy rewrites. The demand for developers who can leverage the tools effectively will continue to grow and the demand for developers who don’t, won’t.</p>
-
-<p>In part three I’ll use Copilot to create data visualizations.</p>
-
-<h3 id="feedback-loop">Feedback Loop</h3>
-
-<p>Feedback is always welcome. Please direct it to <a href="mailto:AIP@pdata.com" target="_blank">AIP@pdata.com</a></p>
-
-<h4 id="disclaimer">Disclaimer</h4>
-
-<p>AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul.</p>
-
-<p>AI Contributions:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Model</th>
-      <th>Prompt</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>ChatGPT4o</td>
-      <td>@github Explain GitHub Copilot Edits multi-file features in one paragraph</td>
-    </tr>
-    <tr>
-      <td>ChatGPT4o</td>
-      <td>@github what are the significant UI differences between Copilot Edits and Copilot Chat?</td>
-    </tr>
-  </tbody>
-</table>
-
-<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/UIAI2">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="AI" /><category term="User Interface" /><category term="Software Development" /><summary type="html"><![CDATA[This is the second installment of my series on using Copilot to implement user interfaces. It does build on the topics discussed in part one, so if you missed it you can check it out here. In this article, I (well, Copilot) will expand on the implementation of the owner-select drop-down by encapsulating the drop-down logic into a new vue component and then replacing the implementation on the Active Leads by Owner vue with the new component.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-03-29/header-UIAI2.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-03-29/header-UIAI2.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/UIAI3">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="AI" /><category term="UI Development" /><category term="GitHub Copilot" /><summary type="html"><![CDATA[This post is the third installment in the series on AI assisted UI development. While this post is largely stand-alone, consider reading parts 1 and 2 before reading this post. We’ve looked at using AI to create and add UI components in prior posts. In this post I’ll add a data visualization to a page.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-04-30/header-UIAI3.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-04-30/header-UIAI3.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>

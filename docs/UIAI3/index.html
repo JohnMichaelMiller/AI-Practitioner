@@ -85,12 +85,22 @@
       <span class="c">&lt;!-- Sales Funnel Visualization --&gt;</span>
       <span class="nt">&lt;h2&gt;</span>Sales Pipeline<span class="nt">&lt;/h2&gt;</span>
       <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"funnel-container"</span><span class="nt">&gt;</span>
-        <span class="nt">&lt;div</span> <span class="na">v-for=</span><span class="s">"stage in funnelStages"</span> <span class="na">:key=</span><span class="s">"stage.dealStatus"</span>
-             <span class="na">class=</span><span class="s">"funnel-stage"</span> <span class="na">:style=</span><span class="s">"{ width: getStageWidth(stage) + '%' }"</span><span class="nt">&gt;</span>
-          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-header"</span><span class="nt">&gt;</span>{{ getDealStatusDescription(stage.dealStatus) }}<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;div</span>
+          <span class="na">v-for=</span><span class="s">"stage in funnelStages"</span>
+          <span class="na">:key=</span><span class="s">"stage.dealStatus"</span>
+          <span class="na">class=</span><span class="s">"funnel-stage"</span>
+          <span class="na">:style=</span><span class="s">"{ width: getStageWidth(stage) + '%' }"</span>
+        <span class="nt">&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-header"</span><span class="nt">&gt;</span>
+            {{ getDealStatusDescription(stage.dealStatus) }}
+          <span class="nt">&lt;/div&gt;</span>
           <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-count"</span><span class="nt">&gt;</span>{{ stage.count }} deals<span class="nt">&lt;/div&gt;</span>
-          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-value"</span><span class="nt">&gt;</span>Total: {{ formatCurrency(stage.totalDealValue) }}<span class="nt">&lt;/div&gt;</span>
-          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-age"</span><span class="nt">&gt;</span>Avg Age: {{ stage.averageAge.toFixed(1) }} days<span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-value"</span><span class="nt">&gt;</span>
+            Total: {{ formatCurrency(stage.totalDealValue) }}
+          <span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"stage-age"</span><span class="nt">&gt;</span>
+            Avg Age: {{ stage.averageAge.toFixed(1) }} days
+          <span class="nt">&lt;/div&gt;</span>
         <span class="nt">&lt;/div&gt;</span>
       <span class="nt">&lt;/div&gt;</span>
 
@@ -103,132 +113,142 @@
 <span class="nt">&lt;/template&gt;</span>
 
 <span class="nt">&lt;script&gt;</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span><span class="p">,</span> <span class="nx">onMounted</span><span class="p">,</span> <span class="nx">computed</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">getSalesFunnelSummary</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
+  <span class="k">import</span> <span class="p">{</span> <span class="nx">ref</span><span class="p">,</span> <span class="nx">onMounted</span><span class="p">,</span> <span class="nx">computed</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span><span class="p">;</span>
+  <span class="k">import</span> <span class="p">{</span> <span class="nx">getSalesFunnelSummary</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/services/leadService</span><span class="dl">"</span><span class="p">;</span>
 
-<span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
-  <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SalesFunnelSummary</span><span class="dl">"</span><span class="p">,</span>
-  <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
-    <span class="kd">const</span> <span class="nx">summary</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
-    <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-    <span class="kd">const</span> <span class="nx">error</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SalesFunnelSummary</span><span class="dl">"</span><span class="p">,</span>
+    <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">summary</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+      <span class="kd">const</span> <span class="nx">loading</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+      <span class="kd">const</span> <span class="nx">error</span> <span class="o">=</span> <span class="nf">ref</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
 
-    <span class="c1">// ...existing functions...</span>
+      <span class="c1">// ...existing functions...</span>
 
-    <span class="c1">// Computed property for funnel stages (filtered and sorted)</span>
-    <span class="kd">const</span> <span class="nx">funnelStages</span> <span class="o">=</span> <span class="nf">computed</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span> <span class="o">||</span> <span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span><span class="p">)</span> <span class="k">return</span> <span class="p">[];</span>
+      <span class="c1">// Computed property for funnel stages (filtered and sorted)</span>
+      <span class="kd">const</span> <span class="nx">funnelStages</span> <span class="o">=</span> <span class="nf">computed</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span> <span class="o">||</span> <span class="o">!</span><span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span><span class="p">)</span> <span class="k">return</span> <span class="p">[];</span>
 
-      <span class="c1">// Filter out "Unknown" (0) and "Closed Lost" (5)</span>
-      <span class="k">return</span> <span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span>
-        <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="nx">status</span> <span class="o">=&gt;</span> <span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">].</span><span class="nf">includes</span><span class="p">(</span><span class="nx">status</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">))</span>
-        <span class="p">.</span><span class="nf">sort</span><span class="p">((</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">a</span><span class="p">.</span><span class="nx">dealStatus</span> <span class="o">-</span> <span class="nx">b</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">);</span> <span class="c1">// Sort by deal status</span>
-    <span class="p">});</span>
+        <span class="c1">// Filter out "Unknown" (0) and "Closed Lost" (5)</span>
+        <span class="k">return</span> <span class="nx">summary</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">byDealStatus</span>
+          <span class="p">.</span><span class="nf">filter</span><span class="p">((</span><span class="nx">status</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">].</span><span class="nf">includes</span><span class="p">(</span><span class="nx">status</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">))</span>
+          <span class="p">.</span><span class="nf">sort</span><span class="p">((</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">a</span><span class="p">.</span><span class="nx">dealStatus</span> <span class="o">-</span> <span class="nx">b</span><span class="p">.</span><span class="nx">dealStatus</span><span class="p">);</span> <span class="c1">// Sort by deal status</span>
+      <span class="p">});</span>
 
-    <span class="c1">// Calculate the width for each stage based on count</span>
-    <span class="kd">const</span> <span class="nx">getStageWidth</span> <span class="o">=</span> <span class="p">(</span><span class="nx">stage</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
-      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+      <span class="c1">// Calculate the width for each stage based on count</span>
+      <span class="kd">const</span> <span class="nx">getStageWidth</span> <span class="o">=</span> <span class="p">(</span><span class="nx">stage</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 
-      <span class="kd">const</span> <span class="nx">maxCount</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nf">max</span><span class="p">(...</span><span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">s</span> <span class="o">=&gt;</span> <span class="nx">s</span><span class="p">.</span><span class="nx">count</span><span class="p">));</span>
-      <span class="c1">// Scale width from 40% to 90% for better visibility</span>
-      <span class="k">return</span> <span class="mi">40</span> <span class="o">+</span> <span class="p">((</span><span class="nx">stage</span><span class="p">.</span><span class="nx">count</span> <span class="o">/</span> <span class="nx">maxCount</span><span class="p">)</span> <span class="o">*</span> <span class="mi">50</span><span class="p">);</span>
-    <span class="p">};</span>
+        <span class="kd">const</span> <span class="nx">maxCount</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nf">max</span><span class="p">(...</span><span class="nx">funnelStages</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nf">map</span><span class="p">((</span><span class="nx">s</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">s</span><span class="p">.</span><span class="nx">count</span><span class="p">));</span>
+        <span class="c1">// Scale width from 40% to 90% for better visibility</span>
+        <span class="k">return</span> <span class="mi">40</span> <span class="o">+</span> <span class="p">(</span><span class="nx">stage</span><span class="p">.</span><span class="nx">count</span> <span class="o">/</span> <span class="nx">maxCount</span><span class="p">)</span> <span class="o">*</span> <span class="mi">50</span><span class="p">;</span>
+      <span class="p">};</span>
 
-    <span class="nf">onMounted</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-      <span class="nf">fetchSalesFunnelSummary</span><span class="p">();</span>
-    <span class="p">});</span>
+      <span class="nf">onMounted</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nf">fetchSalesFunnelSummary</span><span class="p">();</span>
+      <span class="p">});</span>
 
-    <span class="k">return</span> <span class="p">{</span>
-      <span class="nx">summary</span><span class="p">,</span>
-      <span class="nx">loading</span><span class="p">,</span>
-      <span class="nx">error</span><span class="p">,</span>
-      <span class="nx">funnelStages</span><span class="p">,</span>
-      <span class="nx">getStageWidth</span><span class="p">,</span>
-      <span class="nx">getDealStatusDescription</span><span class="p">,</span>
-      <span class="nx">formatCurrency</span><span class="p">,</span>
-    <span class="p">};</span>
-  <span class="p">},</span>
-<span class="p">};</span>
+      <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">summary</span><span class="p">,</span>
+        <span class="nx">loading</span><span class="p">,</span>
+        <span class="nx">error</span><span class="p">,</span>
+        <span class="nx">funnelStages</span><span class="p">,</span>
+        <span class="nx">getStageWidth</span><span class="p">,</span>
+        <span class="nx">getDealStatusDescription</span><span class="p">,</span>
+        <span class="nx">formatCurrency</span><span class="p">,</span>
+      <span class="p">};</span>
+    <span class="p">},</span>
+  <span class="p">};</span>
 <span class="nt">&lt;/script&gt;</span>
 
 <span class="nt">&lt;style </span><span class="na">scoped</span><span class="nt">&gt;</span>
-<span class="c">/* ...existing styles... */</span>
+  <span class="c">/* ...existing styles... */</span>
 
-<span class="c">/* Funnel Visualization */</span>
-<span class="nc">.funnel-container</span> <span class="p">{</span>
-  <span class="nl">display</span><span class="p">:</span> <span class="nb">flex</span><span class="p">;</span>
-  <span class="nl">flex-direction</span><span class="p">:</span> <span class="nb">column</span><span class="p">;</span>
-  <span class="nl">align-items</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
-  <span class="nl">gap</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
-  <span class="nl">max-width</span><span class="p">:</span> <span class="m">900px</span><span class="p">;</span>
-  <span class="nl">margin</span><span class="p">:</span> <span class="m">25px</span> <span class="nb">auto</span><span class="p">;</span>
-  <span class="nl">padding</span><span class="p">:</span> <span class="m">15px</span><span class="p">;</span>
-  <span class="nl">background-color</span><span class="p">:</span> <span class="nx">#f8f9fa</span><span class="p">;</span>
-  <span class="nl">border-radius</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
-  <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">2px</span> <span class="m">4px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.05</span><span class="p">);</span>
-<span class="p">}</span>
+  <span class="c">/* Funnel Visualization */</span>
+  <span class="nc">.funnel-container</span> <span class="p">{</span>
+    <span class="nl">display</span><span class="p">:</span> <span class="nb">flex</span><span class="p">;</span>
+    <span class="nl">flex-direction</span><span class="p">:</span> <span class="nb">column</span><span class="p">;</span>
+    <span class="nl">align-items</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+    <span class="nl">gap</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
+    <span class="nl">max-width</span><span class="p">:</span> <span class="m">900px</span><span class="p">;</span>
+    <span class="nl">margin</span><span class="p">:</span> <span class="m">25px</span> <span class="nb">auto</span><span class="p">;</span>
+    <span class="nl">padding</span><span class="p">:</span> <span class="m">15px</span><span class="p">;</span>
+    <span class="nl">background-color</span><span class="p">:</span> <span class="nx">#f8f9fa</span><span class="p">;</span>
+    <span class="nl">border-radius</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
+    <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">2px</span> <span class="m">4px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.05</span><span class="p">);</span>
+  <span class="p">}</span>
 
-<span class="nc">.funnel-stage</span> <span class="p">{</span>
-  <span class="nl">height</span><span class="p">:</span> <span class="nb">auto</span><span class="p">;</span>
-  <span class="nl">min-height</span><span class="p">:</span> <span class="m">80px</span><span class="p">;</span>
-  <span class="nl">padding</span><span class="p">:</span> <span class="m">12px</span> <span class="m">20px</span><span class="p">;</span>
-  <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#3498db</span><span class="p">,</span> <span class="nx">#5dade2</span><span class="p">);</span>
-  <span class="nl">color</span><span class="p">:</span> <span class="nx">white</span><span class="p">;</span>
-  <span class="nl">border-radius</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span>
-  <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">2px</span> <span class="m">5px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.1</span><span class="p">);</span>
-  <span class="nl">transition</span><span class="p">:</span> <span class="nb">all</span> <span class="m">0.3s</span> <span class="nb">ease</span><span class="p">;</span>
-  <span class="nl">display</span><span class="p">:</span> <span class="nb">flex</span><span class="p">;</span>
-  <span class="nl">flex-direction</span><span class="p">:</span> <span class="nb">column</span><span class="p">;</span>
-  <span class="nl">justify-content</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
-  <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nc">.funnel-stage</span> <span class="p">{</span>
+    <span class="nl">height</span><span class="p">:</span> <span class="nb">auto</span><span class="p">;</span>
+    <span class="nl">min-height</span><span class="p">:</span> <span class="m">80px</span><span class="p">;</span>
+    <span class="nl">padding</span><span class="p">:</span> <span class="m">12px</span> <span class="m">20px</span><span class="p">;</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#3498db</span><span class="p">,</span> <span class="nx">#5dade2</span><span class="p">);</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="nx">white</span><span class="p">;</span>
+    <span class="nl">border-radius</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span>
+    <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">2px</span> <span class="m">5px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.1</span><span class="p">);</span>
+    <span class="nl">transition</span><span class="p">:</span> <span class="nb">all</span> <span class="m">0.3s</span> <span class="nb">ease</span><span class="p">;</span>
+    <span class="nl">display</span><span class="p">:</span> <span class="nb">flex</span><span class="p">;</span>
+    <span class="nl">flex-direction</span><span class="p">:</span> <span class="nb">column</span><span class="p">;</span>
+    <span class="nl">justify-content</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+    <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="nc">.funnel-stage</span><span class="nd">:hover</span> <span class="p">{</span>
-  <span class="nl">transform</span><span class="p">:</span> <span class="nf">translateX</span><span class="p">(</span><span class="m">5px</span><span class="p">);</span>
-  <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">4px</span> <span class="m">8px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.15</span><span class="p">);</span>
-<span class="p">}</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:hover</span> <span class="p">{</span>
+    <span class="nl">transform</span><span class="p">:</span> <span class="nf">translateX</span><span class="p">(</span><span class="m">5px</span><span class="p">);</span>
+    <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">4px</span> <span class="m">8px</span> <span class="nf">rgba</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0.15</span><span class="p">);</span>
+  <span class="p">}</span>
 
-<span class="nc">.stage-header</span> <span class="p">{</span>
-  <span class="nl">font-weight</span><span class="p">:</span> <span class="nb">bold</span><span class="p">;</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">1.1em</span><span class="p">;</span>
-  <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nc">.stage-header</span> <span class="p">{</span>
+    <span class="nl">font-weight</span><span class="p">:</span> <span class="nb">bold</span><span class="p">;</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">1.1em</span><span class="p">;</span>
+    <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="nc">.stage-count</span> <span class="p">{</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.95em</span><span class="p">;</span>
-  <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nc">.stage-count</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.95em</span><span class="p">;</span>
+    <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="nc">.stage-value</span> <span class="p">{</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.9em</span><span class="p">;</span>
-  <span class="nl">font-weight</span><span class="p">:</span> <span class="m">500</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nc">.stage-value</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.9em</span><span class="p">;</span>
+    <span class="nl">font-weight</span><span class="p">:</span> <span class="m">500</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="nc">.stage-age</span> <span class="p">{</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.9em</span><span class="p">;</span>
-  <span class="nl">margin-top</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
-  <span class="nl">opacity</span><span class="p">:</span> <span class="m">0.9</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nc">.stage-age</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">0.9em</span><span class="p">;</span>
+    <span class="nl">margin-top</span><span class="p">:</span> <span class="m">4px</span><span class="p">;</span>
+    <span class="nl">opacity</span><span class="p">:</span> <span class="m">0.9</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="c">/* Create color variations based on the stage */</span>
-<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">1</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#3498db</span><span class="p">,</span> <span class="nx">#5dade2</span><span class="p">);</span> <span class="p">}</span>
-<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">2</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#2e86c1</span><span class="p">,</span> <span class="nx">#5499c7</span><span class="p">);</span> <span class="p">}</span>
-<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">3</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#2874a6</span><span class="p">,</span> <span class="nx">#4a87af</span><span class="p">);</span> <span class="p">}</span>
-<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">4</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#21618c</span><span class="p">,</span> <span class="nx">#417699</span><span class="p">);</span> <span class="p">}</span>
-<span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">5</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#1a5276</span><span class="p">,</span> <span class="nx">#386288</span><span class="p">);</span> <span class="p">}</span>
+  <span class="c">/* Create color variations based on the stage */</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">1</span><span class="o">)</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#3498db</span><span class="p">,</span> <span class="nx">#5dade2</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">2</span><span class="o">)</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#2e86c1</span><span class="p">,</span> <span class="nx">#5499c7</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">3</span><span class="o">)</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#2874a6</span><span class="p">,</span> <span class="nx">#4a87af</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">4</span><span class="o">)</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#21618c</span><span class="p">,</span> <span class="nx">#417699</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="nc">.funnel-stage</span><span class="nd">:nth-child</span><span class="o">(</span><span class="err">5</span><span class="o">)</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="nf">linear-gradient</span><span class="p">(</span><span class="m">90deg</span><span class="p">,</span> <span class="nx">#1a5276</span><span class="p">,</span> <span class="nx">#386288</span><span class="p">);</span>
+  <span class="p">}</span>
 
-<span class="nt">h2</span> <span class="p">{</span>
-  <span class="nl">margin-top</span><span class="p">:</span> <span class="m">30px</span><span class="p">;</span>
-  <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">15px</span><span class="p">;</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">150%</span><span class="p">;</span>
-  <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nt">h2</span> <span class="p">{</span>
+    <span class="nl">margin-top</span><span class="p">:</span> <span class="m">30px</span><span class="p">;</span>
+    <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">15px</span><span class="p">;</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">150%</span><span class="p">;</span>
+    <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+  <span class="p">}</span>
 
-<span class="nt">h1</span> <span class="p">{</span>
-  <span class="nl">font-size</span><span class="p">:</span> <span class="m">175%</span><span class="p">;</span>
-  <span class="nl">padding-top</span><span class="p">:</span> <span class="m">2%</span><span class="p">;</span>
-  <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
-<span class="p">}</span>
+  <span class="nt">h1</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">175%</span><span class="p">;</span>
+    <span class="nl">padding-top</span><span class="p">:</span> <span class="m">2%</span><span class="p">;</span>
+    <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+  <span class="p">}</span>
 <span class="nt">&lt;/style&gt;</span>
 </code></pre></div></div>
 

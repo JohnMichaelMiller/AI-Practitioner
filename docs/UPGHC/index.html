@@ -114,6 +114,7 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
+
 <p><br /></p>
 
 <p>Copilot infers several things:</p>
@@ -135,6 +136,7 @@
         <span class="k">return</span> <span class="m">2</span> <span class="p">*</span> <span class="n">Math</span><span class="p">.</span><span class="n">PI</span> <span class="p">*</span> <span class="n">Radius</span><span class="p">;</span>
     <span class="p">}</span>
 </code></pre></div></div>
+
 <p><br /></p>
 
 <p>For example, when adding the <code class="language-plaintext highlighter-rouge">Circumference</code> method, Copilot understands that:</p>
@@ -160,6 +162,7 @@
 
 <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Oval is a shape class that inherits from Circle and overrides the Area method</span>
 </code></pre></div></div>
+
 <p><br /></p>
 
 <p>And we start the definition of a class on the next line. Copilot will suggest a class that implements the comment.</p>
@@ -274,6 +277,7 @@
 <h4 id="using-chat-variables">Using Chat Variables</h4>
 
 <p>You can also use chat variables to provide more context to Copilot:</p>
+
 <ul>
   <li><strong>#selection</strong>: Refers to the selected text in your code.</li>
   <li><strong>#file</strong>: Refers to the current file.</li>
@@ -287,18 +291,19 @@
 <p>Let’s say you want to add documentation to a method:</p>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">fetchData</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// Fetch data from the URL</span>
-    <span class="k">return</span> <span class="nf">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span>
-        <span class="p">.</span><span class="nf">then</span><span class="p">(</span><span class="nx">response</span> <span class="o">=&gt;</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">())</span>
-        <span class="p">.</span><span class="nf">then</span><span class="p">(</span><span class="nx">data</span> <span class="o">=&gt;</span> <span class="p">{</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
-            <span class="k">return</span> <span class="nx">data</span><span class="p">;</span>
-        <span class="p">})</span>
-        <span class="p">.</span><span class="k">catch</span><span class="p">(</span><span class="nx">error</span> <span class="o">=&gt;</span> <span class="p">{</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Error fetching data:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
-        <span class="p">});</span>
+  <span class="c1">// Fetch data from the URL</span>
+  <span class="k">return</span> <span class="nf">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">response</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">())</span>
+    <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+      <span class="k">return</span> <span class="nx">data</span><span class="p">;</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="k">catch</span><span class="p">((</span><span class="nx">error</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="dl">"</span><span class="s2">Error fetching data:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+    <span class="p">});</span>
 <span class="p">}</span>
 </code></pre></div></div>
+
 <p><br /></p>
 
 <p>You can use the <code class="language-plaintext highlighter-rouge">/doc</code> command to add comments:</p>
