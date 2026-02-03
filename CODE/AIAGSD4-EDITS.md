@@ -1,3 +1,5 @@
+# AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files
+
 This is the fourth post in the series on AI‑assisted greenfield software development. If you're joining mid‑stream, you may want to begin with [Part 1: Business Requirements](https://www.codemag.com/blog/AIPractitioner/AIAGSD1/), where I established the foundation for an AI‑driven development workflow. [Part 2](https://www.codemag.com/Blog/AIPractitioner/AIAGSD2) and [Part 3](https://www.codemag.com/Blog/AIPractitioner/AIAGSD3) expanded that foundation with scaffolding, project‑level instructions, and Git workflow guidance.
 
 In this post, I'll shift from *project‑level* instructions to *architecture‑level* instructions. This is where I'll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.
@@ -82,7 +84,7 @@ With the prompt file in place, I generated a concrete instruction file. Using th
 
 *Submit the prompt generate-cqrs-eventsourcing-instructions.prompt.md in the C# language, the MediatR framework, the EventStoreDB event_store and inline projections*
 
-This generates an instruction that directs an AI agent executing the prompt to generate C# code that strictly separates command handling from query handling, using [MediatR](https://mediatr.io/) for mediation and [EventStoreDB](https://learn.eventstore.com/resources/what-is-eventstoredb) for persistence. When creating commands, agents must structure them so handlers validate inputs, load aggregates by replaying events, execute domain logic that returns new events without mutating state, and append those events using optimistic concurrency checks. Agents are instructed to never allow aggregates to directly modify their internal state; instead, all state changes must flow through Apply() methods that process events.
+This generates an instruction that directs AI agents [JOHN, IN THE PREVIOUS SECTION YOU HAD ONE AGENT. YOU HAVE SEVERAL HERE? IS IT IMPORTANT FOR THE READER TO KNOW WHAT THEY ARE CALLED OR WHAT THEY DO? OR IS THIS ALL HANDLED BY GitHub Copilot?] to generate C# code that strictly separates command handling from query handling, using MediatR [JOHN, WILL READERS KNOW WHAT THIS IS OR SHOULD YOU EXPLAIN IT? PLEASE ADD A LINK] for mediation and EventStoreDB for persistence. When creating commands, agents must structure them so handlers validate inputs, load aggregates by replaying events, execute domain logic that returns new events without mutating state, and append those events using optimistic concurrency checks. Agents are instructed to never allow aggregates to directly modify their internal state; instead, all state changes must flow through Apply() methods that process events.
 
 For queries, agents must create handlers that read exclusively from denormalized read models stored in a separate database schema, never directly accessing the event store. The file mandates inline projections that update read models synchronously within the same transaction as event appends, ensuring immediate consistency. Agents must implement projection classes with event handler methods that transform events into read model updates.
 
@@ -90,7 +92,7 @@ When building aggregates, agents are directed to implement Apply() methods for r
 
 For performance optimization, agents are instructed to implement snapshot stores that cache aggregate state when streams exceed 50-100 events, loading aggregates from the latest snapshot plus subsequent events rather than replaying entire streams. The file directs agents to handle event versioning through upcaster classes that transform old event formats during reads.
 
-Agents must implement idempotency through MediatR pipeline behaviors that track command identifiers and prevent duplicate processing. Testing code should follow Given-When-Then patterns, verifying events produced by commands, read model updates from projections, and state transitions in aggregates.
+Agents must implement idempotency through MediatR pipeline behaviors that track command identifiers and prevent duplicate processing. Testing code should follow Given-When-Then patterns [JOHN, WILL YOUR READERS KNOW WHAT THIS IS? MAYBE DEFINE AND PROVIDE A LINK.], verifying events produced by commands, read model updates from projections, and state transitions in aggregates.
 
 The instruction file explicitly prohibits several patterns: querying event stores for reads, mutating aggregate state outside event application, deleting events, sharing events between aggregates, and loading multiple aggregates in command handlers. It enforces a strict project structure segregating commands, queries, projections, aggregates, events, and infrastructure concerns into designated directories.
 
@@ -108,7 +110,17 @@ To complete the foundation we need technology-specific instructions and project 
 
 Before moving on, it's a good idea to review the .github governance (prompts, instructions, etc.) to ensure there aren't conflicting governance that could confuse Copilot. In [Part 2](https://www.codemag.com/blog/AIPractitioner/AIAGSD2/) I introduced the `check-context.prompt.md` file that examines the current context and reports any anomalies that should be addressed.
 
-The prompt checks for Conflicting Instructions, Factual Inconsistencies, Logical Contradictions, Scope/Priority Conflicts, Technical Incompatibilities, Communication Gaps, and Duplication/Redundancy.
+[JOHN, THE LIST BELOW DOESN'T "FLOW" FOR ME FROM REVIEWING THE FILE ABOVE AND THEN AFTER THE LIST BELOW, THINGS JUST END ABRUPTLY. HOW DO THESE 8 STEPS HAPPEN? AND THINGS SEEM CUT OFF WITH "COPILOT DIDN'T FIND ANY ISSUES TO ADDRESS..." DID SOME PROCESS RUN WHERE YOU ASKED COPILOT TO ANALYSE SOMETHING?]
+Here is the quality assessment portion of the analysis:
+
+✅ Complete AI provenance metadata (all required fields)
+✅ Copilot prompt metadata (description, context, expected_output)
+✅ Optional fields included (tools, mode) for enhanced functionality
+✅ Token-optimized content (~200 tokens core content)
+✅ Clear structured output format (YAML for parseability)
+✅ Actionable 6-step validation workflow
+✅ Comprehensive 7-category conflict detection
+✅ Conversation and summary logs complete
 
 This is a prompt that should be submitted any time the .github governance changes. Copilot didn't find any issues to address, so we are good to proceed.
 
@@ -116,7 +128,7 @@ This is a prompt that should be submitted any time the .github governance change
 
 In Part 5, I'll add instruction files for the technologies we're implementing. These instructions will guide Copilot in the details for implementing specific technologies. That post will cover naming conventions, patterns, namespaces, standards, and templates for implementing the classes that will be implemented.
 
-If you'd like to explore the files or follow along with your own implementation, everything is available in the [Academia GitHub](https://github.com/johnmillerATcodemag-com/zeus.academia.3b) repository. Fork it, experiment, and adapt it to your own workflow.
+If you'd like to explore the files or follow along with your own implementation, everything is available in the Academia GitHub repository [JOHN, PLEASE INCLUDE A LINK]. Fork it, experiment, and adapt it to your own workflow.
 
 ---
 
@@ -139,3 +151,4 @@ Prompts:
 - Summarize `generate-cqrs-eventsourcing-instructions.prompt.md` in prose. don't explain CQRS or Event Sourcing. Describe what the file instructs an AI agent to do.
 - Write a paragraph defining Event Sourcing
 - Explain the CQRS architecture pattern
+-
