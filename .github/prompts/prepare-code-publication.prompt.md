@@ -84,6 +84,8 @@ The AI Practitioner blog posts are originally published at blog.pdata.com and ne
    - Replace complete URL paths
    - Maintain URL structure and parameters
 
+**Important**: Do not modify the original post file in the jekyll-src/_posts/ directory.
+
 ### File Operations
 
 - Create CODE folder if it doesn't exist
