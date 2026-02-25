@@ -41,23 +41,376 @@
 
 <p>Welcome to jMM’s AI Practitioner Blog.</p>
 <h2 class="post-list-heading">Posts</h2>
-    <ul class="post-list"><li><div class="post-item"><div class="post-content">
+    <ul class="post-list"><li><div class="post-item"><a href="/AIAGSD5/" class="post-image-link">
+              <img src="/assets/images/2026-02-24/header-AIAGSD5.png" alt="AI-Assisted Greenfield Software Development, Part 5: Technology Instruction Files" class="post-thumbnail" />
+            </a><div class="post-content">
+            <span class="post-meta">Feb 24, 2026</span>
+            <h3>
+              <a class="post-link" href="/AIAGSD5/">
+                AI-Assisted Greenfield Software Development, Part 5: Technology Instruction Files
+              </a>
+            </h3><h1 id="ai-assisted-greenfield-software-development-part-5-technology-instruction-files">AI-Assisted Greenfield Software Development, Part 5: Technology Instruction Files</h1>
+<p>https://blog.pdata.com/AIAGSD2/
+This is the fifth post in the series on AI-assisted greenfield software development. If you’re joining mid-stream, you may want to begin with <a href="https://blog.pdata.com/AIAGSD1/">Part 1: Business Requirements</a>, where I established the foundation for an AI-driven development workflow. <a href="https://blog.pdata.com/AIAGSD2">Part 2</a>, <a href="https://blog.pdata.com/AIAGSD3">Part 3</a>, and <a href="https://blog.pdata.com/AIAGSD4">Part 4</a> expanded that foundation with scaffolding, project-level instructions, and Git workflow guidance.</p>
+
+<p>In this post, I’ll shift from <em>architecture-level</em> instructions to <em>technology-level</em> instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
+
+<hr />
+
+<h2 id="why-technology-instruction-files-matter">Why Technology Instruction Files Matter</h2>
+
+<p>When humans build software, implementation standards are often implicit; shared understanding, code reviews, and experience enforce consistency. AI doesn’t have that luxury. Without explicit technological rules, AI agents tend to optimize for convenience rather than coherence.</p>
+
+<p>These technology instruction files solve this by providing:</p>
+
+<ul>
+  <li>Language-specific coding standards and conventions</li>
+  <li>Framework-specific implementation patterns</li>
+  <li>Technology integration guidelines</li>
+  <li>Code organization and folder structure</li>
+  <li>Anti-patterns and gotchas to avoid</li>
+  <li>Testing expectations and coverage targets</li>
+  <li>Quality standards and validation checklists</li>
+</ul>
+
+<p>These files become the “rails” that keep AI-generated code aligned with your project’s technical vision, ensuring consistency across all technologies in your stack.</p>
+
+<h2 id="updating-the-project-overview">Updating the Project Overview</h2>
+
+<p>Before diving into CQRS implementation details, it’s important to ensure that our project overview accurately reflects the current state of our architectural decisions. As the project evolves and we make technology choices, we need to keep our foundational documentation current.</p>
+
+<p>To update the project overview with our current technology stack and architectural direction, I ran the following prompt:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit this prompt #file:create-project-overview.prompt.md with these argument values:
+project_name: zeus.academia
+project_type: web app
+primary_language: C#, TypeScript
+key_technologies: Vue 3, Pinia, REST, GraphQL, Vite, Azure Static Web Apps, ASP.NET Core, MediatR, FluentValidation
+project_purpose: Academic Management System
+</code></pre></div></div>
+
+<p>This prompt generates or updates comprehensive project documentation that includes:</p>
+
+<ul>
+  <li><strong>Project identity and purpose</strong> with clear positioning as an academic management system</li>
+  <li><strong>Technology stack overview</strong> documenting our chosen frameworks and tools</li>
+  <li><strong>Architecture approach</strong> reflecting our CQRS implementation strategy</li>
+  <li><strong>Development workflow</strong> aligned with our AI-assisted methodology</li>
+  <li><strong>Integration patterns</strong> between frontend (Vue 3) and backend (ASP.NET Core) components</li>
+</ul>
+
+<p>Running this prompt ensures that anyone joining the project-whether human developers or AI agents-has an accurate, up-to-date understanding of what we’re building and how we’re building it. This foundational clarity becomes especially important as we implement more complex architectural patterns like CQRS.</p>
+
+<h2 id="project-overview-instructions"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/project-overview.instructions.md">Project Overview Instructions</a></h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">project-overview.instructions.md</code> file serves as the foundational context document for the Zeus Academia project, providing AI assistants with essential project information needed to work effectively across the entire codebase. This instruction file is marked to apply globally (<code class="language-plaintext highlighter-rouge">applyTo: "**"</code>), meaning it’s automatically loaded as context whenever you interact with any file in the repository. It acts as a “project primer” that ensures AI assistants understand the project’s identity (Academic Management System), architecture (monorepo with Vue 3 frontend and ASP.NET Core backend), technology stack (C#, TypeScript, MediatR, Pinia, FluentValidation), and core constraints (OAuth 2.0 authentication, WCAG 2.1 AA accessibility, FERPA/GDPR compliance, 80% test coverage).</p>
+
+<p>The file is structured to provide quick, token-optimized reference information across several key dimensions:</p>
+
+<p><strong>Architecture</strong>: Explains the monorepo structure, separation of frontend/backend, and key directories
+<strong>Standards</strong>: Defines coding conventions (PascalCase for C#, camelCase for TypeScript), patterns (CQRS via MediatR, Repository pattern), and testing requirements (xUnit, Vitest, 80% coverage)
+<strong>Environment</strong>: Specifies deployment targets (Azure Static Web Apps, Azure App Service), runtime expectations (modern browsers, .NET 8+), and dependencies (Azure AD B2C, Azure SQL/Cosmos DB)
+<strong>Constraints</strong>: Sets non-negotiable requirements for security (HTTPS-only, RBAC), performance (API &lt;500ms p95, page load &lt;3s), accessibility (WCAG 2.1 AA), privacy (FERPA/GDPR), and scale (10k+ concurrent users)
+<strong>Critical Files</strong>: Points to other essential instruction files for detailed guidance on CQRS implementation, C# coding standards, AI workflows, and git processes
+This overview file is referenced by all technology-specific instruction files (Vue 3, ASP.NET Core, MediatR, etc.) to maintain consistency and avoid duplication. It ensures that any AI-assisted code generation, documentation, or refactoring work aligns with the project’s technical standards, architectural decisions, and compliance requirements. The file itself was AI-generated (as indicated by the YAML front matter) and follows the repository’s AI provenance policy, including complete metadata about its creation, the prompt used, task durations, and links to the conversation log.</p>
+
+<h2 id="creating-technology-specific-instruction-files">Creating Technology-Specific Instruction Files</h2>
+
+<p>With our project overview updated to reflect the current technology stack, the next step is to create detailed instruction files for each technology we’ll be implementing. Rather than manually crafting these files, we can leverage AI to generate comprehensive, consistent instruction files tailored to our specific technology choices.</p>
+
+<p>To generate technology-specific instruction files for all the technologies documented in our project overview, I submitted this prompt:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create a prompt file that creates technology specific instruction files for the technologies specified in the #file:project-overview.instructions.md
+</code></pre></div></div>
+
+<p>This prompt creates a meta-prompt file that can generate individual instruction files for each technology in our stack, including:</p>
+
+<ul>
+  <li><strong>Frontend technologies</strong> - Vue 3, Pinia, Vite configuration and development patterns</li>
+  <li><strong>Backend frameworks</strong> - ASP.NET Core, MediatR, FluentValidation implementation standards</li>
+  <li><strong>API patterns</strong> - REST and GraphQL service design and implementation guidelines</li>
+  <li><strong>Deployment targets</strong> - Azure Static Web Apps configuration and CI/CD workflows</li>
+  <li><strong>Integration approaches</strong> - How these technologies work together within our CQRS architecture</li>
+</ul>
+
+<p>This systematic approach ensures that each technology instruction file maintains consistency with our overall architectural vision while providing the specific implementation guidance that AI agents need to generate quality code. The resulting instruction files will serve as the detailed technical foundation that bridges our high-level architecture decisions with actual code generation.</p>
+
+<hr />
+
+<h2 id="implementing-technology-specific-instructions">Implementing Technology-Specific Instructions</h2>
+
+<p>With the meta-prompt file created, we can now systematically generate instruction files for each technology in our project stack. Rather than creating all instruction files at once, the systematic approach involves submitting the technology instruction prompt for each technology individually, allowing for focused, detailed guidance tailored to each component.</p>
+
+<p>To generate comprehensive instruction files for each technology documented in our project overview, I submitted this prompt:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit the #file:create-technology-instructions.prompt.md for each of the technologies specified in the #file:project-overview.instructions.md file
+</code></pre></div></div>
+
+<p>This approach creates individual instruction files for each technology, ensuring that:</p>
+
+<h3 id="frontend-technology-instructions"><strong>Frontend Technology Instructions</strong></h3>
+
+<ul>
+  <li><strong>Vue 3 implementation patterns</strong> including component composition, reactivity patterns, and lifecycle management</li>
+  <li><strong>Pinia state management</strong> with store organization, state mutations, and persistence strategies</li>
+  <li><strong>Vite configuration</strong> for development workflows, build optimization, and asset handling</li>
+  <li><strong>Frontend integration patterns</strong> defining how these technologies work together cohesively</li>
+</ul>
+
+<h3 id="backend-technology-instructions"><strong>Backend Technology Instructions</strong></h3>
+
+<ul>
+  <li><strong>ASP.NET Core service patterns</strong> covering controller design, dependency injection, and middleware configuration</li>
+  <li><strong>MediatR implementation standards</strong> for command/query handling, pipeline behaviors, and cross-cutting concerns</li>
+  <li><strong>FluentValidation integration</strong> with validation rules, error handling, and localization support</li>
+  <li><strong>API design guidelines</strong> for both REST and GraphQL implementations</li>
+</ul>
+
+<h3 id="infrastructure-integration-instructions"><strong>Infrastructure Integration Instructions</strong></h3>
+
+<ul>
+  <li><strong>Azure Static Web Apps deployment</strong> including CI/CD pipeline configuration and environment management</li>
+  <li><strong>Cross-application communication</strong> patterns between frontend and backend services</li>
+  <li><strong>Authentication and authorization</strong> strategies that work across the technology stack</li>
+  <li><strong>Performance optimization</strong> techniques specific to each technology layer</li>
+</ul>
+
+<h3 id="quality-assurance-instructions"><strong>Quality Assurance Instructions</strong></h3>
+
+<ul>
+  <li><strong>Testing strategies</strong> tailored to each technology (Jest for Vue 3, xUnit for ASP.NET Core)</li>
+  <li><strong>Code quality standards</strong> including linting rules, formatting conventions, and architectural compliance</li>
+  <li><strong>Integration testing patterns</strong> that validate cross-technology communication</li>
+  <li><strong>Documentation requirements</strong> for API endpoints, component interfaces, and deployment procedures</li>
+</ul>
+
+<p>This systematic generation process ensures that each technology instruction file maintains consistency with our overall architectural vision while providing the specific, actionable guidance that AI agents need to generate high-quality, pattern-compliant code. The resulting instruction files serve as the comprehensive technical foundation that connects our architectural decisions to actual implementation.</p>
+
+<h2 id="executing-the-technology-instructions-generation">Executing the Technology Instructions Generation</h2>
+
+<p>With the meta-prompt file in place, the next step involves actually generating the individual instruction files for each technology in our stack. This process transforms our high-level technology choices into concrete, actionable guidance that AI agents can follow consistently.</p>
+
+<p>To execute the technology instruction generation process, I submitted this specific prompt:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit the #file:create-technology-instructions.prompt.md for each of the technologies specified in the #file:project-overview.instructions.md file
+</code></pre></div></div>
+
+<p>This prompt directs the AI to:</p>
+
+<ol>
+  <li><strong>Read the project overview file</strong> to identify all technologies in the current stack</li>
+  <li><strong>Apply the technology instruction template</strong> to each identified technology</li>
+  <li><strong>Generate individual instruction files</strong> with technology-specific implementation guidelines</li>
+  <li><strong>Ensure consistency</strong> across all generated instruction files while maintaining technology-specific focus</li>
+</ol>
+
+<p>The execution results in a comprehensive set of instruction files, each tailored to a specific technology but aligned with the overall project architecture. For example:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>File</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">aspnetcore-implementation.instructions.md</code></td>
+      <td>ASP.NET Core coding standards and patterns for backend development</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">csharp-implementation.instructions.md</code></td>
+      <td>Modern C# coding standards and patterns for backend development</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">fluentvalidation-implementation.instructions.md</code></td>
+      <td>Validation patterns and best practices with FluentValidation</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">mediatr-implementation.instructions.md</code></td>
+      <td>Command/query handling and pipeline behaviors with MediatR</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">pinia-implementation.instructions.md</code></td>
+      <td>State management patterns and best practices for Pinia</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">typescript-frontend-implementation.instructions.md</code></td>
+      <td>TypeScript coding standards and patterns for frontend development</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">vitest-implementation.instructions.md</code></td>
+      <td>Unit testing patterns and best practices with Vitest</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">vue3-implementation.instructions.md</code></td>
+      <td>Component patterns, composition API usage, and Vue 3 best practices</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">xunit-implementation.instructions.md</code></td>
+      <td>Unit testing patterns and best practices with xUnit</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each generated instruction file contains specific implementation rules, code templates, anti-pattern prevention, and integration guidance that ensures AI agents produce consistent, high-quality code aligned with our architectural Vision.</p>
+
+<h3 id="aspnetcore-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/aspnetcore-implementation.instructions.md">aspnetcore-implementation.instructions.md</a></h3>
+
+<p>The ASP.NET Core Implementation standards instruction file establishes comprehensive guidelines for building the backend API layer of the Zeus Academia Academic Management System using ASP.NET Core 8.0+. It mandates a clean architecture approach with minimal APIs for simple endpoints and MVC controllers for complex logic, while enforcing async/await patterns, constructor-based dependency injection, and nullable reference types throughout.</p>
+
+<p>The file provides detailed code examples for minimal API endpoints, controller implementations, Program.cs configuration, exception handling middleware, and dependency injection setup-all integrated with MediatR for CQRS patterns and FluentValidation for request validation. It includes a validation checklist covering async operations, HTTP status codes, logging, cancellation tokens, authorization, and health checks, while explicitly calling out anti-patterns like synchronous I/O, Task.Result/Task.Wait(), service locator patterns, business logic in controllers, and suppressing nullable warnings.</p>
+
+<p>The standards ensure that all backend code follows consistent patterns for Azure AD B2C authentication, Entity Framework Core data access, proper error handling with ProblemDetails responses, and comprehensive OpenAPI documentation for all endpoints.
+At this point, the AI has:</p>
+
+<h3 id="csharp-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/csharp-implementation.instructions.md">csharp-implementation.instructions.md</a></h3>
+
+<p>The C# Implementation standards instruction file establishes comprehensive modern C# coding guidelines for the Zeus Academia project, mandating .NET 8+ with nullable reference types enabled, file-scoped namespaces, and strict adherence to SOLID principles and Clean Architecture patterns.</p>
+
+<p>It provides detailed naming conventions using PascalCase for public members, _camelCase for private fields, and Async suffixes for asynchronous methods, while enforcing one-type-per-file organization with constructors, properties, and methods in a specific order matching namespace-to-folder structure. The file extensively documents type selection criteria favoring record types for immutable DTOs and value objects with structural equality, class types for mutable entities with identity equality, and modern C# 11+ features including required members, raw string literals, list patterns, and expression-bodied members for concise single-statement implementations.</p>
+
+<p>It mandates async/await patterns for all I/O operations with proper CancellationToken propagation while strictly prohibiting blocking calls like <code class="language-plaintext highlighter-rouge">.Result</code> or <code class="language-plaintext highlighter-rouge">.Wait()</code>, requires constructor-based dependency injection over service locator patterns, enforces specific exception types over generic <code class="language-plaintext highlighter-rouge">Exception</code>, and provides LINQ optimization guidelines preferring method syntax, <code class="language-plaintext highlighter-rouge">Any()</code> over <code class="language-plaintext highlighter-rouge">Count() &gt; 0</code>, and avoiding unnecessary materialization with <code class="language-plaintext highlighter-rouge">.ToList()</code>.</p>
+
+<p>The standards include comprehensive XML documentation requirements for public APIs, a detailed anti-patterns table highlighting common mistakes like primitive obsession and mutable static state, and a validation checklist ensuring compiler warnings are resolved, nullable reference types properly handled, and all code follows consistent patterns-serving as the foundational C# guidance that specialized instruction files like CQRS and MediatR implementations build upon.</p>
+
+<h3 id="fluentvalidation-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/fluentvalidation-implementation.instructions.md">fluentvalidation-implementation.instructions.md</a></h3>
+
+<p>The FluentValidation Implementation standards instruction file establishes comprehensive validation patterns for the Zeus Academia backend, mandating one validator per MediatR command or query with FluentValidation 11.0+ to enforce declarative, fail-fast request validation in the CQRS pipeline.</p>
+
+<p>It provides detailed code examples for basic command validators with chained validation rules (<code class="language-plaintext highlighter-rouge">NotEmpty</code>, <code class="language-plaintext highlighter-rouge">MaximumLength</code>, <code class="language-plaintext highlighter-rouge">Matches</code>), conditional validation using <code class="language-plaintext highlighter-rouge">When()</code> for context-specific rules, async validators with <code class="language-plaintext highlighter-rouge">MustAsync</code> for database uniqueness checks and existence verification, nested object validation using <code class="language-plaintext highlighter-rouge">SetValidator()</code> for complex types, and collection validation with <code class="language-plaintext highlighter-rouge">RuleForEach()</code> for batch operations.</p>
+
+<p>The file demonstrates custom error message formatting with property names and values, error code assignment for API responses, reusable validation rule extensions for common patterns like GUID validation and alphanumeric checks, and performance optimization techniques including compiled regex caching and strategic ordering of cheap-before-expensive validations. It explicitly prohibits anti-patterns like validation logic in handlers, synchronous database checks blocking the pipeline, mixing business rules with input validation, throwing custom exceptions from validators, and generic unhelpful error messages-instead requiring stateless validators injected via DI, async operations with proper cancellation token support, separation of validation (input correctness) from business rules (domain logic), and specific actionable error messages that guide users toward correct input, all integrated automatically through the MediatR ValidationBehavior pipeline that collects all validation failures before executing handlers.</p>
+
+<h3 id="mediatr-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/mediatr-implementation.instructions.md">mediatr-implementation.instructions.md</a></h3>
+
+<p>The MediatR CQRS Implementation standards instruction file establishes comprehensive patterns for implementing the Command Query Responsibility Segregation (CQRS) pattern in the Zeus Academia backend using MediatR 12.0+. It enforces strict separation between commands (write operations) and queries (read operations) through immutable record types, with one handler per request following single responsibility principles.</p>
+
+<p>The file provides detailed code examples for command patterns (<code class="language-plaintext highlighter-rouge">create</code>, <code class="language-plaintext highlighter-rouge">update</code>, <code class="language-plaintext highlighter-rouge">delete</code>), query patterns (<code class="language-plaintext highlighter-rouge">single entity</code>, <code class="language-plaintext highlighter-rouge">paginated lists with filtering</code>), <code class="language-plaintext highlighter-rouge">void</code> commands returning Unit, and pipeline behaviors for cross-cutting concerns like FluentValidation integration and structured logging with performance metrics.</p>
+
+<p>It includes dependency injection setup that automatically registers all handlers and validators from the application assembly, establishes clear naming conventions (e.g., <code class="language-plaintext highlighter-rouge">Create&lt;Entity&gt;Command</code>, <code class="language-plaintext highlighter-rouge">Get&lt;Entity&gt;Query</code>, <code class="language-plaintext highlighter-rouge">&lt;Command&gt;Handler</code>), and demonstrates integration with repositories, unit of work transactions, and domain entities.</p>
+
+<p>The standards explicitly prohibit anti-patterns like mutable commands/queries, business logic in pipeline behaviors, queries that modify state, returning domain entities directly to APIs, and validation logic embedded in handlers-instead mandating the use of FluentValidation validators in the pipeline, repository abstractions for data access, DTO projections for API responses, and proper cancellation token propagation throughout async operations to ensure scalable, maintainable, and testable CQRS implementations.</p>
+
+<h3 id="pinia-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/pinia-implementation.instructions.md">pinia-implementation.instructions.md</a></h3>
+
+<p>The Pinia State Management standards instruction file establishes comprehensive guidelines for implementing global state management in the Zeus Academia Vue 3 frontend using Pinia 2.1+ with TypeScript, mandating setup stores (composition API style) exclusively while avoiding the options API altogether. It provides extensive code examples for standard CRUD store structure with reactive state using <code class="language-plaintext highlighter-rouge">ref()</code>, computed getters for derived values, async actions with loading/error states, and the <code class="language-plaintext highlighter-rouge">$reset()</code> function for cleanup, along with patterns for store composition to combine multiple stores for related functionality, manual state persistence for sensitive data like auth tokens, and optimistic updates with rollback for improved perceived performance.</p>
+
+<p>The file documents integration patterns including component usage with <code class="language-plaintext highlighter-rouge">useXxxStore()</code>, router guard integration for auth checks, and test patterns using <code class="language-plaintext highlighter-rouge">setActivePinia()</code> with Vitest for isolated store testing with mocked API calls. It establishes strict naming conventions (<code class="language-plaintext highlighter-rouge">use&lt;Feature&gt;Store.ts</code>), file organization under <code class="language-plaintext highlighter-rouge">src/frontend/stores/</code>, and type safety requirements ensuring all state, getters, and actions have explicit TypeScript types, while explicitly prohibiting anti-patterns like options API stores, direct state mutations from components, storing derived values instead of using computed getters, mixing unrelated concerns in one store, async logic in getters, persisting loading states, and creating store instances outside component setup-instead requiring focused domain-specific stores, action-based state modifications, selective data persistence, and proper reactive composition to ensure maintainable, performant, and type-safe global state management that leverages Vue 3’s reactivity system and Pinia’s modern composition-based architecture.</p>
+
+<h3 id="typescript-frontend-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/typescript-frontend-implementation.instructions.md">typescript-frontend-implementation.instructions.md</a></h3>
+
+<p>The TypeScript Frontend Implementation standards instruction file establishes comprehensive type-safety guidelines for the Zeus Academia Vue 3 SPA frontend, mandating TypeScript 5.3+ with strict mode enabled and zero tolerance for implicit any types.</p>
+
+<p>It provides detailed patterns for domain model interfaces, API request/response types, type guards for runtime validation, discriminated unions for type-safe error handling, and utility types for common transformations like <code class="language-plaintext highlighter-rouge">DeepPartial</code> and <code class="language-plaintext highlighter-rouge">RequireAtLeastOne</code>. The file includes extensive code examples for Vue 3 integration-specifically typed component props using <code class="language-plaintext highlighter-rouge">defineProps&lt;T&gt;()</code>, composable return types, and Pinia store interfaces-while also covering <code class="language-plaintext highlighter-rouge">TSConfig</code> settings that enforce strict linting rules including <code class="language-plaintext highlighter-rouge">noUnusedLocals</code>, <code class="language-plaintext highlighter-rouge">noUnusedParameters</code>, and <code class="language-plaintext highlighter-rouge">noImplicitReturns</code>.</p>
+
+<p>It explicitly calls out anti-patterns like using any, unchecked type assertions with as, excessive optional chaining, numeric enums, and <code class="language-plaintext highlighter-rouge">@ts-ignore</code> comments, instead promoting type guards, readonly modifiers, string enums or union types, and proper null handling through type narrowing to ensure the frontend codebase maintains complete type safety and leverages TypeScript’s full compile-time guarantees.</p>
+
+<h3 id="vitest-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/vitest-implementation.instructions.md">vitest-implementation.instructions.md</a></h3>
+
+<p>The Vitest Testing standards instruction file establishes comprehensive testing guidelines for the Zeus Academia Vue 3 frontend, mandating Vitest 1.2+ with 80%+ code coverage through clear Arrange-Act-Assert patterns, descriptive test naming that explains behavior rather than implementation, and fast execution times measured in milliseconds for unit tests.</p>
+
+<p>It provides extensive code examples for unit testing composables with <code class="language-plaintext highlighter-rouge">vi.mock</code> and store mocking, component testing using <code class="language-plaintext highlighter-rouge">@testing-library/vue</code> with proper user-facing queries and event simulation, Pinia store testing with <code class="language-plaintext highlighter-rouge">setActivePinia</code> and isolated state, API mocking with axios interception, async component testing with <code class="language-plaintext highlighter-rouge">waitFor</code> patterns, and comprehensive setup configurations including <code class="language-plaintext highlighter-rouge">vitest.config.ts</code> with <code class="language-plaintext highlighter-rouge">jsdom</code> environment and <code class="language-plaintext highlighter-rouge">@testing-library/jest-dom</code> matchers.</p>
+
+<p>The file documents all standard assertion patterns from basic equality checks through Testing Library’s accessibility-focused matchers like <code class="language-plaintext highlighter-rouge">toBeInTheDocument()</code> and <code class="language-plaintext highlighter-rouge">toHaveTextContent()</code>, while establishing strict validation requirements including mock cleanup with <code class="language-plaintext highlighter-rouge">beforeEach(() =&gt; vi.clearAllMocks())</code>, async/await over <code class="language-plaintext highlighter-rouge">setTimeout</code> delays, and proper test isolation. It explicitly prohibits anti-patterns including testing implementation details instead of user behavior, shallow rendering without justification, hardcoded test data duplication, generic uninformative test names, and multiple unrelated assertions per test-instead requiring focused behavioral tests, full component renders with Testing Library, test data factories for reusable fixtures, descriptive test names that serve as documentation, and single-concern tests that validate one logical behavior to ensure maintainable, reliable test suites that validate frontend functionality through user-centric testing patterns aligned with Testing Library philosophy.</p>
+
+<h3 id="vue3-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/vue3-implementation.instructions.md">vue3-implementation.instructions.md</a></h3>
+
+<p>The Vue 3 Implementation standards instruction file establishes comprehensive guidelines for building the Zeus Academia frontend SPA using Vue 3.4+ with TypeScript, mandating exclusive use of the Composition API with <code class="language-plaintext highlighter-rouge">&lt;script setup&gt;</code> syntax while completely avoiding the Options API. It provides extensive code examples for Single File Component (SFC) structure with typed props using <code class="language-plaintext highlighter-rouge">defineProps&lt;T&gt;()</code>, emits declaration with <code class="language-plaintext highlighter-rouge">defineEmits&lt;{}&gt;()</code>, composable patterns prefixed with use that encapsulate reusable logic with proper TypeScript return types, and template refs with explicit type annotations for DOM element and component instance access.</p>
+
+<p>The file documents integration patterns with Pinia stores via <code class="language-plaintext highlighter-rouge">useXxxStore()</code> composables, Vue Router navigation hooks, and performance optimization techniques including lazy-loaded routes with <code class="language-plaintext highlighter-rouge">() =&gt; import()</code>, <code class="language-plaintext highlighter-rouge">v-once</code> for static content, <code class="language-plaintext highlighter-rouge">v-memo</code> for expensive list rendering, and computed properties over methods for derived reactive state. It establishes strict lifecycle hook usage patterns with cleanup requirements in <code class="language-plaintext highlighter-rouge">onUnmounted</code> for subscriptions and event listeners, validation checklists ensuring all components use scoped styles and handle async operations with loading/error states, and explicitly prohibits anti-patterns like untyped props, prop mutations, global state in composables, missing :key attributes in <code class="language-plaintext highlighter-rouge">v-for</code> loops, and inline event handler creation that causes unnecessary <code class="language-plaintext highlighter-rouge">re-renders-all</code> while maintaining strict TypeScript typing throughout to ensure type-safe, performant, and maintainable Vue 3 components that leverage reactivity primitives (<code class="language-plaintext highlighter-rouge">ref</code>, <code class="language-plaintext highlighter-rouge">reactive</code>, <code class="language-plaintext highlighter-rouge">computed</code>) and lifecycle hooks correctly for optimal rendering performance and developer experience.</p>
+
+<h3 id="xunit-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/xunit-implementation.instructions.md">xunit-implementation.instructions.md</a></h3>
+
+<p>The xUnit Testing standards instruction file establishes comprehensive testing guidelines for the Zeus Academia backend, mandating xUnit 2.6+ with a target of 80%+ code coverage through clear Arrange-Act-Assert test structure, descriptive naming conventions that explain the scenario and expected result, and one logical assertion per test for focused validation. It provides extensive code examples for unit tests using <code class="language-plaintext highlighter-rouge">NSubstitute</code> for mocking dependencies, theory tests with <code class="language-plaintext highlighter-rouge">InlineData</code> and <code class="language-plaintext highlighter-rouge">MemberData</code> for parameterized testing, test fixtures with <code class="language-plaintext highlighter-rouge">IClassFixture</code> for shared setup across test classes, integration tests using <code class="language-plaintext highlighter-rouge">WebApplicationFactory</code> to test actual HTTP endpoints, and repository tests with in-memory Entity Framework databases for data access validation.</p>
+
+<p>The file demonstrates FluentAssertions usage for readable, expressive assertions covering objects, collections, strings, exceptions, and async operations, while establishing strict naming patterns like <code class="language-plaintext highlighter-rouge">MethodName_Scenario_ExpectedResult</code> (e.g., <code class="language-plaintext highlighter-rouge">Handle_WithValidCommand_CreatesStudent</code>). It explicitly prohibits anti-patterns including multiple unrelated assertions in one test, implementation detail testing instead of behavior validation, test interdependencies, hardcoded test data duplication, async void test methods, and production database usage in tests-instead requiring isolated independent tests with test data builders, async Task signatures for async operations, specific FluentAssertions over generic <code class="language-plaintext highlighter-rouge">Assert.True</code>, and in-memory databases or test containers to ensure fast (&lt;100ms unit, &lt;1s integration), reliable, and maintainable test suites that validate behavior rather than implementation while maintaining clear separation between unit tests (<code class="language-plaintext highlighter-rouge">Zeus.Academia.UnitTests</code>), integration tests (<code class="language-plaintext highlighter-rouge">Zeus.Academia.IntegrationTests</code>), and API tests (<code class="language-plaintext highlighter-rouge">Zeus.Academia.Api.Tests</code>).</p>
+
+<h2 id="checking-the-context">Checking the Context</h2>
+
+<p>Before moving on, it’s a good idea to review the .github governance (prompts, instructions, etc.) to ensure there aren’t conflicting governance that could confuse Copilot. In <a href="https://blog.pdata.com/AIAGSD2/">Part 2</a> I introduced the <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> file that examines the current context and reports any anomalies that should be addressed.</p>
+
+<p>The prompt checks for Conflicting Instructions, Factual Inconsistencies, Logical Contradictions, Scope/Priority Conflicts, Technical Incompatibilities, Communication Gaps, and Duplication/Redundancy.</p>
+
+<p>This is a prompt that should be submitted any time the .github governance changes. Copilot didn’t find any issues to address, so we are good to proceed.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>This post shifted focus from architecture-level instructions to technology-level instructions that guide AI agents during code generation. We updated the project overview to document our current technology stack (Vue 3, Pinia, ASP.NET Core, MediatR, FluentValidation, etc.), then systematically generated comprehensive instruction files for each technology.</p>
+
+<p>These nine technology-specific instruction files establish the standards and practices that ensure consistency across the solution:</p>
+
+<ul>
+  <li><strong>Backend</strong>: ASP.NET Core patterns, modern C# coding standards, MediatR CQRS implementation, FluentValidation rules, and xUnit testing practices</li>
+  <li><strong>Frontend</strong>: Vue 3 Composition API conventions, TypeScript type-safety requirements, Pinia state management patterns, and Vitest testing standards</li>
+</ul>
+
+<p>Each instruction file provides code examples, naming conventions, anti-patterns to avoid, and validation checklists that AI agents use to generate high-quality, architecturally-aligned code. These “rails” keep AI-generated code consistent with the project’s technical vision while maintaining clarity for both human and AI developers working on the project.</p>
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>Now that we’ve set the standards for the technical implementation, we’re almost ready to begin the implementation. Before we can start implementing the solution we need an implementation plan. The implementation plan defines the tasks, their dependencies, and the order in which they should be executed to build the solution. It serves as a roadmap for the development process, ensuring that all necessary steps are taken in the correct sequence to achieve the desired outcome.</p>
+
+<p>In Part 6, I’ll introduce the vertical slice implementation pattern which breaks down the project into small, end-to-end slices that can be developed and tested independently. I’ll also introduce an implementation plan prompt and show how to use AI to generate a detailed implementation plan that breaks down the project into manageable tasks while respecting the architectural constraints we’ve established. We’ll finish this phase by creating implementation prompts that guide AI agents through the actual coding work, ensuring that all generated code adheres to our technology-specific instruction files and architectural vision.</p>
+
+<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
+
+<hr />
+
+<h2 id="feedback-loop">Feedback Loop</h2>
+
+<p>Feedback is always welcome. Send your thoughts to <strong>AIP@pdata.com</strong>.</p>
+
+<hr />
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<p>Prompts:</p>
+<ul>
+  <li>Rewrite this blog post focusing on technology instruction files</li>
+  <li>After the section “## Why Architecture Instruction Files Matter” add a section describing running the following prompt to update the project overview:
+submit this prompt #file:create-project-overview.prompt.md with these argument values:
+project_name: zeus.academia
+project_type: web app
+primary_language: C#, TypeScript
+key_technologies: Vue 3, Pinia, REST, GraphQL, Vite, Azure Static Web Apps, ASP.NET Core, MediatR, FluentValidation
+project_purpose: Academic Management System</li>
+  <li>After the “## Updating the Project Overview” section add a section describing the submission of this prompt: create a prompt file that creates technology specific instruction files for the technologies specified in the #file:project-overview.instructions.md</li>
+  <li>drop the CQRS example and replace it with as section describing this prompt: submit the #file:create-technology-instructions.prompt.md for each of the technologies specified in the #file:project-overview.instructions.md file</li>
+  <li>add a section describing the submission of this prompt: submit the #file:create-technology-instructions.prompt.md for each of the technologies specified in the #file:project-overview.instructions.md file</li>
+  <li>write a paragraph describing these instructions #file:aspnetcore-implementation.instructions.md</li>
+  <li>write a paragraph describing these instructions #file:mediatr-implementation.instructions.md</li>
+  <li>write a paragraph describing these instructions #file:xunit-implementation.instructions.md</li>
+  <li>write a paragraph describing these instructions #file:vue3-implementation.instructions.md</li>
+  <li>write a paragraph describing these instructions #file:csharp-implementation.instructions.md</li>
+  <li>write a paragraph describing these instructions #file:typescript-frontend-implementation.instructions.md</li>
+  <li>write a paragraph describing these instructions #file:fluentvalidation-implementation.instructions.md</li>
+  <li>write a paragraph describing these instructions #file:vitest-implementation.instructions.md</li>
+  <li>write a paragraph describing these instructions #file:pinia-implementation.instructions.md</li>
+</ul>
+</div>
+        </div>
+      </li><li><div class="post-item"><a href="/AIAGSD4/" class="post-image-link">
+              <img src="/assets/images/2026-01-26/header-AIAGSD4.jpg" alt="AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files" class="post-thumbnail" />
+            </a><div class="post-content">
             <span class="post-meta">Jan 26, 2026</span>
             <h3>
               <a class="post-link" href="/AIAGSD4/">
                 AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files
               </a>
-            </h3><h1 id="ai-assisted-greenfield-software-development-part-4-architecture-prompts-and-instructions">AI-Assisted Greenfield Software Development, Part 4: Architecture Prompts and Instructions</h1>
+            </h3><h1 id="ai-assisted-greenfield-software-development-part-4-architecture-instruction-files">AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files</h1>
 
-<p>This is the fourth post in the series on AI‑assisted greenfield software development. If you’re joining mid‑stream, you may want to begin with <a href="https://blog.pdata.com/AIAGSD1/">Part 1: Business Requirements</a>, where we established the foundation for an AI‑driven development workflow. Parts 2 and 3 expanded that foundation with scaffolding, project‑level instructions, and Git workflow guidance.</p>
+<p>This is the fourth post in the series on AI‑assisted greenfield software development. If you’re joining mid‑stream, you may want to begin with <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1/">Part 1: Business Requirements</a>, where I established the foundation for an AI‑driven development workflow. <a href="https://www.codemag.com/Blog/AIPractitioner/AIAGSD2">Part 2</a> and <a href="https://www.codemag.com/Blog/AIPractitioner/AIAGSD3">Part 3</a> expanded that foundation with scaffolding, project‑level instructions, and Git workflow guidance.</p>
 
-<p>In this post, we shift from <em>project‑level</em> instructions to <em>architecture‑level</em> instructions. This is where we define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
+<p>In this post, I’ll shift from <em>project‑level</em> instructions to <em>architecture‑level</em> instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
 
 <hr />
 
 <h2 id="why-architecture-instruction-files-matter">Why Architecture Instruction Files Matter</h2>
 
-<p>When humans build software, architecture is often implicit—shared understanding, tribal knowledge, and experience fill in the gaps. AI doesn’t have that luxury. Without explicit architectural rules, AI agents tend to optimize for convenience rather than coherence.</p>
+<p>When humans build software, architecture is often implicit; shared understanding, tribal knowledge and experience fill in the gaps. AI doesn’t have that luxury. Without explicit architectural rules, AI agents tend to optimize for convenience rather than coherence.</p>
 
 <p>Architecture instruction files solve this by providing:</p>
 
@@ -73,49 +426,48 @@
 
 <p>These files become the “rails” that keep AI‑generated code aligned with the intended system design.</p>
 
-<p>In <a href="https://blog.pdata.com/AIAGSD4/">Part 4</a>, we focus on one of the most widely used architectural patterns in modern backend systems: <code class="language-plaintext highlighter-rouge">CQRS</code>. I’ve chosen <code class="language-plaintext highlighter-rouge">CQRS</code> because it is not a trivial architecture and is a good test of AI’s ability to create architectural instructions and implement in accordance with those instructions.</p>
+<p>To begin, I’ll focus on one of the most widely used architectural patterns in modern back end systems: <strong>CQRS</strong>. I’ve chosen CQRS because it is not a trivial architecture and is a good test of AI’s ability to create architectural instructions and implement in accordance with those instructions.</p>
 
 <hr />
 
 <h2 id="what-is-cqrs">What Is CQRS?</h2>
 
-<p>The <code class="language-plaintext highlighter-rouge">CQRS</code> (Command Query Responsibility Segregation) architectural pattern separates read operations (queries) from write operations (commands). Instead of a single model handling everything, <code class="language-plaintext highlighter-rouge">CQRS</code> splits responsibilities so each side can be optimized independently.</p>
+<p>The CQRS (Command Query Responsibility Segregation) architectural pattern separates read operations (queries) from write operations (commands). Instead of a single model handling everything, CQRS splits responsibilities so each side can be optimized independently.</p>
 
 <h3 id="core-principle">Core Principle</h3>
 
-<p>Traditional <code class="language-plaintext highlighter-rouge">CRUD</code> applications use a single model to handle both read and write operations. <code class="language-plaintext highlighter-rouge">CQRS</code> separates these concerns by introducing two distinct models: one dedicated to commands (writes) and another focused on queries (reads).</p>
+<p>Traditional <strong>CRUD</strong> applications use a single model to handle both read and write operations. CQRS separates these concerns by introducing two distinct models: one dedicated to commands (writes) and another focused on queries (reads).</p>
 
-<p><strong>Commands</strong></p>
-
-<p>A command is responsible for modifying the system’s state and carrying out the necessary business logic to make that change meaningful. Its job ends there—it does not return any domain‑level data, only an acknowledgment that the operation completed. Command examples are <code class="language-plaintext highlighter-rouge">CreateOrderCommand</code> and <code class="language-plaintext highlighter-rouge">ChangePasswordCommand</code></p>
-
-<p><strong>Queries</strong></p>
-
-<p>A query’s sole responsibility is to retrieve information from the system. It provides data back to the caller but never alters application state or triggers any side effects</p>
+<ul>
+  <li>
+    <p><strong>Commands</strong> - A command is responsible for modifying the system’s state and carrying out the necessary business logic to make that change meaningful. Its job ends there—it does not return any domain‑level data, only an acknowledgment that the operation completed. Command examples are <code class="language-plaintext highlighter-rouge">CreateOrderCommand</code> and <code class="language-plaintext highlighter-rouge">ChangePasswordCommand</code></p>
+  </li>
+  <li>
+    <p><strong>Queries</strong> - A query’s sole responsibility is to retrieve information from the system. It provides data back to the caller but never alters application state or triggers any side effects</p>
+  </li>
+</ul>
 
 <h3 id="key-benefits">Key Benefits</h3>
 
-<p><code class="language-plaintext highlighter-rouge">CQRS</code> makes it possible to scale the read and write sides of the system independently, allowing each to grow according to its own demands. Because the two responsibilities are separated, each side can use models tailored to its specific purpose, with the read side often taking advantage of denormalized structures to maximize performance. This separation also creates cleaner security boundaries, making it easier to control who can read or modify data. And since the two sides operate independently, each can use the storage technology best suited to its workload, giving the architecture far more flexibility overall</p>
+<p>CQRS makes it possible to scale the read and write sides of the system independently, allowing each to grow according to its own demands. Because the two responsibilities are separated, each side can use models tailored to its specific purpose, with the read side often taking advantage of denormalized structures to maximize performance. This separation also creates cleaner security boundaries, making it easier to control who can read or modify data. And since the two sides operate independently, each can use the storage technology best suited to its workload, giving the architecture far more flexibility overall</p>
 
 <h3 id="common-implementation-pattern">Common Implementation Pattern</h3>
 
 <p>Write operations trigger events that update read models. This creates an <em>eventually consistent</em> system—an intentional tradeoff that unlocks performance and scalability.</p>
 
-<h3 id="when-cqrs-is-a-good-fit">When <code class="language-plaintext highlighter-rouge">CQRS</code> Is a Good Fit</h3>
+<h3 id="when-cqrs-is-a-good-fit">When CQRS Is a Good Fit</h3>
 
-<p><code class="language-plaintext highlighter-rouge">CQRS</code> is especially effective in environments where read operations vastly outnumber writes, allowing the system to optimize each side independently. It also shines in domains with intricate business rules, where separating commands and queries helps keep complexity manageable. Architectures built around event sourcing benefit naturally from <code class="language-plaintext highlighter-rouge">CQRS</code>, as do multi‑tenant applications that must serve diverse read patterns. And in systems where auditability is essential, the clear separation of responsibilities makes tracking and verifying changes far more straightforward.</p>
+<p>CQRS is especially effective in environments where read operations vastly outnumber writes, allowing the system to optimize each side independently. It also shines in domains with intricate business rules, where separating commands and queries helps keep complexity manageable. Architectures built around event sourcing benefit naturally from CQRS, as do multi‑tenant applications that must serve diverse read patterns. And in systems where auditability is essential, the clear separation of responsibilities makes tracking and verifying changes far more straightforward.</p>
 
 <h3 id="when-to-avoid-it">When to Avoid It</h3>
 
-<p>If your application is simple <code class="language-plaintext highlighter-rouge">CRUD</code>, <code class="language-plaintext highlighter-rouge">CQRS</code> adds complexity without meaningful benefit.</p>
-
-<hr />
+<p>If your application is simple CRUD, CQRS adds complexity without meaningful benefit.</p>
 
 <h2 id="creating-the-architecture-prompt-file">Creating the Architecture Prompt File</h2>
 
-<p>Prior to creating CQRS instructions, I created a prompt file to guide the creation of the instructions. By asking Copilot to create a prompt file, you give Copilot a chance to add relevant context to the which improves the prompt, which in turn will improve the instructions generated by the prompt.</p>
+<p>Prior to creating CQRS instructions, I created a prompt file to guide the creation of the instructions. By asking Copilot to create a prompt file, you give Copilot a chance to add relevant context which improves the prompt, which in turn will improve the instructions generated by the prompt.</p>
 
-<p>When generating GitHub AI guidance I used the custom <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/chatmodes/prompt-engineer.chatmode.md">prompt-engineer.chatmode.md</a> chat mode, introduced in <a href="https://blog.pdata.com/AIAGSD2/">Part 2</a>, which focuses Copilot on the skills needed to generate effective prompts.</p>
+<p>When generating GitHub AI guidance I used the custom <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/chatmodes/prompt-engineer.chatmode.md">prompt-engineer.chatmode.md</a> chat mode, introduced in <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD2/">Part 2</a>, which focuses Copilot on the skills needed to generate effective prompts.</p>
 
 <p>When working with GitHub AI guidance there is always a chicken-and-egg problem. For Copilot to generate an artifact, you need a prompt. In this case we want Copilot to generate a prompt file. We could create a prompt file that would generate the prompt file we need to generate the instruction file. This is a recursive process with diminishing returns. At some point we’d need to manually prompt Copilot to bootstrap the artifact generation.</p>
 
@@ -125,11 +477,9 @@
 
 <p>All of this meta guidance (prompts that generate prompts which create instructions that govern the generation of code) can get confusing. Take a close look at the files I’ve referenced in this post and have Copilot explain anything you don’t quite understand.</p>
 
-<hr />
+<h3 id="understanding-the-generate-cqrs-eventsourcing-instructionspromptmd-prompt-file">Understanding the <code class="language-plaintext highlighter-rouge">generate-cqrs-eventsourcing-instructions.prompt.md</code> Prompt File</h3>
 
-<h3 id="understanding-the-generate-cqrs-eventsourcing-instructionspromptmd-prompt-file">Understanding the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/13fc7e8eb6fa47a5f933cd0e427dc7c65642f5c0/.github/prompts/generate-cqrs-eventsourcing-instructions.prompt.md">generate-cqrs-eventsourcing-instructions.prompt.md</a> prompt file.</h3>
-
-<p>The <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/13fc7e8eb6fa47a5f933cd0e427dc7c65642f5c0/.github/prompts/generate-cqrs-eventsourcing-instructions.prompt.md">generate-cqrs-eventsourcing-instructions.prompt.md</a> prompt file instructs an AI agent to generate a complete instruction file for implementing CQRS with Event Sourcing patterns in a specific programming language and technology stack. The agent takes four parameters, the programming language, mediator framework, event store implementation, and projection strategy, and produces a comprehensive .instructions.md file that will guide future AI-assisted code generation.</p>
+<p>The <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/13fc7e8eb6fa47a5f933cd0e427dc7c65642f5c0/.github/prompts/generate-cqrs-eventsourcing-instructions.prompt.md">generate-cqrs-eventsourcing-instructions.prompt.md</a> prompt file instructs an AI agent to generate a complete instruction file for implementing CQRS with event sourcing patterns in a specific programming language and technology stack. The agent takes four parameters, the programming language, mediator framework, event store implementation, and projection strategy, and produces a comprehensive <code class="language-plaintext highlighter-rouge">.instructions.md</code> file that will guide future AI-assisted code generation.</p>
 
 <p>The instruction file content follows a rigid 15-section structure. The agent begins with a brief overview, then creates a reference table defining core concepts like events, aggregates, event stores, projections, and snapshots. It documents three main implementation patterns, command handling with event-sourced aggregates, event store operations for writing and reading event streams, and query handling using projections rather than direct event store access.</p>
 
@@ -137,15 +487,13 @@
 
 <p>Additional sections cover event schema design with versioning strategies, aggregate reconstruction patterns, idempotency handling, anti-patterns to avoid, event schema evolution techniques using upcasters, and testing approaches. The agent concludes with a validation checklist ensuring all critical patterns are documented.</p>
 
-<hr />
-
 <h2 id="creating-the-architecture-instruction-file">Creating the Architecture Instruction File</h2>
 
 <p>With the prompt file in place, I generated a concrete instruction file. Using the prompt:</p>
 
 <p><em>Submit the prompt generate-cqrs-eventsourcing-instructions.prompt.md in the C# language, the MediatR framework, the EventStoreDB event_store and inline projections</em></p>
 
-<p>This generates an instruction that directs AI agents to generate C# code that strictly separates command handling from query handling, using MediatR for mediation and EventStoreDB for persistence. When creating commands, agents must structure them so handlers validate inputs, load aggregates by replaying events, execute domain logic that returns new events without mutating state, and append those events using optimistic concurrency checks. Agents are instructed to never allow aggregates to directly modify their internal state; instead, all state changes must flow through Apply() methods that process events.</p>
+<p>This generates an instruction that directs an AI agent executing the prompt to generate C# code that strictly separates command handling from query handling, using <a href="https://mediatr.io/">MediatR</a> for mediation and <a href="https://learn.eventstore.com/resources/what-is-eventstoredb">EventStoreDB</a> for persistence. When creating commands, agents must structure them so handlers validate inputs, load aggregates by replaying events, execute domain logic that returns new events without mutating state, and append those events using optimistic concurrency checks. Agents are instructed to never allow aggregates to directly modify their internal state; instead, all state changes must flow through Apply() methods that process events.</p>
 
 <p>For queries, agents must create handlers that read exclusively from denormalized read models stored in a separate database schema, never directly accessing the event store. The file mandates inline projections that update read models synchronously within the same transaction as event appends, ensuring immediate consistency. Agents must implement projection classes with event handler methods that transform events into read model updates.</p>
 
@@ -167,40 +515,27 @@
   <li>Architecture‑level instructions</li>
 </ul>
 
-<p>To complete the foundation we need technology specific instructions and project implementation guidance.</p>
-
-<hr />
+<p>To complete the foundation we need technology-specific instructions and project implementation guidance.</p>
 
 <h2 id="checking-the-context">Checking the Context</h2>
 
-<p>Before moving on, it’s a good idea to review the .github governance (prompts, instructions, etc.) as whole to make sure there aren’t conflicting governance that could confuse Copilot. In <a href="https://blog.pdata.com/AIAGSD2/">Part 2</a> I introduced the check-context.prompt.md file that examines the current context and reports any anomalies that should be addressed.</p>
+<p>Before moving on, it’s a good idea to review the .github governance (prompts, instructions, etc.) to ensure there aren’t conflicting governance that could confuse Copilot. In <a href="https://blog.pdata.com/AIAGSD2/">Part 2</a> I introduced the <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> file that examines the current context and reports any anomalies that should be addressed.</p>
 
-<p>Here is the Quality Assessment portion of the analysis:</p>
-
-<p>✅ Complete AI provenance metadata (all required fields)
-✅ Copilot prompt metadata (description, context, expected_output)
-✅ Optional fields included (tools, mode) for enhanced functionality
-✅ Token-optimized content (~200 tokens core content)
-✅ Clear structured output format (YAML for parseability)
-✅ Actionable 6-step validation workflow
-✅ Comprehensive 7-category conflict detection
-✅ Conversation and summary logs complete</p>
+<p>The prompt checks for Conflicting Instructions, Factual Inconsistencies, Logical Contradictions, Scope/Priority Conflicts, Technical Incompatibilities, Communication Gaps, and Duplication/Redundancy.</p>
 
 <p>This is a prompt that should be submitted any time the .github governance changes. Copilot didn’t find any issues to address, so we are good to proceed.</p>
 
-<hr />
-
 <h2 id="whats-next">What’s Next?</h2>
 
-<p>In Part 5, I’ll add instruction files for the technologies we’re implementing. These instructions will guide Copilot in the details for implementing specific technologies. We’ll cover naming conventions, patterns, namespaces, standards, and templates for implementing the classes that will be implemented.</p>
+<p>In Part 5, I’ll add instruction files for the technologies we’re implementing. These instructions will guide Copilot in the details for implementing specific technologies. That post will cover naming conventions, patterns, namespaces, standards, and templates for implementing the classes that will be implemented.</p>
 
-<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the Academia GitHub repository. Fork it, experiment, and adapt it to your own workflow.</p>
+<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
 
 <hr />
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 
-<p>Feedback is always welcome. Send your thoughts to <strong>AIP@pdata.com</strong>.</p>
+<p>Feedback is always welcome. Send your thoughts to <strong>john.miller@codemag.com</strong>.</p>
 
 <hr />
 
@@ -213,16 +548,14 @@
 <ul>
   <li>Rephrase these points as prose:
     <ul>
-      <li>Traditional: In a typical <code class="language-plaintext highlighter-rouge">CRUD</code> application, one model handles both reads and writes</li>
-      <li><code class="language-plaintext highlighter-rouge">CQRS</code>: With <code class="language-plaintext highlighter-rouge">CQRS</code>, there are two models—one for commands, one for queries</li>
+      <li>Traditional: In a typical CRUD application, one model handles both reads and writes</li>
+      <li>CQRS: With CQRS, there are two models—one for commands, one for queries</li>
     </ul>
   </li>
   <li>Summarize <code class="language-plaintext highlighter-rouge">generate-csharp-implementation-instructions.prompt.md</code> in prose. Don’t explain CQRS or Event Sourcing. Describe what the file instructs an AI agent to do.</li>
   <li>Summarize <code class="language-plaintext highlighter-rouge">generate-cqrs-eventsourcing-instructions.prompt.md</code> in prose. don’t explain CQRS or Event Sourcing. Describe what the file instructs an AI agent to do.</li>
   <li>Write a paragraph defining Event Sourcing</li>
-  <li>
-    <h2 id="explain-the-cqrs-architecture-pattern">Explain the <code class="language-plaintext highlighter-rouge">CQRS</code> architecture pattern</h2>
-  </li>
+  <li>Explain the CQRS architecture pattern</li>
 </ul>
 </div>
         </div>
@@ -236,7 +569,7 @@
               </a>
             </h3><p>This is the retro-inaugural post of the AI Practitioner’s Blog. When I started the blog I jumped right into the content without a proper introduction. While I been in software development for many years, my only qualifications for writing a blog about AI is my experiences using the technology in anger creating real-world applications.</p>
 
-<p>When I started the blog, my goal was to create a resource for professionals interested in the practical applications of artificial intelligence. By sharing my experences I hoped to provide insights and guidance to those looking to leverage AI in their own projects and organizations.</p>
+<p>When I started the blog, my goal was to create a resource for professionals interested in the practical applications of artificial intelligence. By sharing my experiences I hoped to provide insights and guidance to those looking to leverage AI in their own projects and organizations.</p>
 
 </div>
         </div>
@@ -354,7 +687,9 @@
               <a class="post-link" href="/UIAI2/">
                 Developing User Interfaces with GitHub Copilot, Part 2
               </a>
-            </h3><p>This is the second installment of my series on using Copilot to implement user interfaces. It does build on the topics discussed in part one, so if you missed it you can check it out <a href="https://www.codemag.com/blog/AIPractitioner/UIAI">here</a>.</p>
+            </h3><h1 id="developing-user-interfaces-with-github-copilot-part-2">Developing User Interfaces with GitHub Copilot, Part 2</h1>
+
+<p>This is the second installment of my series on using Copilot to implement user interfaces. It does build on the topics discussed in part one, so if you missed it you can check it out <a href="https://blog.pdata.com/UIAI">here</a>.</p>
 
 <p>In this article, I (well, Copilot) will expand on the implementation of the <code class="language-plaintext highlighter-rouge">owner-select</code> drop-down by encapsulating the drop-down logic into a new vue component and then replacing the implementation on the <code class="language-plaintext highlighter-rouge">Active Leads by Owner</code> vue with the new component.</p>
 
@@ -401,7 +736,7 @@
               <a class="post-link" href="/CP4TA/">
                 Test Generation Using GitHub Copilot
               </a>
-            </h3><p>Using AI in a production application is risky, particularly if you are new to working with NLM-generated code. This post will show how you can get started using AI in a production application by leveraging AI’s ability to generate test automation.</p>
+            </h3><p>Using AI in a production application is risky, particularly if you are new to working with LLM-generated code. This post will show how you can get started using AI in a production application by leveraging AI’s ability to generate test automation.</p>
 
 <p>If you’re hesitant to apply AI directly to a production codebase, that hesitation is well-grounded. Test automation is one area of your code that is begging for a little help from AI.</p>
 
