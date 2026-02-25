@@ -1,6 +1,12 @@
 # Generate AI images for blog posts based on their categories
 # Uses Pollinations.ai
 # Set POLLINATIONS_API_KEY environment variable or use -ApiKey parameter for authenticated access
+#
+# Usage Examples:
+#   .\generate-post-images.ps1                                    # Process all posts
+#   .\generate-post-images.ps1 -SinglePost "AIAGSD5"            # Process single post by name match
+#   .\generate-post-images.ps1 -SinglePost "2026-02-24-AIAGSD5.md"  # Process single post by filename
+#   .\generate-post-images.ps1 -DryRun -SinglePost "AIAGSD5"    # Preview single post processing
 
 param(
     [string]$PostsPath = "..\jekyll-src\_posts",
@@ -9,7 +15,8 @@ param(
     [string]$ImageHeight = 200,
     [string]$ApiKey = "",
     [switch]$DryRun,
-    [switch]$OverwriteExisting
+    [switch]$OverwriteExisting,
+    [string]$SinglePost = ""
 )
 
 # Get absolute paths
@@ -35,6 +42,11 @@ else {
 Write-Host "=" * 60 -ForegroundColor Cyan
 Write-Host "Posts directory: $PostsPath" -ForegroundColor Gray
 Write-Host "Assets directory: $AssetsBasePath" -ForegroundColor Gray
+
+if (-not [string]::IsNullOrEmpty($SinglePost)) {
+    Write-Host "Target post: $SinglePost" -ForegroundColor Cyan
+}
+
 Write-Host ""
 
 # Function to extract front matter from markdown file
@@ -333,7 +345,44 @@ function Add-ImageToPost {
 Add-Type -AssemblyName System.Web
 
 # Main processing
-$posts = Get-ChildItem -Path $PostsPath -Filter "*.md"
+if (-not [string]::IsNullOrEmpty($SinglePost)) {
+    # Process single post
+    $postPath = ""
+
+    # Check if SinglePost is a full path or just a filename
+    if (Test-Path $SinglePost) {
+        $postPath = $SinglePost
+    }
+    elseif (Test-Path (Join-Path $PostsPath $SinglePost)) {
+        $postPath = Join-Path $PostsPath $SinglePost
+    }
+    else {
+        # Try to find the post by matching the filename pattern
+        $matchingPosts = Get-ChildItem -Path $PostsPath -Filter "*$SinglePost*" | Where-Object { $_.Extension -eq '.md' }
+        if ($matchingPosts.Count -eq 1) {
+            $postPath = $matchingPosts[0].FullName
+        }
+        elseif ($matchingPosts.Count -gt 1) {
+            Write-Host "Multiple posts found matching '$SinglePost':" -ForegroundColor Yellow
+            $matchingPosts | ForEach-Object { Write-Host "  $($_.Name)" -ForegroundColor Gray }
+            Write-Host "Please be more specific." -ForegroundColor Yellow
+            exit 1
+        }
+        else {
+            Write-Error "Post not found: $SinglePost"
+            exit 1
+        }
+    }
+
+    $posts = @(Get-Item $postPath)
+    Write-Host "Processing single post: $($posts[0].Name)" -ForegroundColor Magenta
+}
+else {
+    # Process all posts
+    $posts = Get-ChildItem -Path $PostsPath -Filter "*.md"
+    Write-Host "Processing all posts in directory" -ForegroundColor Magenta
+}
+
 $processedCount = 0
 $skippedCount = 0
 $errorCount = 0
