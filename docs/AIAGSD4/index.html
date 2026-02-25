@@ -8,19 +8,19 @@
 <meta property="og:title" content="AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files" />
 <meta name="author" content="John Michael Miller" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files This is the fourth post in the series on AI‑assisted greenfield software development. If you’re joining mid‑stream, you may want to begin with Part 1: Business Requirements, where I established the foundation for an AI‑driven development workflow. Part 2 and Part 3 expanded that foundation with scaffolding, project‑level instructions, and Git workflow guidance. In this post, I’ll shift from project‑level instructions to architecture‑level instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution." />
-<meta property="og:description" content="AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files This is the fourth post in the series on AI‑assisted greenfield software development. If you’re joining mid‑stream, you may want to begin with Part 1: Business Requirements, where I established the foundation for an AI‑driven development workflow. Part 2 and Part 3 expanded that foundation with scaffolding, project‑level instructions, and Git workflow guidance. In this post, I’ll shift from project‑level instructions to architecture‑level instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution." />
+<meta name="description" content="In this post, I’ll shift from project-level instructions to architecture-level instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution." />
+<meta property="og:description" content="In this post, I’ll shift from project-level instructions to architecture-level instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution." />
 <link rel="canonical" href="https://blog.pdata.com/AIAGSD4/" />
 <meta property="og:url" content="https://blog.pdata.com/AIAGSD4/" />
 <meta property="og:site_name" content="AI Practitioner" />
-<meta property="og:image" content="https://blog.pdata.com/assets/images/2026-01-26/header-AIAGSD4.jpg" />
+<meta property="og:image" content="https://blog.pdata.com/assets/images/2026-01-26/AIAGSD4_2_Header_Rectangle.jpg" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2026-01-26T00:00:00-08:00" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta property="twitter:image" content="https://blog.pdata.com/assets/images/2026-01-26/header-AIAGSD4.jpg" />
+<meta property="twitter:image" content="https://blog.pdata.com/assets/images/2026-01-26/AIAGSD4_2_Header_Rectangle.jpg" />
 <meta property="twitter:title" content="AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2026-01-26T00:00:00-08:00","datePublished":"2026-01-26T00:00:00-08:00","description":"AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files This is the fourth post in the series on AI‑assisted greenfield software development. If you’re joining mid‑stream, you may want to begin with Part 1: Business Requirements, where I established the foundation for an AI‑driven development workflow. Part 2 and Part 3 expanded that foundation with scaffolding, project‑level instructions, and Git workflow guidance. In this post, I’ll shift from project‑level instructions to architecture‑level instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.","headline":"AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files","image":"https://blog.pdata.com/assets/images/2026-01-26/header-AIAGSD4.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIAGSD4/"},"url":"https://blog.pdata.com/AIAGSD4/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2026-01-26T00:00:00-08:00","datePublished":"2026-01-26T00:00:00-08:00","description":"In this post, I’ll shift from project-level instructions to architecture-level instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.","headline":"AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files","image":"https://blog.pdata.com/assets/images/2026-01-26/AIAGSD4_2_Header_Rectangle.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIAGSD4/"},"url":"https://blog.pdata.com/AIAGSD4/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
 <body><header class="site-header" role="banner">
@@ -50,15 +50,11 @@
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <h1 id="ai-assisted-greenfield-software-development-part-4-architecture-instruction-files">AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files</h1>
-
-<p>This is the fourth post in the series on AI‑assisted greenfield software development. If you’re joining mid‑stream, you may want to begin with <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1/">Part 1: Business Requirements</a>, where I established the foundation for an AI‑driven development workflow. <a href="https://www.codemag.com/Blog/AIPractitioner/AIAGSD2">Part 2</a> and <a href="https://www.codemag.com/Blog/AIPractitioner/AIAGSD3">Part 3</a> expanded that foundation with scaffolding, project‑level instructions, and Git workflow guidance.</p>
-
-<p>In this post, I’ll shift from <em>project‑level</em> instructions to <em>architecture‑level</em> instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
+    <p>In this post, I’ll shift from <em>project-level</em> instructions to <em>architecture-level</em> instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
 
 <!--more-->
 
-<hr />
+<p><img src="/assets/images/2026-01-26/AIAGSD4_2_Header_Rectangle.png" alt="Header Image" /> This is the fourth post in the series on AI-assisted greenfield software development. If you’re joining mid-stream, you may want to begin with <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1/">Part 1: Business Requirements</a>, where I established the foundation for an AI-driven development workflow. <a href="https://www.codemag.com/Blog/AIPractitioner/AIAGSD2">Part 2</a> and <a href="https://www.codemag.com/Blog/AIPractitioner/AIAGSD3">Part 3</a> expanded that foundation with scaffolding, project-level instructions, and Git workflow guidance.</p>
 
 <h2 id="why-architecture-instruction-files-matter">Why Architecture Instruction Files Matter</h2>
 
@@ -70,13 +66,13 @@
   <li>A clear architectural pattern</li>
   <li>Implementation rules and constraints</li>
   <li>Folder and feature structure</li>
-  <li>Cross‑cutting concerns</li>
-  <li>Anti‑patterns to avoid</li>
+  <li>Cross-cutting concerns</li>
+  <li>Anti-patterns to avoid</li>
   <li>Testing expectations</li>
   <li>Success criteria for generated code</li>
 </ul>
 
-<p>These files become the “rails” that keep AI‑generated code aligned with the intended system design.</p>
+<p>These files become the “rails” that keep AI-generated code aligned with the intended system design.</p>
 
 <p>To begin, I’ll focus on one of the most widely used architectural patterns in modern back end systems: <strong>CQRS</strong>. I’ve chosen CQRS because it is not a trivial architecture and is a good test of AI’s ability to create architectural instructions and implement in accordance with those instructions.</p>
 
@@ -92,7 +88,7 @@
 
 <ul>
   <li>
-    <p><strong>Commands</strong> - A command is responsible for modifying the system’s state and carrying out the necessary business logic to make that change meaningful. Its job ends there—it does not return any domain‑level data, only an acknowledgment that the operation completed. Command examples are <code class="language-plaintext highlighter-rouge">CreateOrderCommand</code> and <code class="language-plaintext highlighter-rouge">ChangePasswordCommand</code></p>
+    <p><strong>Commands</strong> - A command is responsible for modifying the system’s state and carrying out the necessary business logic to make that change meaningful. Its job ends there—it does not return any domain-level data, only an acknowledgment that the operation completed. Command examples are <code class="language-plaintext highlighter-rouge">CreateOrderCommand</code> and <code class="language-plaintext highlighter-rouge">ChangePasswordCommand</code></p>
   </li>
   <li>
     <p><strong>Queries</strong> - A query’s sole responsibility is to retrieve information from the system. It provides data back to the caller but never alters application state or triggers any side effects</p>
@@ -109,7 +105,7 @@
 
 <h3 id="when-cqrs-is-a-good-fit">When CQRS Is a Good Fit</h3>
 
-<p>CQRS is especially effective in environments where read operations vastly outnumber writes, allowing the system to optimize each side independently. It also shines in domains with intricate business rules, where separating commands and queries helps keep complexity manageable. Architectures built around event sourcing benefit naturally from CQRS, as do multi‑tenant applications that must serve diverse read patterns. And in systems where auditability is essential, the clear separation of responsibilities makes tracking and verifying changes far more straightforward.</p>
+<p>CQRS is especially effective in environments where read operations vastly outnumber writes, allowing the system to optimize each side independently. It also shines in domains with intricate business rules, where separating commands and queries helps keep complexity manageable. Architectures built around event sourcing benefit naturally from CQRS, as do multi-tenant applications that must serve diverse read patterns. And in systems where auditability is essential, the clear separation of responsibilities makes tracking and verifying changes far more straightforward.</p>
 
 <h3 id="when-to-avoid-it">When to Avoid It</h3>
 
@@ -163,8 +159,8 @@
 
 <ul>
   <li>Business requirements</li>
-  <li>Project‑level instructions</li>
-  <li>Architecture‑level instructions</li>
+  <li>Project-level instructions</li>
+  <li>Architecture-level instructions</li>
 </ul>
 
 <p>To complete the foundation we need technology-specific instructions and project implementation guidance.</p>
