@@ -106,3 +106,11 @@ This repository includes tools for managing multiple GitHub accounts:
 # Configure git settings for current repository
 .\scripts\github-setup.ps1 -Action setup-git-configs
 ```
+
+## Copilot Custom Agents
+
+- **[.github/agents/blog-author.agent.md](.github/agents/blog-author.agent.md)**: Repository-scoped custom agent for drafting and refining AIAGSD-style technical blog content.
+
+## Copilot Prompts
+
+- **[.github/prompts/create-blog-section.prompt.md](.github/prompts/create-blog-section.prompt.md)**: Reusable prompt to generate or revise a single AIAGSD-style blog section with explicit constraints and scope.
