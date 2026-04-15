@@ -1,488 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-04-15T08:55:20-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning</title><link href="https://blog.pdata.com/AIAGSD6/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning" /><published>2026-03-01T00:00:00-08:00</published><updated>2026-03-01T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD6</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD6/"><![CDATA[<p><strong>TL;DR:</strong> This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution.</p>
-
-<p>We’re moving from architecture into implementation, but first we need a plan that defines tasks, dependencies, and execution order. This post shows how to generate planning artifacts — vertical-slice definitions, Product Requirements Documents (PRDs), workflow models, and dependency diagrams — that create a roadmap for coordinated, predictable slice-by-slice delivery. <a href="https://blog.pdata.com/AIAGSD1/">See earlier posts in the AIAGSD series for context.</a></p>
-
-<!--more-->
-
-<figure>
-  <img src="/assets/images/2026-02-24/AIAGSD5_Header_Large.png" alt="Vertical slices flowing into implementation: showing the transition from planning artifacts (custom agents, PRDs, workflows) into coordinated slice-by-slice delivery" />
-  <figcaption>Part 6 bridges planning artifacts into implementation: custom agents guide planning decisions; vertical slices package those decisions into executable, testable increments.</figcaption>
-</figure>
-
-<p>To create an implementation plan we need to define tasks, dependencies, and execution order. In a greenfield project, that often starts with vertical-slice definitions: narrow, end-to-end features that can be built and tested independently. To make those slices effective, we need planning artifacts that reduce ambiguity before coding starts: custom-agent standards to guide planning decisions, Product Requirements Document (PRD) prompts to structure requirements, workflow models to identify dependencies, and implementation instructions to govern execution. In this post, I show how to generate those artifacts using meta-prompts and AI agents, creating a clear handoff from architecture into implementation. Along the way we’ll create the following artifacts:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>File</th>
-      <th>Purpose</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">create-custom-agents-instructions.prompt.md</code></td>
-      <td>Generates custom-agent instruction-file prompts from official GitHub docs</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">custom-agents.instructions.md</code></td>
-      <td>Defines repository standards for authoring <code class="language-plaintext highlighter-rouge">.agent.md</code> profiles</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">create-product-manager-agent.prompt.md</code></td>
-      <td>Generates a Product Manager (PM) persona agent profile with explicit boundaries and evidence standards</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">product-manager.agent.md</code></td>
-      <td>Provides the planning-focused PM persona agent used in slice definition workflows</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">create-prd.prompt.md</code></td>
-      <td>Standardizes Product Requirements Document (PRD) generation (problem, goals, non-goals, success metrics)</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">create-vertical-slice-implementation-instructions.prompt.md</code></td>
-      <td>Generates vertical-slice implementation guidance prompts/instructions</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">vertical-slice-implementation.instructions.md</code></td>
-      <td>Encodes practical execution guidance for slice-by-slice implementation</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">academia-workflows.md</code></td>
-      <td>Captures domain workflows to drive slice coverage and dependency planning</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">academia-implementation-plan.md</code></td>
-      <td>Defines implementation sequencing and dependencies with a slice diagram</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>In the end we’ll have a clear, AI-generated roadmap for vertical-slice delivery that reduces ambiguity, improves consistency, and creates a stronger bridge from planning into execution. Let’s dive in.</p>
-
-<hr />
-
-<h2 id="what-are-vertical-slices">What are vertical slices?</h2>
-
-<p>A vertical slice is a narrow, end-to-end feature that delivers user value and can be built, tested, and deployed independently. Instead of building horizontally (e.g., database → API → UI for the entire system), you build vertically through all layers but only for a small piece of functionality. For example, a “Course Discovery” slice in an academia management system might include:</p>
-<ul>
-  <li>A database query to list active courses</li>
-  <li>An API endpoint to serve that data</li>
-  <li>A UI component to display the course list</li>
-  <li>Tests that validate the entire flow</li>
-</ul>
-
-<p>Vertical slices are powerful because they create small, testable increments that can be delivered independently. They also help manage complexity by reducing the scope of each implementation chunk and making dependencies explicit. However, they only work when planning artifacts are precise enough to reduce ambiguity before implementation starts. In this phase, I used prompts to generate role-specific standards and agent definitions so each slice can move from intent to code with fewer interpretation gaps.</p>
-
-<h3 id="concrete-example-course-discovery-slice">Concrete Example: “Course Discovery” Slice</h3>
-
-<p>Here’s a minimal vertical slice from the academia system to illustrate the pattern:</p>
-
-<p><strong>Slice</strong>: Course Discovery (Read-Only)</p>
-
-<p><strong>Problem</strong>: Registrars need to search for and view active courses before enrollment opens; stakeholders need visibility into what’s offered.</p>
-
-<p><strong>Acceptance Criteria</strong>:</p>
-<ul>
-  <li>List all active courses (paginated, 10 per page)</li>
-  <li>Filter by department and term</li>
-  <li>Show course code, title, instructor, and capacity</li>
-  <li>No edit or enrollment; read-only views only</li>
-</ul>
-
-<p><strong>Minimal Tasks</strong>:</p>
-<ol>
-  <li>Add course search endpoint (filter by department, term, status)</li>
-  <li>Create course list UI component</li>
-  <li>Add course detail modal</li>
-  <li>Wire endpoints to UI</li>
-  <li>Add tests for list, filter, and detail views</li>
-</ol>
-
-<p><strong>Test</strong>: User can search courses by department “Mathematics”, see 5 results, click one, and view full details including instructor and capacity.</p>
-
-<p>This slice is narrow (read-only), end-to-end (DB → API → UI), and testable. It has zero external dependencies and can ship in 2-3 days. It also unblocks downstream slices (e.g., enrollment) that depend on course visibility.</p>
-
-<hr />
-
-<h2 id="governance-checkpoint-planning-artifact-coherence">Governance Checkpoint: Planning Artifact Coherence</h2>
-
-<p>Before diving into artifact generation, it’s worth pausing to validate that the planning artifacts we’re about to create work together as a coherent system. A strong planning system requires alignment across four dimensions: governance standards, role boundaries, requirement structure, and implementation guidance.</p>
-
-<p><strong>The Planning Artifact Stack:</strong></p>
-
-<ol>
-  <li><strong>Agent governance standards</strong> (<code class="language-plaintext highlighter-rouge">custom-agents.instructions.md</code>) define how planning agents must be scoped, what tools they can access, and what escalation triggers protect against over-automation.</li>
-  <li><strong>PM agent profile</strong> (<code class="language-plaintext highlighter-rouge">product-manager.agent.md</code>) applies those standards to a specific planning persona, with explicit boundaries around domain authority (e.g., “Academia Management”), tool constraints (e.g., no <code class="language-plaintext highlighter-rouge">execute</code>), and evidence standards for prioritization decisions.</li>
-  <li><strong>Structured PRD prompt</strong> (<code class="language-plaintext highlighter-rouge">create-prd.prompt.md</code>) ensures every vertical-slice requirement follows a consistent template: problem framing, goals, non-goals, and measurable success metrics.</li>
-  <li><strong>Implementation instructions</strong> (<code class="language-plaintext highlighter-rouge">vertical-slice-implementation.instructions.md</code>) translate planning artifacts into executable slice definitions with task breakdown, dependency mapping, and estimation guardrails.</li>
-</ol>
-
-<p>These four layers create a self-reinforcing cycle: standards make agents predictable, the PM agent applies those standards consistently, the PRD prompt ensures requirements are structured, and implementation instructions enforce slicing discipline. Without this coherence, individual slices can drift in scope, priority, and execution rhythm.</p>
-
-<p><strong>Validation checks before implementation:</strong></p>
-
-<ul>
-  <li>Does the PM agent govern its own scope? (Yes — the agent profile explicitly constrains it to Academia Management and disables <code class="language-plaintext highlighter-rouge">execute</code>.)</li>
-  <li>Does the PRD structure enforce clarity without over-specification? (Yes — problem, goals, non-goals, metrics require trade-off thinking but allow implementation flexibility.)</li>
-  <li>Can implementation instructions reference both governance and PRD artifacts? (Yes — they cite standards and validation checklists tied to both layers.)</li>
-  <li>Are escalation triggers clear? (Yes — standards define when to flag political, security, or architectural concerns for human review.)</li>
-</ul>
-
-<p>With these checks in place, we’re ready to generate the artifacts themselves.</p>
-
-<hr />
-
-<h2 id="creating-the-custom-agents-instruction-prompt">Creating the Custom-Agents Instruction Prompt</h2>
-
-<p>To build a reusable prompt for agent-governance instructions, I submitted this prompt:</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>using https://docs.github.com/en/copilot/reference/custom-agents-configuration, https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents, https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents create a prompt that will create an instruction file for creating agents.
-</code></pre></div></div>
-
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md">create-custom-agents-instructions.prompt.md</a></p>
-
-<p>This is a meta-prompt: instead of directly generating an agent profile, it generates a reusable prompt that can produce a full instruction file for agent authors. In practice, we’re creating a repeatable tool, not a one-off output.</p>
-
-<p>The meta-prompt is grounded in three official GitHub sources:</p>
-
-<ul>
-  <li><strong><a href="https://docs.github.com/en/copilot/reference/custom-agents-configuration">Custom agents configuration</a></strong> (property-level reference)</li>
-  <li><strong><a href="https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents">About custom agents</a></strong> (conceptual model and where agents run)</li>
-  <li><strong><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents">Create custom agents</a></strong> (end-to-end creation workflow across GitHub and IDEs)</li>
-</ul>
-
-<p>By anchoring to these docs, the generated output stays aligned with current capabilities and avoids unsupported or environment-specific assumptions. Also, since GitHub is transitioning from chatmodes to agents, specifically referencing the latest agent-focused docs keeps the AI from making outdated assumptions based on outdated training data.</p>
-
-<p>What this prompt produces:</p>
-
-<ul>
-  <li>A parameterized prompt file designed to generate token-optimized <code class="language-plaintext highlighter-rouge">.instructions.md</code> content</li>
-  <li>Input controls for <code class="language-plaintext highlighter-rouge">instruction_filename</code>, <code class="language-plaintext highlighter-rouge">apply_to</code>, <code class="language-plaintext highlighter-rouge">agent_scope</code>, and <code class="language-plaintext highlighter-rouge">include_ide_notes</code></li>
-  <li>A repeatable workflow for creating agent-governance guidance across repositories</li>
-</ul>
-
-<p>Architecture/workflow impact: this creates a stable generation pattern for agent standards, which improves consistency across slices and reduces prompt drift. Prompt drift is the gradual shift of AI outputs away from the intended scope, constraints, or style over repeated prompt iterations.</p>
-
-<h3 id="what-the-generated-instruction-file-should-contain">What the generated instruction file should contain</h3>
-
-<p>The prompt enforces a practical instruction file structure focused on real authoring tasks:</p>
-
-<ol>
-  <li><strong>Purpose and scope</strong> for custom agents and where they run (GitHub.com, IDEs, CLI)</li>
-  <li><strong>Placement and naming rules</strong> for repository vs organization/enterprise usage</li>
-  <li><strong>Agent profile schema guidance</strong> for YAML frontmatter (<code class="language-plaintext highlighter-rouge">description</code>, <code class="language-plaintext highlighter-rouge">tools</code>, <code class="language-plaintext highlighter-rouge">target</code>, <code class="language-plaintext highlighter-rouge">mcp-servers</code>, and related fields)</li>
-  <li><strong>Tools and Model Context Protocol (MCP) guidance</strong> with least-privilege defaults and namespaced tool examples</li>
-  <li><strong>Prompt authoring guidance</strong> including role boundaries, constraints, and anti-patterns</li>
-  <li><strong>Behavior testing guidance</strong> with representative prompts and expected response patterns</li>
-  <li><strong>Processing and precedence rules</strong> for conflicts, tool behavior, and versioning semantics</li>
-  <li><strong>Validation checklist</strong> to verify completeness and safety before use</li>
-  <li><strong>Example profiles</strong> (minimal and scoped) to accelerate adoption</li>
-</ol>
-
-<h3 id="why-this-matters-in-the-vertical-slice-workflow">Why this matters in the vertical-slice workflow</h3>
-
-<p>Vertical slices succeed when implementation agents are narrowly scoped, predictable, and testable. This meta-prompt helps enforce those qualities by requiring explicit tool boundaries, escalation triggers, and environment-specific notes. The result is a stronger handoff between planning and implementation: less prompt drift, safer automation, and more consistent outcomes across slices.</p>
-
-<hr />
-
-<h2 id="generating-the-custom-agents-instruction-file">Generating the Custom-Agents Instruction File</h2>
-
-<p>With the meta-prompt in place, I executed it with repository-specific arguments:</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit the prompt #file:create-custom-agents-instructions.prompt.md with these arguments:
-instruction_filename: custom-agents.instructions.md
-apply_to: .github/agents/**/*.agent.md
-agent_scope: repository
-include_ide_notes: true
-</code></pre></div></div>
-
-<p>Submitting the prompt with these arguments generates the actual instruction file that defines repository standards for authoring <code class="language-plaintext highlighter-rouge">.agent.md</code> profiles. The prior step created the generator; this step produces the generated artifact <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md">custom-agents.instructions.md</a></p>
-
-<p>This is the execution step where the reusable prompt is run with concrete project settings. The first step produced the tool; this step applies it to generate repository-ready standards.</p>
-
-<p>Here is what each argument does in practice:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">instruction_filename: custom-agents.instructions.md</code> creates a dedicated standards file focused on custom agent authoring.</li>
-  <li><code class="language-plaintext highlighter-rouge">apply_to: .github/agents/**/*.agent.md</code> scopes guidance to agent profiles in the repository’s agent folder hierarchy.</li>
-  <li><code class="language-plaintext highlighter-rouge">agent_scope: repository</code> tells the instruction to prioritize repository-level usage and naming conventions.</li>
-  <li><code class="language-plaintext highlighter-rouge">include_ide_notes: true</code> forces explicit GitHub.com vs IDE behavior notes so authors avoid portability mistakes.</li>
-</ul>
-
-<p>What this prompt produces:</p>
-
-<ul>
-  <li>A concrete repository-scoped instruction file for <code class="language-plaintext highlighter-rouge">.github/agents/**/*.agent.md</code></li>
-  <li>A standardized authoring contract for custom-agent fields, behavior, and safety</li>
-  <li>Explicit environment-difference guidance to prevent GitHub.com/IDE confusion</li>
-</ul>
-
-<p>Architecture/workflow impact: this turns planning guidance into enforceable authoring rules that keep implementation agents consistent across vertical slices.</p>
-
-<h3 id="what-the-generated-custom-agentsinstructionsmd-file-adds">What the generated <code class="language-plaintext highlighter-rouge">custom-agents.instructions.md</code> file adds</h3>
-
-<p>The generated instruction file becomes the operational contract for anyone creating <code class="language-plaintext highlighter-rouge">.agent.md</code> files in the repo, encoding enforced patterns that keep planning agents consistent and safe across vertical slices.</p>
-
-<p>The file is structured around two core enforced patterns. First, <strong>governance and boundaries</strong>: it defines placement rules (<code class="language-plaintext highlighter-rouge">.github/agents/&lt;name&gt;.agent.md</code>), required YAML fields (<code class="language-plaintext highlighter-rouge">description</code>, <code class="language-plaintext highlighter-rouge">tools</code>, <code class="language-plaintext highlighter-rouge">target</code>, <code class="language-plaintext highlighter-rouge">disable-model-invocation</code>, <code class="language-plaintext highlighter-rouge">user-invocable</code>, <code class="language-plaintext highlighter-rouge">mcp-servers</code>, <code class="language-plaintext highlighter-rouge">metadata</code>), and least-privilege tool defaults that prevent agents from accessing more authority than their scope requires. Second, <strong>persona integrity</strong>: it specifies how planning agents must declare their skills, escalation triggers (political, security, architectural), and evidence standards so authors, reviewers, and users understand agent limitations before deployment.</p>
-
-<p>The anti-patterns section prevents common drift: agents that claim broad competence without explicit scope notes, agents that attempt to execute code or modify systems without governance approval, profiles missing behavior-test examples, and environment assumptions that don’t distinguish GitHub.com from IDE behavior. Integration points include direct references to prior instruction files (so agents follow repository-wide standards), validation checklists that must pass before merge, and example profiles (minimal, scoped persona) that accelerate adoption for new contributors.</p>
-
-<h3 id="why-this-execution-step-matters">Why this execution step matters</h3>
-
-<p>Without this second step, you only have a meta-prompt blueprint. Running it with repository-specific arguments produces the enforceable instruction layer that implementation agents and contributors can follow consistently. That reduces variance between slices and improves reliability as coding work scales.</p>
-
-<p>This execution step moves us closer to an implementation plan by establishing the governance foundation that all subsequent slice work must follow. With clear, enforceable custom-agent standards in place, we can now generate persona agents (like our Product Manager agent) that make slice-definition decisions consistently and predictably. Those governance standards create trust in the planning artifacts—PRDs, workflows, and dependency diagrams—that follow. In other words, without enforcing how planning agents behave, we can’t trust the planning outputs they produce. By running the meta-prompt with concrete repository settings, we transform abstract guidance into operational rules that downstream slices can depend on, making the entire planning-to-implementation handoff more reliable and auditable.</p>
-
-<hr />
-
-<h2 id="creating-the-product-manager-agent-prompt-file">Creating the Product-Manager Agent Prompt File</h2>
-
-<p>After establishing custom-agent standards, I created a dedicated prompt file for generating a product manager persona agent:</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create a prompt file that creates an agent for the product manager persona
-</code></pre></div></div>
-
-<p>This generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md">create-product-manager-agent.prompt.md</a> prompt file. This is a prompt-generation step, not an agent-generation step. The purpose is to produce a reusable authoring prompt that can consistently generate or refine a PM persona agent as requirements evolve.</p>
-
-<p>What this prompt produces:</p>
-
-<ul>
-  <li>A reusable prompt file dedicated to product-manager persona agent creation</li>
-  <li>A standardized structure for role scope, behavior boundaries, and expected outputs</li>
-  <li>Repeatable generation logic for skills, actions, escalation triggers, and evidence standards</li>
-</ul>
-
-<p>Architecture/workflow impact: this adds a stable bridge between custom-agent governance and persona-specific implementation. Instead of hand-authoring PM agents each time, we can reuse a single prompt artifact to create consistent planning agents across slices.</p>
-
-<p>This meta-prompt moves us closer to a detailed implementation plan by ensuring that requirements and priorities are framed consistently across all slices. When every vertical slice goes through the same PM agent with the same boundaries and evidence standards, the resulting PRDs are comparable, dependencies become clearer, and sequencing decisions gain more confidence. The PM agent becomes the filter that converts domain facts and workflows into requirement statements that follow a predictable structure—one that implementation agents can parse reliably during coding tasks. Without this standardized persona layer, each slice’s requirements would be slightly different in shape and rigor, making it harder to build sequencing logic and harder to trust dependencies between slices.</p>
-
-<hr />
-
-<h2 id="generating-the-product-manager-agent-file">Generating the Product-Manager Agent File</h2>
-
-<p>With the PM-agent prompt file in place, I submitted it with concrete arguments to generate the actual agent profile:</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit the #file:create-product-manager-agent.prompt.md prompt file with these arguments:
-agent_filename: product-manager.agent.md
-target: omit
-include_execute_tool: false
-scope_note: The universe of discourse is Academia Management
-</code></pre></div></div>
-
-<p>The generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md">product-manager.agent.md</a> custom agent.</p>
-
-<p>This is the execution step that converts the reusable PM-agent prompt into a concrete, repository-ready persona agent file. In other words, the prior step created the generator, and this step produced the generated artifact.</p>
-
-<p>What this prompt produces:</p>
-
-<ul>
-  <li>A concrete <code class="language-plaintext highlighter-rouge">product-manager.agent.md</code> profile file for planning and requirement definition workflows</li>
-  <li>A scoped agent configuration that omits <code class="language-plaintext highlighter-rouge">target</code> so it remains broadly usable</li>
-  <li>A safer default tool posture by explicitly disabling <code class="language-plaintext highlighter-rouge">execute</code></li>
-  <li>Domain-constrained behavior through the scope note: “The universe of discourse is Academia Management”</li>
-</ul>
-
-<p>Architecture/workflow impact: this generated agent creates a reliable planning handoff artifact for vertical slices. It improves consistency in requirement framing, prioritization rationale, and acceptance-criteria definition before implementation starts.</p>
-
-<p>With the PM agent in place, we now have a governance-compliant persona that can drive slice definition decisions predictably. This moves us closer to an implementation plan because every vertical slice will be evaluated through the same lens—the same persona, with the same boundaries, and the same evidence standards for prioritization and acceptance criteria. Instead of each slice being defined ad hoc or with different planning rigor, the PM agent becomes the quality filter that translates domain workflows into structured requirement documents (PRDs) that implementation agents can parse reliably. This consistency is critical for sequencing: when slices use a common planning format and persona, dependencies become clearer, handoff quality improves, and we can build a dependency diagram that reflects actual task sequencing rather than guesses. The PM agent is the bridge that connects governance standards (from our instruction files) into executable slice definitions that implementation can depend on.</p>
-
-<hr />
-
-<h2 id="creating-the-structured-prd-prompt-file">Creating the Structured PRD Prompt File</h2>
-
-<p>To support repeatable requirements definition, I used the Product Manager custom agent to generate a dedicated PRD prompt file with this request:</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create a new prompt file containing the steps to create a structured PRD with problem, goals, non-goals, and success metrics
-</code></pre></div></div>
-
-<p>The is is another prompt-generation step that strengthens planning quality before implementation begins. Instead of drafting PRDs ad hoc, we now have a reusable prompt artifact that drives a consistent PRD structure across slices.</p>
-
-<p>This prompt generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md">create-prd.prompt.md</a> file :</p>
-
-<ul>
-  <li>A reusable PRD prompt file with explicit section requirements</li>
-  <li>A repeatable structure for problem framing, goals, non-goals, and measurable success criteria</li>
-  <li>A stronger planning handoff artifact that can be reviewed before coding starts</li>
-</ul>
-
-<p>Architecture/workflow impact: this improves requirement clarity and alignment at the slice level. By standardizing PRD output shape, it reduces ambiguity for downstream implementation prompts and makes acceptance discussions more concrete.</p>
-
-<p>A structured PRD prompt ensures that every vertical slice—regardless of complexity or domain—follows the same requirement format. This consistency is essential for building an implementation plan because sequencing and dependency decisions depend on comparable requirement definitions. When slices define problems, goals, non-goals, and success metrics in the same shape, the implementation plan can reliably identify which slices block others (through non-goals or success criteria constraints), estimate relative effort more fairly, and sequence work with higher confidence. Without this standardization, slices would have inconsistent requirement depth, making dependencies ambiguous and forcing implementation teams to re-interpret requirements slice-by-slice. The structured PRD becomes the input layer for sequencing logic: clearer, more comparable requirements lead to more accurate dependency maps, which lead to more predictable implementation schedules.</p>
-
-<hr />
-
-<h2 id="creating-the-vertical-slice-instruction-prompt-generator">Creating the Vertical-Slice Instruction-Prompt Generator</h2>
-
-<p>I also generated a refined meta-prompt focused on producing instruction-file prompts for vertical-slice implementation:</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create a new prompt file, that creates an instruction file, that provides guidance for implementing applications in vertical slices
-</code></pre></div></div>
-
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md">create-vertical-slice-implementation-instructions.prompt.md</a></p>
-
-<p>This request is one level more specific than a general implementation prompt: it creates a prompt artifact whose job is to generate instruction files for vertical-slice execution. That distinction helps keep planning guidance and implementation governance synchronized as the project grows.</p>
-
-<p>What this prompt produces:</p>
-
-<ul>
-  <li>A reusable prompt file that can generate vertical-slice implementation instruction files</li>
-  <li>A repeatable pattern for defining slice boundaries, sequencing, and execution constraints</li>
-  <li>A governance-friendly path for scaling slice guidance without rewriting rules by hand</li>
-</ul>
-
-<p>Architecture/workflow impact: this improves consistency at the instruction-file layer, not just the prompt layer. It makes vertical-slice implementation guidance easier to regenerate, version, and apply across teams.</p>
-
-<p>By creating a meta-prompt that generates instruction files for vertical-slice execution, we establish a reusable governance artifact that can guide coding work across all slices consistently. Instead of hand-authoring implementation guidance for each slice from scratch, this prompt factory ensures every slice follows the same execution discipline—the same boundary definitions, sequencing rules, and guard rails. That consistency is essential for building a reliable implementation plan: when all slices share the same instruction-file standards, dependencies become clearer, handoff quality improves, and the overall timeline becomes more predictable. This meta-prompt layer bridges the gap between planning (which defines what to build) and execution (which defines how to build it), creating the enforcement mechanism that keeps implementation work aligned with the workflows and PRDs we’ve already defined.</p>
-
-<hr />
-
-<h2 id="generating-the-vertical-slice-implementation-instruction-file">Generating the Vertical-Slice Implementation Instruction File</h2>
-
-<p>With the vertical-slice instruction-prompt generator in place, I submitted it directly:</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit #file:create-vertical-slice-implementation-instructions.prompt.md
-</code></pre></div></div>
-
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md">vertical-slice-implementation.instructions.md</a></p>
-
-<p>This is the execution step that produces the instruction file used to guide slice-by-slice implementation work. The previous step created the generator prompt; this step produced the concrete implementation-governance artifact.</p>
-
-<p>What this prompt produces:</p>
-
-<ul>
-  <li>A concrete <code class="language-plaintext highlighter-rouge">vertical-slice-implementation.instructions.md</code> standards file</li>
-  <li>Practical guidance for sequencing, slice boundaries, and implementation guardrails</li>
-  <li>A reusable instruction artifact that can be loaded during coding tasks</li>
-</ul>
-
-<p>Architecture/workflow impact: this makes vertical-slice execution rules explicit and reusable during implementation. It reduces interpretation drift between planning and coding phases and improves consistency across slices.</p>
-
-<p>With this instruction file in place, we now have the enforcement layer that bridges planning decisions into coding discipline. The file defines how slices are bounded, sequenced, and executed consistently across all implementation work. Instead of letting teams interpret slice requirements differently, these instructions establish a shared execution contract that keeps all coding work aligned. This is critical for predictable delivery: when every implementation team follows the same guidance for slice boundaries, dependency handling, and task breakdown, the overall timeline becomes more reliable and the actual delivery sequence matches the planned sequence. The instruction file becomes the quality gate that prevents implementation drift—the mechanism that ensures that the workflows, PRDs, and dependency diagrams we generated earlier actually translate into executable code in the right order, with the right boundaries, and at predictable velocity.</p>
-
-<hr />
-
-<h2 id="generating-the-workflow-model-inventory">Generating the Workflow Model Inventory</h2>
-
-<p>To make slice planning concrete, I generated a workflow inventory from the domain facts:</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>given these #file:academia.txt facts create a comprehensive list, in markdown, of the workflows needed for the zeus.academia management system. put the file in the models/workflows folder
-</code></pre></div></div>
-
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md">academia-workflows.md</a></p>
-
-<p>This step converts domain facts into an implementation-facing workflow catalog. Instead of inferring workflows ad hoc during coding, the team gets an explicit markdown inventory that can be mapped to vertical slices and prioritized systematically.</p>
-
-<p>What this prompt produces:</p>
-
-<ul>
-  <li>A comprehensive workflow list in markdown format</li>
-  <li>A shared modeling artifact that ties domain facts to implementation planning</li>
-  <li>A slice-planning reference that helps identify dependencies, handoffs, and coverage gaps</li>
-</ul>
-
-<p>Architecture/workflow impact: this improves planning fidelity before coding begins. By grounding slices in an explicit workflow model, it reduces missed paths, strengthens sequencing decisions, and improves end-to-end completeness.</p>
-
-<p>This workflow inventory is a critical input to building the implementation plan because it establishes the complete picture of what the system must do, independent of how it’s sliced or sequenced. Instead of guessing at coverage or accidentally omitting a workflow because it wasn’t top-of-mind, the team now has a definitive artifact that shows every user interaction pattern, data transformation, and cross-system handoff. When we map these workflows to vertical slices in the next step, this inventory becomes the reference layer that ensures no work falls through the cracks and every slice contributes meaningfully to system completeness. It also clarifies which slices can be built independently and which have hidden dependencies—dependencies that will show up in our final dependency diagram and inform execution sequencing. Without this workflow catalog, the implementation plan would be based on intuition; with it, the plan is grounded in observable, reviewable domain facts that the entire team can agree on before any code is written.</p>
-
-<hr />
-
-<h2 id="generating-the-workflow-based-implementation-plan">Generating the Workflow-Based Implementation Plan</h2>
-
-<p>With workflow and rules artifacts in place, I generated the implementation plan with this request:</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create an implementation plan that implements the workflows #file:academia-workflows.md and the business rules #file:academia.txt. include a portrait mermaid diagram that shows the slices and their dependencies
-</code></pre></div></div>
-
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md">academia-implementation-plan.md</a></p>
-
-<p>This step converts workflow modeling into an executable delivery plan. Instead of planning slices from memory, it uses explicit workflow and rule inputs and adds a visual dependency model to make sequencing decisions easier to review.</p>
-
-<p>What this prompt produces:</p>
-
-<ul>
-  <li>A markdown implementation plan grounded in <code class="language-plaintext highlighter-rouge">academia-workflows.md</code> and <code class="language-plaintext highlighter-rouge">academia.txt</code></li>
-  <li>A slice-oriented execution roadmap with dependencies and ordering guidance</li>
-  <li>A portrait Mermaid diagram showing slice dependencies for planning clarity</li>
-</ul>
-
-<p>Architecture/workflow impact: this creates a concrete bridge from domain workflows to implementation sequencing. It improves handoff quality, makes dependencies explicit, and supports more predictable vertical-slice delivery.</p>
-
-<h3 id="reading-the-slice-dependency-diagram">Reading the Slice Dependency Diagram</h3>
-
-<p>The generated implementation plan includes a visual diagram showing how slices depend on each other. Here’s an example:</p>
-
-<figure>
-  <img src="../../jekyll-src/assets/images/2026-03-01/dependency-diagram.jpg" alt="Mermaid diagram showing vertical slices as boxes arranged in layers. Top layer: Course Discovery (no dependencies). Middle layer: Enrollment, Waitlist, Cancellation (all depend on Course Discovery). Bottom layer: Grade Posting, Transcript (depend on Enrollment)." />
-  <figcaption>Slice dependency diagram: boxes are slices, arrows point to dependencies. Build bottom-up (no-dependency slices first) so each new slice can be integrated and tested immediately.</figcaption>
-</figure>
-
-<p><strong>How to read it:</strong></p>
-
-<ul>
-  <li><strong>Boxes</strong> = vertical slices</li>
-  <li><strong>Arrows</strong> = “depends on” relationships (arrow points to the slice being depended upon)</li>
-  <li><strong>Top-to-bottom flow</strong> = suggested build order (start with slices that have no dependencies, build downward)</li>
-</ul>
-
-<p>In the example:</p>
-<ol>
-  <li>“Course Discovery” has no dependencies → build first</li>
-  <li>“Enrollment”, “Waitlist”, and “Cancellation” all depend on “Course Discovery” → build after</li>
-  <li>“Grade Posting” and “Transcript” depend on “Enrollment” → build last</li>
-</ol>
-
-<p>This ordering ensures each slice can run tests end-to-end and be deployed (or held for later) without waiting for unrelated work.</p>
-
-<hr />
-
-<h2 id="checking-the-context">Checking the Context</h2>
-
-<p>Because these changes expand <code class="language-plaintext highlighter-rouge">.github</code> governance artifacts (prompts and agent standards), I run a context review pass before moving forward. This helps catch overlaps, contradictions, and scope conflicts before they leak into implementation prompts.</p>
-
-<h2 id="whats-next">What’s Next?</h2>
-
-<p>We’ll finish this phase by creating implementation prompts that guide AI agents through coding work while keeping generated output aligned with our technology-specific instruction files and architectural vision. In the next step, I’ll use the planning and persona-agent outputs to define implementation slices with clear dependencies and acceptance criteria. The goal is to move from governance-compliant planning into execution prompts that drive coding tasks with minimal ambiguity.</p>
-
-<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
-
-<hr />
-
-<h2 id="feedback-loop">Feedback Loop</h2>
-
-<p>Feedback is always welcome. Send your thoughts to <strong>AIP@pdata.com</strong>.</p>
-
-<hr />
-
-<h2 id="disclaimer">Disclaimer</h2>
-
-<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
-
-<p>Prompts:</p>
-
-<ul>
-  <li>Expand on this post with descriptions of this prompt: “using (https://docs.github.com/en/copilot/reference/custom-agents-configuration), https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents, https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents create a prompt that will create an instruction file for creating agents” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md” created by the prompt</li>
-  <li>Expand this post with a description of this prompt: “Prompt: submit this prompt #file:create-custom-agents-instructions.prompt.md with these arguments:
-instruction*filename: custom-agents.instructions.md
-apply_to: .github/agents/**/_.agent.md
-agent_scope: repository
-include_ide_notes: true” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a prompt file that creates an agent for the product manager persona” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “submit the #file:create-product-manager-agent.prompt.md prompt file with these arguments:
-agent_filename: product-manager.agent.md
-target: omit
-include_execute_tool: false
-scope_note: The universe of discourse is Academia Management” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing the steps to create a structured PRD with problem, goals, non-goals, and success metrics” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing guidance for implementing applications in vertical slices” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a new prompt file, that creates an instruction file, that provides guidance for implementing applications in vertical slices” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “submit #file:create-vertical-slice-implementation-instructions.prompt.md” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “given these #file:academia.txt facts create a comprehensive list, in markdown, of the workflows needed for the zeus.academia management system. put the file in the models/workflows folder” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create an implementation plan that implements the workflows #file:academia-workflows.md and the business rules #file:academia.txt. include a portrait mermaid diagram that shows the slices and their dependencies” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md” created by the prompt</li>
-  <li>Insert a governance checkpoint: After the vertical-slice introduction, add a section validating that the planning artifacts (agent standards, agent profiles, PRD template, and implementation instructions) form a coherent system</li>
-  <li>Refactor artifact summaries: Convert feature lists to thesis-first paragraphs where appropriate</li>
-  <li>Add a definition of prompt drift</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.]]></summary></entry><entry><title type="html">AI Pratitioner Resources: A Brief History of the Repository and Its Evolution</title><link href="https://blog.pdata.com/AIPR1/" rel="alternate" type="text/html" title="AI Pratitioner Resources: A Brief History of the Repository and Its Evolution" /><published>2026-03-01T00:00:00-08:00</published><updated>2026-03-01T00:00:00-08:00</updated><id>https://blog.pdata.com/AIPR1</id><content type="html" xml:base="https://blog.pdata.com/AIPR1/"><![CDATA[<p>I’m turning my attention back to the ai-practitioner-resources repository. This project has been my case study in AI-first software development practices. If you’re not familiar, it started as prompt to return a list of resources relevant to AI assisted software developers. Today it is an AI integrated platform with automated resource curation, AI project management, and a fully autonomous issue lifecycle.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-04-15T10:52:25-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI Pratitioner Resources: A Brief History of the Repository and Its Evolution</title><link href="https://blog.pdata.com/AIPR1/" rel="alternate" type="text/html" title="AI Pratitioner Resources: A Brief History of the Repository and Its Evolution" /><published>2026-04-14T00:00:00-07:00</published><updated>2026-04-14T00:00:00-07:00</updated><id>https://blog.pdata.com/AIPR1</id><content type="html" xml:base="https://blog.pdata.com/AIPR1/"><![CDATA[<p>I’m turning my attention back to the ai-practitioner-resources repository. This project has been my case study in AI-first software development practices. If you’re not familiar, it started as prompt to return a list of resources relevant to AI assisted software developers. Today it is an AI integrated platform with automated resource curation, AI project management, and a fully autonomous issue lifecycle.</p>
 
 <p>Looking back, i regretted not keeping a more detailed journal of the project’s evolution as I thought it might make for an interesting case study in how AI-first development practices evolve under real usage. Then a prompt occured to me that could write that blog post for me.</p>
 
@@ -998,7 +514,491 @@ ed3b588 2026-02-24 — feat: add configurable resource count and update mode sup
   <li>Examine key diffs (first commit, Copilot’s first PR, OpenAI→Claude migration, modularization, PM review pipeline) to quantify change scope</li>
   <li>Read all project documentation (README, CONTRIBUTORS, DEV_NOTES, REFACTORING_SUMMARY, IMPLEMENTATION_SUMMARY, DETERMINISM_GUIDE, SESSION_MANAGEMENT_README, QUICK_REFERENCE, scripts/README) for architectural context</li>
   <li>Draft a chronological blog post following AIAGSD series conventions with evidence from git history</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Tracing the evolution of AI Practitioner Resources: from static HTML to AI-first platform with automated workflows and autonomous issue management.]]></summary></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails</title><link href="https://blog.pdata.com/AIAGSD5/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD5</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD5/"><![CDATA[<p>In this post, I’ll shift from <em>architecture-level</em> instructions to <em>technology-level</em> instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Tracing the evolution of AI Practitioner Resources: from static HTML to AI-first platform with automated workflows and autonomous issue management.]]></summary></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning</title><link href="https://blog.pdata.com/AIAGSD6/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning" /><published>2026-03-01T00:00:00-08:00</published><updated>2026-03-01T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD6</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD6/"><![CDATA[<p><strong>TL;DR:</strong> This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution.</p>
+
+<p>We’re moving from architecture into implementation, but first we need a plan that defines tasks, dependencies, and execution order. This post shows how to generate planning artifacts — vertical-slice definitions, Product Requirements Documents (PRDs), workflow models, and dependency diagrams — that create a roadmap for coordinated, predictable slice-by-slice delivery. <a href="https://blog.pdata.com/AIAGSD1/">See earlier posts in the AIAGSD series for context.</a></p>
+
+<!--more-->
+
+<figure>
+  <img src="/assets/images/2026-02-24/AIAGSD5_Header_Large.png" alt="Vertical slices flowing into implementation: showing the transition from planning artifacts (custom agents, PRDs, workflows) into coordinated slice-by-slice delivery" />
+  <figcaption>Part 6 bridges planning artifacts into implementation: custom agents guide planning decisions; vertical slices package those decisions into executable, testable increments.</figcaption>
+</figure>
+
+<p>To create an implementation plan we need to define tasks, dependencies, and execution order. In a greenfield project, that often starts with vertical-slice definitions: narrow, end-to-end features that can be built and tested independently. To make those slices effective, we need planning artifacts that reduce ambiguity before coding starts: custom-agent standards to guide planning decisions, Product Requirements Document (PRD) prompts to structure requirements, workflow models to identify dependencies, and implementation instructions to govern execution. In this post, I show how to generate those artifacts using meta-prompts and AI agents, creating a clear handoff from architecture into implementation. Along the way we’ll create the following artifacts:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>File</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">create-custom-agents-instructions.prompt.md</code></td>
+      <td>Generates custom-agent instruction-file prompts from official GitHub docs</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">custom-agents.instructions.md</code></td>
+      <td>Defines repository standards for authoring <code class="language-plaintext highlighter-rouge">.agent.md</code> profiles</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">create-product-manager-agent.prompt.md</code></td>
+      <td>Generates a Product Manager (PM) persona agent profile with explicit boundaries and evidence standards</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">product-manager.agent.md</code></td>
+      <td>Provides the planning-focused PM persona agent used in slice definition workflows</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">create-prd.prompt.md</code></td>
+      <td>Standardizes Product Requirements Document (PRD) generation (problem, goals, non-goals, success metrics)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">create-vertical-slice-implementation-instructions.prompt.md</code></td>
+      <td>Generates vertical-slice implementation guidance prompts/instructions</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">vertical-slice-implementation.instructions.md</code></td>
+      <td>Encodes practical execution guidance for slice-by-slice implementation</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">academia-workflows.md</code></td>
+      <td>Captures domain workflows to drive slice coverage and dependency planning</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">academia-implementation-plan.md</code></td>
+      <td>Defines implementation sequencing and dependencies with a slice diagram</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>In the end we’ll have a clear, AI-generated roadmap for vertical-slice delivery that reduces ambiguity, improves consistency, and creates a stronger bridge from planning into execution. Let’s dive in.</p>
+
+<hr />
+
+<h2 id="what-are-vertical-slices">What are vertical slices?</h2>
+
+<p>A vertical slice is a narrow, end-to-end feature that delivers user value and can be built, tested, and deployed independently. Instead of building horizontally (e.g., database → API → UI for the entire system), you build vertically through all layers but only for a small piece of functionality. For example, a “Course Discovery” slice in an academia management system might include:</p>
+<ul>
+  <li>A database query to list active courses</li>
+  <li>An API endpoint to serve that data</li>
+  <li>A UI component to display the course list</li>
+  <li>Tests that validate the entire flow</li>
+</ul>
+
+<p>Vertical slices are powerful because they create small, testable increments that can be delivered independently. They also help manage complexity by reducing the scope of each implementation chunk and making dependencies explicit. However, they only work when planning artifacts are precise enough to reduce ambiguity before implementation starts. In this phase, I used prompts to generate role-specific standards and agent definitions so each slice can move from intent to code with fewer interpretation gaps.</p>
+
+<h3 id="concrete-example-course-discovery-slice">Concrete Example: “Course Discovery” Slice</h3>
+
+<p>Here’s a minimal vertical slice from the academia system to illustrate the pattern:</p>
+
+<p><strong>Slice</strong>: Course Discovery (Read-Only)</p>
+
+<p><strong>Problem</strong>: Registrars need to search for and view active courses before enrollment opens; stakeholders need visibility into what’s offered.</p>
+
+<p><strong>Acceptance Criteria</strong>:</p>
+<ul>
+  <li>List all active courses (paginated, 10 per page)</li>
+  <li>Filter by department and term</li>
+  <li>Show course code, title, instructor, and capacity</li>
+  <li>No edit or enrollment; read-only views only</li>
+</ul>
+
+<p><strong>Minimal Tasks</strong>:</p>
+<ol>
+  <li>Add course search endpoint (filter by department, term, status)</li>
+  <li>Create course list UI component</li>
+  <li>Add course detail modal</li>
+  <li>Wire endpoints to UI</li>
+  <li>Add tests for list, filter, and detail views</li>
+</ol>
+
+<p><strong>Test</strong>: User can search courses by department “Mathematics”, see 5 results, click one, and view full details including instructor and capacity.</p>
+
+<p>This slice is narrow (read-only), end-to-end (DB → API → UI), and testable. It has zero external dependencies and can ship in 2-3 days. It also unblocks downstream slices (e.g., enrollment) that depend on course visibility.</p>
+
+<hr />
+
+<h2 id="governance-checkpoint-planning-artifact-coherence">Governance Checkpoint: Planning Artifact Coherence</h2>
+
+<p>Before diving into artifact generation, it’s worth pausing to validate that the planning artifacts we’re about to create work together as a coherent system. A strong planning system requires alignment across four dimensions: governance standards, role boundaries, requirement structure, and implementation guidance.</p>
+
+<p><strong>The Planning Artifact Stack:</strong></p>
+
+<ol>
+  <li><strong>Agent governance standards</strong> (<code class="language-plaintext highlighter-rouge">custom-agents.instructions.md</code>) define how planning agents must be scoped, what tools they can access, and what escalation triggers protect against over-automation.</li>
+  <li><strong>PM agent profile</strong> (<code class="language-plaintext highlighter-rouge">product-manager.agent.md</code>) applies those standards to a specific planning persona, with explicit boundaries around domain authority (e.g., “Academia Management”), tool constraints (e.g., no <code class="language-plaintext highlighter-rouge">execute</code>), and evidence standards for prioritization decisions.</li>
+  <li><strong>Structured PRD prompt</strong> (<code class="language-plaintext highlighter-rouge">create-prd.prompt.md</code>) ensures every vertical-slice requirement follows a consistent template: problem framing, goals, non-goals, and measurable success metrics.</li>
+  <li><strong>Implementation instructions</strong> (<code class="language-plaintext highlighter-rouge">vertical-slice-implementation.instructions.md</code>) translate planning artifacts into executable slice definitions with task breakdown, dependency mapping, and estimation guardrails.</li>
+</ol>
+
+<p>These four layers create a self-reinforcing cycle: standards make agents predictable, the PM agent applies those standards consistently, the PRD prompt ensures requirements are structured, and implementation instructions enforce slicing discipline. Without this coherence, individual slices can drift in scope, priority, and execution rhythm.</p>
+
+<p><strong>Validation checks before implementation:</strong></p>
+
+<ul>
+  <li>Does the PM agent govern its own scope? (Yes — the agent profile explicitly constrains it to Academia Management and disables <code class="language-plaintext highlighter-rouge">execute</code>.)</li>
+  <li>Does the PRD structure enforce clarity without over-specification? (Yes — problem, goals, non-goals, metrics require trade-off thinking but allow implementation flexibility.)</li>
+  <li>Can implementation instructions reference both governance and PRD artifacts? (Yes — they cite standards and validation checklists tied to both layers.)</li>
+  <li>Are escalation triggers clear? (Yes — standards define when to flag political, security, or architectural concerns for human review.)</li>
+</ul>
+
+<p>With these checks in place, we’re ready to generate the artifacts themselves.</p>
+
+<hr />
+
+<h2 id="creating-the-custom-agents-instruction-prompt">Creating the Custom-Agents Instruction Prompt</h2>
+
+<p>To build a reusable prompt for agent-governance instructions, I submitted this prompt:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>using https://docs.github.com/en/copilot/reference/custom-agents-configuration, https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents, https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents create a prompt that will create an instruction file for creating agents.
+</code></pre></div></div>
+
+<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md">create-custom-agents-instructions.prompt.md</a></p>
+
+<p>This is a meta-prompt: instead of directly generating an agent profile, it generates a reusable prompt that can produce a full instruction file for agent authors. In practice, we’re creating a repeatable tool, not a one-off output.</p>
+
+<p>The meta-prompt is grounded in three official GitHub sources:</p>
+
+<ul>
+  <li><strong><a href="https://docs.github.com/en/copilot/reference/custom-agents-configuration">Custom agents configuration</a></strong> (property-level reference)</li>
+  <li><strong><a href="https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents">About custom agents</a></strong> (conceptual model and where agents run)</li>
+  <li><strong><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents">Create custom agents</a></strong> (end-to-end creation workflow across GitHub and IDEs)</li>
+</ul>
+
+<p>By anchoring to these docs, the generated output stays aligned with current capabilities and avoids unsupported or environment-specific assumptions. Also, since GitHub is transitioning from chatmodes to agents, specifically referencing the latest agent-focused docs keeps the AI from making outdated assumptions based on outdated training data.</p>
+
+<p>What this prompt produces:</p>
+
+<ul>
+  <li>A parameterized prompt file designed to generate token-optimized <code class="language-plaintext highlighter-rouge">.instructions.md</code> content</li>
+  <li>Input controls for <code class="language-plaintext highlighter-rouge">instruction_filename</code>, <code class="language-plaintext highlighter-rouge">apply_to</code>, <code class="language-plaintext highlighter-rouge">agent_scope</code>, and <code class="language-plaintext highlighter-rouge">include_ide_notes</code></li>
+  <li>A repeatable workflow for creating agent-governance guidance across repositories</li>
+</ul>
+
+<p>Architecture/workflow impact: this creates a stable generation pattern for agent standards, which improves consistency across slices and reduces prompt drift. Prompt drift is the gradual shift of AI outputs away from the intended scope, constraints, or style over repeated prompt iterations.</p>
+
+<h3 id="what-the-generated-instruction-file-should-contain">What the generated instruction file should contain</h3>
+
+<p>The prompt enforces a practical instruction file structure focused on real authoring tasks:</p>
+
+<ol>
+  <li><strong>Purpose and scope</strong> for custom agents and where they run (GitHub.com, IDEs, CLI)</li>
+  <li><strong>Placement and naming rules</strong> for repository vs organization/enterprise usage</li>
+  <li><strong>Agent profile schema guidance</strong> for YAML frontmatter (<code class="language-plaintext highlighter-rouge">description</code>, <code class="language-plaintext highlighter-rouge">tools</code>, <code class="language-plaintext highlighter-rouge">target</code>, <code class="language-plaintext highlighter-rouge">mcp-servers</code>, and related fields)</li>
+  <li><strong>Tools and Model Context Protocol (MCP) guidance</strong> with least-privilege defaults and namespaced tool examples</li>
+  <li><strong>Prompt authoring guidance</strong> including role boundaries, constraints, and anti-patterns</li>
+  <li><strong>Behavior testing guidance</strong> with representative prompts and expected response patterns</li>
+  <li><strong>Processing and precedence rules</strong> for conflicts, tool behavior, and versioning semantics</li>
+  <li><strong>Validation checklist</strong> to verify completeness and safety before use</li>
+  <li><strong>Example profiles</strong> (minimal and scoped) to accelerate adoption</li>
+</ol>
+
+<h3 id="why-this-matters-in-the-vertical-slice-workflow">Why this matters in the vertical-slice workflow</h3>
+
+<p>Vertical slices succeed when implementation agents are narrowly scoped, predictable, and testable. This meta-prompt helps enforce those qualities by requiring explicit tool boundaries, escalation triggers, and environment-specific notes. The result is a stronger handoff between planning and implementation: less prompt drift, safer automation, and more consistent outcomes across slices.</p>
+
+<hr />
+
+<h2 id="generating-the-custom-agents-instruction-file">Generating the Custom-Agents Instruction File</h2>
+
+<p>With the meta-prompt in place, I executed it with repository-specific arguments:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit the prompt #file:create-custom-agents-instructions.prompt.md with these arguments:
+instruction_filename: custom-agents.instructions.md
+apply_to: .github/agents/**/*.agent.md
+agent_scope: repository
+include_ide_notes: true
+</code></pre></div></div>
+
+<p>Submitting the prompt with these arguments generates the actual instruction file that defines repository standards for authoring <code class="language-plaintext highlighter-rouge">.agent.md</code> profiles. The prior step created the generator; this step produces the generated artifact <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md">custom-agents.instructions.md</a></p>
+
+<p>This is the execution step where the reusable prompt is run with concrete project settings. The first step produced the tool; this step applies it to generate repository-ready standards.</p>
+
+<p>Here is what each argument does in practice:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">instruction_filename: custom-agents.instructions.md</code> creates a dedicated standards file focused on custom agent authoring.</li>
+  <li><code class="language-plaintext highlighter-rouge">apply_to: .github/agents/**/*.agent.md</code> scopes guidance to agent profiles in the repository’s agent folder hierarchy.</li>
+  <li><code class="language-plaintext highlighter-rouge">agent_scope: repository</code> tells the instruction to prioritize repository-level usage and naming conventions.</li>
+  <li><code class="language-plaintext highlighter-rouge">include_ide_notes: true</code> forces explicit GitHub.com vs IDE behavior notes so authors avoid portability mistakes.</li>
+</ul>
+
+<p>What this prompt produces:</p>
+
+<ul>
+  <li>A concrete repository-scoped instruction file for <code class="language-plaintext highlighter-rouge">.github/agents/**/*.agent.md</code></li>
+  <li>A standardized authoring contract for custom-agent fields, behavior, and safety</li>
+  <li>Explicit environment-difference guidance to prevent GitHub.com/IDE confusion</li>
+</ul>
+
+<p>Architecture/workflow impact: this turns planning guidance into enforceable authoring rules that keep implementation agents consistent across vertical slices.</p>
+
+<h3 id="what-the-generated-custom-agentsinstructionsmd-file-adds">What the generated <code class="language-plaintext highlighter-rouge">custom-agents.instructions.md</code> file adds</h3>
+
+<p>The generated instruction file becomes the operational contract for anyone creating <code class="language-plaintext highlighter-rouge">.agent.md</code> files in the repo, encoding enforced patterns that keep planning agents consistent and safe across vertical slices.</p>
+
+<p>The file is structured around two core enforced patterns. First, <strong>governance and boundaries</strong>: it defines placement rules (<code class="language-plaintext highlighter-rouge">.github/agents/&lt;name&gt;.agent.md</code>), required YAML fields (<code class="language-plaintext highlighter-rouge">description</code>, <code class="language-plaintext highlighter-rouge">tools</code>, <code class="language-plaintext highlighter-rouge">target</code>, <code class="language-plaintext highlighter-rouge">disable-model-invocation</code>, <code class="language-plaintext highlighter-rouge">user-invocable</code>, <code class="language-plaintext highlighter-rouge">mcp-servers</code>, <code class="language-plaintext highlighter-rouge">metadata</code>), and least-privilege tool defaults that prevent agents from accessing more authority than their scope requires. Second, <strong>persona integrity</strong>: it specifies how planning agents must declare their skills, escalation triggers (political, security, architectural), and evidence standards so authors, reviewers, and users understand agent limitations before deployment.</p>
+
+<p>The anti-patterns section prevents common drift: agents that claim broad competence without explicit scope notes, agents that attempt to execute code or modify systems without governance approval, profiles missing behavior-test examples, and environment assumptions that don’t distinguish GitHub.com from IDE behavior. Integration points include direct references to prior instruction files (so agents follow repository-wide standards), validation checklists that must pass before merge, and example profiles (minimal, scoped persona) that accelerate adoption for new contributors.</p>
+
+<h3 id="why-this-execution-step-matters">Why this execution step matters</h3>
+
+<p>Without this second step, you only have a meta-prompt blueprint. Running it with repository-specific arguments produces the enforceable instruction layer that implementation agents and contributors can follow consistently. That reduces variance between slices and improves reliability as coding work scales.</p>
+
+<p>This execution step moves us closer to an implementation plan by establishing the governance foundation that all subsequent slice work must follow. With clear, enforceable custom-agent standards in place, we can now generate persona agents (like our Product Manager agent) that make slice-definition decisions consistently and predictably. Those governance standards create trust in the planning artifacts—PRDs, workflows, and dependency diagrams—that follow. In other words, without enforcing how planning agents behave, we can’t trust the planning outputs they produce. By running the meta-prompt with concrete repository settings, we transform abstract guidance into operational rules that downstream slices can depend on, making the entire planning-to-implementation handoff more reliable and auditable.</p>
+
+<hr />
+
+<h2 id="creating-the-product-manager-agent-prompt-file">Creating the Product-Manager Agent Prompt File</h2>
+
+<p>After establishing custom-agent standards, I created a dedicated prompt file for generating a product manager persona agent:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create a prompt file that creates an agent for the product manager persona
+</code></pre></div></div>
+
+<p>This generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md">create-product-manager-agent.prompt.md</a> prompt file. This is a prompt-generation step, not an agent-generation step. The purpose is to produce a reusable authoring prompt that can consistently generate or refine a PM persona agent as requirements evolve.</p>
+
+<p>What this prompt produces:</p>
+
+<ul>
+  <li>A reusable prompt file dedicated to product-manager persona agent creation</li>
+  <li>A standardized structure for role scope, behavior boundaries, and expected outputs</li>
+  <li>Repeatable generation logic for skills, actions, escalation triggers, and evidence standards</li>
+</ul>
+
+<p>Architecture/workflow impact: this adds a stable bridge between custom-agent governance and persona-specific implementation. Instead of hand-authoring PM agents each time, we can reuse a single prompt artifact to create consistent planning agents across slices.</p>
+
+<p>This meta-prompt moves us closer to a detailed implementation plan by ensuring that requirements and priorities are framed consistently across all slices. When every vertical slice goes through the same PM agent with the same boundaries and evidence standards, the resulting PRDs are comparable, dependencies become clearer, and sequencing decisions gain more confidence. The PM agent becomes the filter that converts domain facts and workflows into requirement statements that follow a predictable structure—one that implementation agents can parse reliably during coding tasks. Without this standardized persona layer, each slice’s requirements would be slightly different in shape and rigor, making it harder to build sequencing logic and harder to trust dependencies between slices.</p>
+
+<hr />
+
+<h2 id="generating-the-product-manager-agent-file">Generating the Product-Manager Agent File</h2>
+
+<p>With the PM-agent prompt file in place, I submitted it with concrete arguments to generate the actual agent profile:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit the #file:create-product-manager-agent.prompt.md prompt file with these arguments:
+agent_filename: product-manager.agent.md
+target: omit
+include_execute_tool: false
+scope_note: The universe of discourse is Academia Management
+</code></pre></div></div>
+
+<p>The generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md">product-manager.agent.md</a> custom agent.</p>
+
+<p>This is the execution step that converts the reusable PM-agent prompt into a concrete, repository-ready persona agent file. In other words, the prior step created the generator, and this step produced the generated artifact.</p>
+
+<p>What this prompt produces:</p>
+
+<ul>
+  <li>A concrete <code class="language-plaintext highlighter-rouge">product-manager.agent.md</code> profile file for planning and requirement definition workflows</li>
+  <li>A scoped agent configuration that omits <code class="language-plaintext highlighter-rouge">target</code> so it remains broadly usable</li>
+  <li>A safer default tool posture by explicitly disabling <code class="language-plaintext highlighter-rouge">execute</code></li>
+  <li>Domain-constrained behavior through the scope note: “The universe of discourse is Academia Management”</li>
+</ul>
+
+<p>Architecture/workflow impact: this generated agent creates a reliable planning handoff artifact for vertical slices. It improves consistency in requirement framing, prioritization rationale, and acceptance-criteria definition before implementation starts.</p>
+
+<p>With the PM agent in place, we now have a governance-compliant persona that can drive slice definition decisions predictably. This moves us closer to an implementation plan because every vertical slice will be evaluated through the same lens—the same persona, with the same boundaries, and the same evidence standards for prioritization and acceptance criteria. Instead of each slice being defined ad hoc or with different planning rigor, the PM agent becomes the quality filter that translates domain workflows into structured requirement documents (PRDs) that implementation agents can parse reliably. This consistency is critical for sequencing: when slices use a common planning format and persona, dependencies become clearer, handoff quality improves, and we can build a dependency diagram that reflects actual task sequencing rather than guesses. The PM agent is the bridge that connects governance standards (from our instruction files) into executable slice definitions that implementation can depend on.</p>
+
+<hr />
+
+<h2 id="creating-the-structured-prd-prompt-file">Creating the Structured PRD Prompt File</h2>
+
+<p>To support repeatable requirements definition, I used the Product Manager custom agent to generate a dedicated PRD prompt file with this request:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create a new prompt file containing the steps to create a structured PRD with problem, goals, non-goals, and success metrics
+</code></pre></div></div>
+
+<p>The is is another prompt-generation step that strengthens planning quality before implementation begins. Instead of drafting PRDs ad hoc, we now have a reusable prompt artifact that drives a consistent PRD structure across slices.</p>
+
+<p>This prompt generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md">create-prd.prompt.md</a> file :</p>
+
+<ul>
+  <li>A reusable PRD prompt file with explicit section requirements</li>
+  <li>A repeatable structure for problem framing, goals, non-goals, and measurable success criteria</li>
+  <li>A stronger planning handoff artifact that can be reviewed before coding starts</li>
+</ul>
+
+<p>Architecture/workflow impact: this improves requirement clarity and alignment at the slice level. By standardizing PRD output shape, it reduces ambiguity for downstream implementation prompts and makes acceptance discussions more concrete.</p>
+
+<p>A structured PRD prompt ensures that every vertical slice—regardless of complexity or domain—follows the same requirement format. This consistency is essential for building an implementation plan because sequencing and dependency decisions depend on comparable requirement definitions. When slices define problems, goals, non-goals, and success metrics in the same shape, the implementation plan can reliably identify which slices block others (through non-goals or success criteria constraints), estimate relative effort more fairly, and sequence work with higher confidence. Without this standardization, slices would have inconsistent requirement depth, making dependencies ambiguous and forcing implementation teams to re-interpret requirements slice-by-slice. The structured PRD becomes the input layer for sequencing logic: clearer, more comparable requirements lead to more accurate dependency maps, which lead to more predictable implementation schedules.</p>
+
+<hr />
+
+<h2 id="creating-the-vertical-slice-instruction-prompt-generator">Creating the Vertical-Slice Instruction-Prompt Generator</h2>
+
+<p>I also generated a refined meta-prompt focused on producing instruction-file prompts for vertical-slice implementation:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create a new prompt file, that creates an instruction file, that provides guidance for implementing applications in vertical slices
+</code></pre></div></div>
+
+<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md">create-vertical-slice-implementation-instructions.prompt.md</a></p>
+
+<p>This request is one level more specific than a general implementation prompt: it creates a prompt artifact whose job is to generate instruction files for vertical-slice execution. That distinction helps keep planning guidance and implementation governance synchronized as the project grows.</p>
+
+<p>What this prompt produces:</p>
+
+<ul>
+  <li>A reusable prompt file that can generate vertical-slice implementation instruction files</li>
+  <li>A repeatable pattern for defining slice boundaries, sequencing, and execution constraints</li>
+  <li>A governance-friendly path for scaling slice guidance without rewriting rules by hand</li>
+</ul>
+
+<p>Architecture/workflow impact: this improves consistency at the instruction-file layer, not just the prompt layer. It makes vertical-slice implementation guidance easier to regenerate, version, and apply across teams.</p>
+
+<p>By creating a meta-prompt that generates instruction files for vertical-slice execution, we establish a reusable governance artifact that can guide coding work across all slices consistently. Instead of hand-authoring implementation guidance for each slice from scratch, this prompt factory ensures every slice follows the same execution discipline—the same boundary definitions, sequencing rules, and guard rails. That consistency is essential for building a reliable implementation plan: when all slices share the same instruction-file standards, dependencies become clearer, handoff quality improves, and the overall timeline becomes more predictable. This meta-prompt layer bridges the gap between planning (which defines what to build) and execution (which defines how to build it), creating the enforcement mechanism that keeps implementation work aligned with the workflows and PRDs we’ve already defined.</p>
+
+<hr />
+
+<h2 id="generating-the-vertical-slice-implementation-instruction-file">Generating the Vertical-Slice Implementation Instruction File</h2>
+
+<p>With the vertical-slice instruction-prompt generator in place, I submitted it directly:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit #file:create-vertical-slice-implementation-instructions.prompt.md
+</code></pre></div></div>
+
+<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md">vertical-slice-implementation.instructions.md</a></p>
+
+<p>This is the execution step that produces the instruction file used to guide slice-by-slice implementation work. The previous step created the generator prompt; this step produced the concrete implementation-governance artifact.</p>
+
+<p>What this prompt produces:</p>
+
+<ul>
+  <li>A concrete <code class="language-plaintext highlighter-rouge">vertical-slice-implementation.instructions.md</code> standards file</li>
+  <li>Practical guidance for sequencing, slice boundaries, and implementation guardrails</li>
+  <li>A reusable instruction artifact that can be loaded during coding tasks</li>
+</ul>
+
+<p>Architecture/workflow impact: this makes vertical-slice execution rules explicit and reusable during implementation. It reduces interpretation drift between planning and coding phases and improves consistency across slices.</p>
+
+<p>With this instruction file in place, we now have the enforcement layer that bridges planning decisions into coding discipline. The file defines how slices are bounded, sequenced, and executed consistently across all implementation work. Instead of letting teams interpret slice requirements differently, these instructions establish a shared execution contract that keeps all coding work aligned. This is critical for predictable delivery: when every implementation team follows the same guidance for slice boundaries, dependency handling, and task breakdown, the overall timeline becomes more reliable and the actual delivery sequence matches the planned sequence. The instruction file becomes the quality gate that prevents implementation drift—the mechanism that ensures that the workflows, PRDs, and dependency diagrams we generated earlier actually translate into executable code in the right order, with the right boundaries, and at predictable velocity.</p>
+
+<hr />
+
+<h2 id="generating-the-workflow-model-inventory">Generating the Workflow Model Inventory</h2>
+
+<p>To make slice planning concrete, I generated a workflow inventory from the domain facts:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>given these #file:academia.txt facts create a comprehensive list, in markdown, of the workflows needed for the zeus.academia management system. put the file in the models/workflows folder
+</code></pre></div></div>
+
+<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md">academia-workflows.md</a></p>
+
+<p>This step converts domain facts into an implementation-facing workflow catalog. Instead of inferring workflows ad hoc during coding, the team gets an explicit markdown inventory that can be mapped to vertical slices and prioritized systematically.</p>
+
+<p>What this prompt produces:</p>
+
+<ul>
+  <li>A comprehensive workflow list in markdown format</li>
+  <li>A shared modeling artifact that ties domain facts to implementation planning</li>
+  <li>A slice-planning reference that helps identify dependencies, handoffs, and coverage gaps</li>
+</ul>
+
+<p>Architecture/workflow impact: this improves planning fidelity before coding begins. By grounding slices in an explicit workflow model, it reduces missed paths, strengthens sequencing decisions, and improves end-to-end completeness.</p>
+
+<p>This workflow inventory is a critical input to building the implementation plan because it establishes the complete picture of what the system must do, independent of how it’s sliced or sequenced. Instead of guessing at coverage or accidentally omitting a workflow because it wasn’t top-of-mind, the team now has a definitive artifact that shows every user interaction pattern, data transformation, and cross-system handoff. When we map these workflows to vertical slices in the next step, this inventory becomes the reference layer that ensures no work falls through the cracks and every slice contributes meaningfully to system completeness. It also clarifies which slices can be built independently and which have hidden dependencies—dependencies that will show up in our final dependency diagram and inform execution sequencing. Without this workflow catalog, the implementation plan would be based on intuition; with it, the plan is grounded in observable, reviewable domain facts that the entire team can agree on before any code is written.</p>
+
+<hr />
+
+<h2 id="generating-the-workflow-based-implementation-plan">Generating the Workflow-Based Implementation Plan</h2>
+
+<p>With workflow and rules artifacts in place, I generated the implementation plan with this request:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create an implementation plan that implements the workflows #file:academia-workflows.md and the business rules #file:academia.txt. include a portrait mermaid diagram that shows the slices and their dependencies
+</code></pre></div></div>
+
+<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md">academia-implementation-plan.md</a></p>
+
+<p>This step converts workflow modeling into an executable delivery plan. Instead of planning slices from memory, it uses explicit workflow and rule inputs and adds a visual dependency model to make sequencing decisions easier to review.</p>
+
+<p>What this prompt produces:</p>
+
+<ul>
+  <li>A markdown implementation plan grounded in <code class="language-plaintext highlighter-rouge">academia-workflows.md</code> and <code class="language-plaintext highlighter-rouge">academia.txt</code></li>
+  <li>A slice-oriented execution roadmap with dependencies and ordering guidance</li>
+  <li>A portrait Mermaid diagram showing slice dependencies for planning clarity</li>
+</ul>
+
+<p>Architecture/workflow impact: this creates a concrete bridge from domain workflows to implementation sequencing. It improves handoff quality, makes dependencies explicit, and supports more predictable vertical-slice delivery.</p>
+
+<h3 id="reading-the-slice-dependency-diagram">Reading the Slice Dependency Diagram</h3>
+
+<p>The generated implementation plan includes a visual diagram showing how slices depend on each other. Here’s an example:</p>
+
+<figure>
+  <img src="../../jekyll-src/assets/images/2026-03-01/dependency-diagram.jpg" alt="Mermaid diagram showing vertical slices as boxes arranged in layers. Top layer: Course Discovery (no dependencies). Middle layer: Enrollment, Waitlist, Cancellation (all depend on Course Discovery). Bottom layer: Grade Posting, Transcript (depend on Enrollment)." />
+  <figcaption>Slice dependency diagram: boxes are slices, arrows point to dependencies. Build bottom-up (no-dependency slices first) so each new slice can be integrated and tested immediately.</figcaption>
+</figure>
+
+<p><strong>How to read it:</strong></p>
+
+<ul>
+  <li><strong>Boxes</strong> = vertical slices</li>
+  <li><strong>Arrows</strong> = “depends on” relationships (arrow points to the slice being depended upon)</li>
+  <li><strong>Top-to-bottom flow</strong> = suggested build order (start with slices that have no dependencies, build downward)</li>
+</ul>
+
+<p>In the example:</p>
+<ol>
+  <li>“Course Discovery” has no dependencies → build first</li>
+  <li>“Enrollment”, “Waitlist”, and “Cancellation” all depend on “Course Discovery” → build after</li>
+  <li>“Grade Posting” and “Transcript” depend on “Enrollment” → build last</li>
+</ol>
+
+<p>This ordering ensures each slice can run tests end-to-end and be deployed (or held for later) without waiting for unrelated work.</p>
+
+<hr />
+
+<h2 id="checking-the-context">Checking the Context</h2>
+
+<p>Because these changes expand <code class="language-plaintext highlighter-rouge">.github</code> governance artifacts (prompts and agent standards), I run a context review pass before moving forward. This helps catch overlaps, contradictions, and scope conflicts before they leak into implementation prompts.</p>
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>We’ll finish this phase by creating implementation prompts that guide AI agents through coding work while keeping generated output aligned with our technology-specific instruction files and architectural vision. In the next step, I’ll use the planning and persona-agent outputs to define implementation slices with clear dependencies and acceptance criteria. The goal is to move from governance-compliant planning into execution prompts that drive coding tasks with minimal ambiguity.</p>
+
+<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
+
+<hr />
+
+<h2 id="feedback-loop">Feedback Loop</h2>
+
+<p>Feedback is always welcome. Send your thoughts to <strong>AIP@pdata.com</strong>.</p>
+
+<hr />
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<p>Prompts:</p>
+
+<ul>
+  <li>Expand on this post with descriptions of this prompt: “using (https://docs.github.com/en/copilot/reference/custom-agents-configuration), https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents, https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents create a prompt that will create an instruction file for creating agents” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md” created by the prompt</li>
+  <li>Expand this post with a description of this prompt: “Prompt: submit this prompt #file:create-custom-agents-instructions.prompt.md with these arguments:
+instruction*filename: custom-agents.instructions.md
+apply_to: .github/agents/**/_.agent.md
+agent_scope: repository
+include_ide_notes: true” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a prompt file that creates an agent for the product manager persona” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “submit the #file:create-product-manager-agent.prompt.md prompt file with these arguments:
+agent_filename: product-manager.agent.md
+target: omit
+include_execute_tool: false
+scope_note: The universe of discourse is Academia Management” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing the steps to create a structured PRD with problem, goals, non-goals, and success metrics” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing guidance for implementing applications in vertical slices” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a new prompt file, that creates an instruction file, that provides guidance for implementing applications in vertical slices” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “submit #file:create-vertical-slice-implementation-instructions.prompt.md” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “given these #file:academia.txt facts create a comprehensive list, in markdown, of the workflows needed for the zeus.academia management system. put the file in the models/workflows folder” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create an implementation plan that implements the workflows #file:academia-workflows.md and the business rules #file:academia.txt. include a portrait mermaid diagram that shows the slices and their dependencies” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md” created by the prompt</li>
+  <li>Insert a governance checkpoint: After the vertical-slice introduction, add a section validating that the planning artifacts (agent standards, agent profiles, PRD template, and implementation instructions) form a coherent system</li>
+  <li>Refactor artifact summaries: Convert feature lists to thesis-first paragraphs where appropriate</li>
+  <li>Add a definition of prompt drift</li>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.]]></summary></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails</title><link href="https://blog.pdata.com/AIAGSD5/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD5</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD5/"><![CDATA[<p>In this post, I’ll shift from <em>architecture-level</em> instructions to <em>technology-level</em> instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
 
 <!--more-->
 
