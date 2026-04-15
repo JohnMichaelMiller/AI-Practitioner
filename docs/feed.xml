@@ -1,4 +1,454 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-03-02T09:34:26-08:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning</title><link href="https://blog.pdata.com/AIAGSD6/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning" /><published>2026-03-01T00:00:00-08:00</published><updated>2026-03-01T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD6</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD6/"><![CDATA[<p><strong>TL;DR:</strong> This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-04-15T08:49:22-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Generated Code in Regulated Software: Compliance Risks &amp;amp; Mitigations</title><link href="https://blog.pdata.com/AIA-COMP/" rel="alternate" type="text/html" title="AI-Generated Code in Regulated Software: Compliance Risks &amp;amp; Mitigations" /><published>2026-04-01T00:00:00-07:00</published><updated>2026-04-01T00:00:00-07:00</updated><id>https://blog.pdata.com/AIA-COMP</id><content type="html" xml:base="https://blog.pdata.com/AIA-COMP/"><![CDATA[<h1 id="ai-generated-code-in-regulated-software"><strong>AI-Generated Code in Regulated Software</strong></h1>
+
+<h2 id="compliance-risks-impacted-standards--practical-mitigations">Compliance Risks, Impacted Standards &amp; Practical Mitigations</h2>
+
+<p><strong>Webinar</strong></p>
+
+<p>::: notes
+Welcome everyone and set the tone: AI-assisted development is here, but regulated environments need clarity.
+Emphasize that this session is practical, not theoretical.
+Mention that we’ll cover risks, standards, and concrete mitigations.
+:::</p>
+
+<hr />
+
+<h1 id="agenda"><strong>Agenda</strong></h1>
+
+<ol>
+  <li>Why this topic matters now</li>
+  <li>Compliance challenges introduced by AI-generated code</li>
+  <li>Impacted standards and regulations</li>
+  <li>Mitigation strategies and best practices</li>
+  <li>Q&amp;A</li>
+</ol>
+
+<p>::: notes
+Walk through the agenda quickly.
+Highlight that the session builds from risk → standards → mitigations.
+Encourage attendees to jot down questions for the Q&amp;A.
+:::</p>
+
+<hr />
+
+<h1 id="why-this-matters"><strong>Why This Matters</strong></h1>
+
+<ul>
+  <li>AI-assisted development is accelerating adoption across industries</li>
+  <li>Regulated environments face new audit vulnerabilities</li>
+  <li>Traditional SDLC controls were not designed for AI-generated artifacts</li>
+  <li>Organizations need clarity, governance, and repeatable processes</li>
+</ul>
+
+<p>::: notes
+Frame the urgency: AI is already in use, often informally.
+Stress that regulators aren’t banning AI—they expect organizations to control it.
+Position this as a modernization of compliance, not a barrier to innovation.
+:::</p>
+
+<hr />
+
+<h1 id="compliance-challenges"><strong>Compliance Challenges</strong></h1>
+
+<h2 id="key-risk-areas">Key Risk Areas</h2>
+
+<ul>
+  <li>Traceability gaps</li>
+  <li>Validation &amp; verification uncertainty</li>
+  <li>Documentation &amp; reproducibility issues</li>
+  <li>Explainability challenges</li>
+  <li>Change control complications</li>
+  <li>IP &amp; licensing exposure</li>
+</ul>
+
+<p>::: notes
+Introduce the six major categories of risk.
+Mention that these risks appear across industries, not just medical or finance.
+Set up the next slides where each risk is unpacked.
+:::</p>
+
+<hr />
+
+<h1 id="traceability-gaps"><strong>Traceability Gaps</strong></h1>
+
+<ul>
+  <li>Missing lineage from requirements → design → code → tests</li>
+  <li>No deterministic mapping from prompt to output</li>
+  <li>Difficulty reconstructing how code was produced</li>
+  <li>Weak auditability without additional controls</li>
+</ul>
+
+<p>::: notes
+Explain that traceability is the #1 issue auditors flag.
+AI outputs are not inherently traceable unless teams enforce it.
+Give a quick example: “Show me the requirement that led to this function.”
+:::</p>
+
+<hr />
+
+<h1 id="validation--verification-risks"><strong>Validation &amp; Verification Risks</strong></h1>
+
+<ul>
+  <li>Hallucinated or incorrect logic</li>
+  <li>Inconsistent coding patterns</li>
+  <li>Security vulnerabilities introduced by generated code</li>
+  <li>Increased burden on testing and review</li>
+</ul>
+
+<p>::: notes
+Emphasize that AI-generated code can look correct but behave incorrectly.
+Mention that validation must increase, not decrease, when AI is involved.
+Highlight the need for automated testing.
+:::</p>
+
+<hr />
+
+<h1 id="documentation--reproducibility"><strong>Documentation &amp; Reproducibility</strong></h1>
+
+<ul>
+  <li>AI tools do not produce design rationale</li>
+  <li>Prompts and model versions often untracked</li>
+  <li>Outputs may not be reproducible</li>
+  <li>Creates documentation debt for regulated teams</li>
+</ul>
+
+<p>::: notes
+Stress that documentation is a regulatory requirement, not a nice-to-have.
+Explain that reproducibility is essential for audits and investigations.
+Mention prompt logging as a mitigation we’ll cover later.
+:::</p>
+
+<hr />
+
+<h1 id="explainability--review-challenges"><strong>Explainability &amp; Review Challenges</strong></h1>
+
+<ul>
+  <li>Non-idiomatic or opaque code</li>
+  <li>Harder to justify decisions during audits</li>
+  <li>Increased reviewer workload</li>
+  <li>Potential misalignment with internal patterns</li>
+</ul>
+
+<p>::: notes
+Explain that reviewers often struggle with AI-generated code because it lacks human reasoning.
+Auditors may ask “Why was this implemented this way?” and teams need an answer.
+:::</p>
+
+<hr />
+
+<h1 id="change-control-issues"><strong>Change Control Issues</strong></h1>
+
+<ul>
+  <li>Large, rapid code changes</li>
+  <li>Unclear impact analysis</li>
+  <li>Risk of bypassing formal workflows</li>
+  <li>Need for explicit tagging of AI-generated changes</li>
+</ul>
+
+<p>::: notes
+Emphasize that AI can generate hundreds of lines instantly, which breaks traditional change control expectations.
+Stress the importance of tagging AI-generated commits.
+:::</p>
+
+<hr />
+
+<h1 id="ip--licensing-risks"><strong>IP &amp; Licensing Risks</strong></h1>
+
+<ul>
+  <li>Potential inclusion of copyrighted or copyleft code</li>
+  <li>Unclear provenance</li>
+  <li>Legal exposure if not scanned and reviewed</li>
+  <li>Requires automated license compliance checks</li>
+</ul>
+
+<p>::: notes
+Explain that AI models may generate code resembling licensed material.
+Stress that legal teams are increasingly concerned about provenance.
+:::</p>
+
+<hr />
+
+<h1 id="impacted-standards--regulations"><strong>Impacted Standards &amp; Regulations</strong></h1>
+
+<h2 id="cross-industry-impact">Cross-Industry Impact</h2>
+
+<ul>
+  <li><strong>FDA Software Validation Expectations</strong></li>
+  <li><strong>ISO/IEC 62304</strong> (software lifecycle)</li>
+  <li><strong>ISO 14971</strong> (risk management)</li>
+  <li><strong>SOC 2</strong> (security &amp; change control)</li>
+  <li><strong>SOX</strong> (financial reporting controls)</li>
+  <li><strong>PCI-DSS</strong> (secure coding &amp; data protection)</li>
+  <li><strong>GDPR</strong> (privacy by design)</li>
+</ul>
+
+<p>::: notes
+Introduce the standards landscape.
+Emphasize that AI-generated code affects multiple compliance domains simultaneously.
+:::</p>
+
+<hr />
+
+<h1 id="medical-device-standards"><strong>Medical Device Standards</strong></h1>
+
+<h3 id="fda-expectations"><strong>FDA Expectations</strong></h3>
+
+<ul>
+  <li>Full traceability</li>
+  <li>Documented verification &amp; validation</li>
+  <li>Controlled change management</li>
+  <li>Tool qualification</li>
+</ul>
+
+<h3 id="isoiec-62304"><strong>ISO/IEC 62304</strong></h3>
+
+<ul>
+  <li>Lifecycle documentation</li>
+  <li>Architecture &amp; design controls</li>
+  <li>Verification rigor</li>
+</ul>
+
+<h3 id="iso-14971"><strong>ISO 14971</strong></h3>
+
+<ul>
+  <li>New hazard sources</li>
+  <li>Hard-to-predict failure modes</li>
+</ul>
+
+<p>::: notes
+Highlight that medical device software is one of the most impacted domains.
+Explain that AI-generated code must still meet all lifecycle and risk requirements.
+:::</p>
+
+<hr />
+
+<h1 id="enterprise--financial-standards"><strong>Enterprise &amp; Financial Standards</strong></h1>
+
+<h3 id="soc-2"><strong>SOC 2</strong></h3>
+
+<ul>
+  <li>Secure SDLC</li>
+  <li>Change management</li>
+  <li>Access control</li>
+</ul>
+
+<h3 id="sox"><strong>SOX</strong></h3>
+
+<ul>
+  <li>Auditability of changes</li>
+  <li>Segregation of duties</li>
+  <li>Deterministic logic in financial systems</li>
+</ul>
+
+<h3 id="pci-dss"><strong>PCI-DSS</strong></h3>
+
+<ul>
+  <li>Secure coding</li>
+  <li>Vulnerability management</li>
+  <li>Logging &amp; monitoring</li>
+</ul>
+
+<p>::: notes
+Emphasize that enterprise auditors are already asking about AI usage.
+Explain that SOX and SOC 2 care deeply about change control and auditability.
+:::</p>
+
+<hr />
+
+<h1 id="privacy-regulations"><strong>Privacy Regulations</strong></h1>
+
+<h3 id="gdpr"><strong>GDPR</strong></h3>
+
+<ul>
+  <li>Privacy by design</li>
+  <li>Data minimization</li>
+  <li>Auditability of data flows</li>
+  <li>Risk of unsafe defaults in generated code</li>
+</ul>
+
+<p>::: notes
+Explain that AI-generated code may inadvertently mishandle personal data.
+Stress that privacy-by-design must be preserved even with AI assistance.
+:::</p>
+
+<hr />
+
+<h1 id="mitigation-strategies"><strong>Mitigation Strategies</strong></h1>
+
+<h2 id="governance--controls">Governance &amp; Controls</h2>
+
+<ul>
+  <li>Tool qualification</li>
+  <li>Human-in-the-loop review</li>
+  <li>Prompt &amp; model version logging</li>
+  <li>Automated testing</li>
+  <li>Risk-based change control</li>
+  <li>IP &amp; license scanning</li>
+</ul>
+
+<p>::: notes
+Introduce the mitigation section as the “how to fix it” part.
+Emphasize that these controls are practical and auditable.
+:::</p>
+
+<hr />
+
+<h1 id="tool-qualification"><strong>Tool Qualification</strong></h1>
+
+<ul>
+  <li>Define intended use</li>
+  <li>Validate outputs for accuracy</li>
+  <li>Restrict access</li>
+  <li>Version-lock models when possible</li>
+  <li>Maintain prompt logs</li>
+</ul>
+
+<p>::: notes
+Explain that AI tools must be treated like any other software tool in regulated environments.
+Mention that qualification does not mean certifying the model—just validating its intended use.
+:::</p>
+
+<hr />
+
+<h1 id="human-in-the-loop-review"><strong>Human-in-the-Loop Review</strong></h1>
+
+<ul>
+  <li>Mandatory peer review</li>
+  <li>Architectural oversight</li>
+  <li>Security review for sensitive modules</li>
+  <li>Style and pattern conformance checks</li>
+</ul>
+
+<p>::: notes
+Stress that human review is non-negotiable.
+Explain that reviewers should be trained to identify AI-specific failure modes.
+:::</p>
+
+<hr />
+
+<h1 id="documentation--traceability"><strong>Documentation &amp; Traceability</strong></h1>
+
+<ul>
+  <li>Capture prompts and model versions</li>
+  <li>Link generated code to requirements</li>
+  <li>Document design rationale</li>
+  <li>Annotate code reviews for auditability</li>
+</ul>
+
+<p>::: notes
+Emphasize that prompt logging is becoming a best practice.
+Explain that traceability must be restored manually if AI breaks it.
+:::</p>
+
+<hr />
+
+<h1 id="automated-testing--analysis"><strong>Automated Testing &amp; Analysis</strong></h1>
+
+<ul>
+  <li>Unit, integration, and regression tests</li>
+  <li>Static analysis (SAST)</li>
+  <li>Dynamic analysis (DAST)</li>
+  <li>Dependency and license scanning</li>
+  <li>Continuous validation pipelines</li>
+</ul>
+
+<p>::: notes
+Explain that automated testing compensates for AI unpredictability.
+Mention that static analysis tools often catch AI-generated anti-patterns.
+:::</p>
+
+<hr />
+
+<h1 id="risk-management--change-control"><strong>Risk Management &amp; Change Control</strong></h1>
+
+<ul>
+  <li>Perform impact analysis for AI-generated changes</li>
+  <li>Tag AI-generated code in commits</li>
+  <li>Require approvals for high-risk modules</li>
+  <li>Maintain audit logs of generation events</li>
+</ul>
+
+<p>::: notes
+Stress that AI-generated changes should be treated as high-risk by default.
+Explain that tagging AI-generated code helps during audits and investigations.
+:::</p>
+
+<hr />
+
+<h1 id="ip--licensing-safeguards"><strong>IP &amp; Licensing Safeguards</strong></h1>
+
+<ul>
+  <li>Automated license scanning</li>
+  <li>Code similarity detection</li>
+  <li>Legal review for high-risk components</li>
+  <li>Policies restricting AI use in sensitive areas</li>
+</ul>
+
+<p>::: notes
+Reinforce that IP risk is real and growing.
+Encourage teams to integrate license scanning into CI/CD.
+:::</p>
+
+<hr />
+
+<h1 id="best-practices"><strong>Best Practices</strong></h1>
+
+<ul>
+  <li>Treat AI tools as validated development tools</li>
+  <li>Require full human review</li>
+  <li>Maintain prompt + output logs</li>
+  <li>Strengthen automated testing</li>
+  <li>Enforce strict change control</li>
+  <li>Integrate risk management into every change</li>
+  <li>Scan for IP and licensing issues</li>
+</ul>
+
+<p>::: notes
+Summarize the “do this” list.
+Encourage teams to adopt these as part of their SDLC modernization.
+:::</p>
+
+<hr />
+
+<h1 id="common-pitfalls"><strong>Common Pitfalls</strong></h1>
+
+<ul>
+  <li>Allowing AI tools to commit code directly</li>
+  <li>Failing to document prompts or model versions</li>
+  <li>Assuming generated code is correct</li>
+  <li>Mixing AI and human code without tagging</li>
+  <li>Neglecting licensing risks</li>
+  <li>Using AI without tool qualification</li>
+</ul>
+
+<p>::: notes
+Present these as “avoid these traps.”
+Mention that most audit findings stem from these exact issues.
+:::</p>
+
+<hr />
+
+<h1 id="conclusion"><strong>Conclusion</strong></h1>
+
+<p>AI-generated code can be used safely in regulated environments —
+<strong>but only with strong governance, traceability, validation, and human oversight.</strong></p>
+
+<p>::: notes
+Reinforce that AI is not the enemy—lack of controls is.
+Encourage attendees to view this as an opportunity to modernize compliance.
+:::</p>
+
+<hr />
+
+<h1 id="qa"><strong>Q&amp;A</strong></h1>
+
+<p>Thank you for joining the session.</p>
+
+<p>::: notes
+Invite questions.
+Offer to share templates, checklists, or deeper dives if requested.
+:::</p>
+
+<hr />]]></content><author><name>John Michael Miller</name></author><summary type="html"><![CDATA[AI-Generated Code in Regulated Software Compliance Risks, Impacted Standards &amp; Practical Mitigations Webinar ::: notes Welcome everyone and set the tone: AI-assisted development is here, but regulated environments need clarity. Emphasize that this session is practical, not theoretical. Mention that we’ll cover risks, standards, and concrete mitigations. ::: Agenda Why this topic matters now Compliance challenges introduced by AI-generated code Impacted standards and regulations Mitigation strategies and best practices Q&amp;A ::: notes Walk through the agenda quickly. Highlight that the session builds from risk → standards → mitigations. Encourage attendees to jot down questions for the Q&amp;A. ::: Why This Matters AI-assisted development is accelerating adoption across industries Regulated environments face new audit vulnerabilities Traditional SDLC controls were not designed for AI-generated artifacts Organizations need clarity, governance, and repeatable processes ::: notes Frame the urgency: AI is already in use, often informally. Stress that regulators aren’t banning AI—they expect organizations to control it. Position this as a modernization of compliance, not a barrier to innovation. ::: Compliance Challenges Key Risk Areas Traceability gaps Validation &amp; verification uncertainty Documentation &amp; reproducibility issues Explainability challenges Change control complications IP &amp; licensing exposure ::: notes Introduce the six major categories of risk. Mention that these risks appear across industries, not just medical or finance. Set up the next slides where each risk is unpacked. ::: Traceability Gaps Missing lineage from requirements → design → code → tests No deterministic mapping from prompt to output Difficulty reconstructing how code was produced Weak auditability without additional controls ::: notes Explain that traceability is the #1 issue auditors flag. AI outputs are not inherently traceable unless teams enforce it. Give a quick example: “Show me the requirement that led to this function.” ::: Validation &amp; Verification Risks Hallucinated or incorrect logic Inconsistent coding patterns Security vulnerabilities introduced by generated code Increased burden on testing and review ::: notes Emphasize that AI-generated code can look correct but behave incorrectly. Mention that validation must increase, not decrease, when AI is involved. Highlight the need for automated testing. ::: Documentation &amp; Reproducibility AI tools do not produce design rationale Prompts and model versions often untracked Outputs may not be reproducible Creates documentation debt for regulated teams ::: notes Stress that documentation is a regulatory requirement, not a nice-to-have. Explain that reproducibility is essential for audits and investigations. Mention prompt logging as a mitigation we’ll cover later. ::: Explainability &amp; Review Challenges Non-idiomatic or opaque code Harder to justify decisions during audits Increased reviewer workload Potential misalignment with internal patterns ::: notes Explain that reviewers often struggle with AI-generated code because it lacks human reasoning. Auditors may ask “Why was this implemented this way?” and teams need an answer. ::: Change Control Issues Large, rapid code changes Unclear impact analysis Risk of bypassing formal workflows Need for explicit tagging of AI-generated changes ::: notes Emphasize that AI can generate hundreds of lines instantly, which breaks traditional change control expectations. Stress the importance of tagging AI-generated commits. ::: IP &amp; Licensing Risks Potential inclusion of copyrighted or copyleft code Unclear provenance Legal exposure if not scanned and reviewed Requires automated license compliance checks ::: notes Explain that AI models may generate code resembling licensed material. Stress that legal teams are increasingly concerned about provenance. ::: Impacted Standards &amp; Regulations Cross-Industry Impact FDA Software Validation Expectations ISO/IEC 62304 (software lifecycle) ISO 14971 (risk management) SOC 2 (security &amp; change control) SOX (financial reporting controls) PCI-DSS (secure coding &amp; data protection) GDPR (privacy by design) ::: notes Introduce the standards landscape. Emphasize that AI-generated code affects multiple compliance domains simultaneously. ::: Medical Device Standards FDA Expectations Full traceability Documented verification &amp; validation Controlled change management Tool qualification ISO/IEC 62304 Lifecycle documentation Architecture &amp; design controls Verification rigor ISO 14971 New hazard sources Hard-to-predict failure modes ::: notes Highlight that medical device software is one of the most impacted domains. Explain that AI-generated code must still meet all lifecycle and risk requirements. ::: Enterprise &amp; Financial Standards SOC 2 Secure SDLC Change management Access control SOX Auditability of changes Segregation of duties Deterministic logic in financial systems PCI-DSS Secure coding Vulnerability management Logging &amp; monitoring ::: notes Emphasize that enterprise auditors are already asking about AI usage. Explain that SOX and SOC 2 care deeply about change control and auditability. ::: Privacy Regulations GDPR Privacy by design Data minimization Auditability of data flows Risk of unsafe defaults in generated code ::: notes Explain that AI-generated code may inadvertently mishandle personal data. Stress that privacy-by-design must be preserved even with AI assistance. ::: Mitigation Strategies Governance &amp; Controls Tool qualification Human-in-the-loop review Prompt &amp; model version logging Automated testing Risk-based change control IP &amp; license scanning ::: notes Introduce the mitigation section as the “how to fix it” part. Emphasize that these controls are practical and auditable. ::: Tool Qualification Define intended use Validate outputs for accuracy Restrict access Version-lock models when possible Maintain prompt logs ::: notes Explain that AI tools must be treated like any other software tool in regulated environments. Mention that qualification does not mean certifying the model—just validating its intended use. ::: Human-in-the-Loop Review Mandatory peer review Architectural oversight Security review for sensitive modules Style and pattern conformance checks ::: notes Stress that human review is non-negotiable. Explain that reviewers should be trained to identify AI-specific failure modes. ::: Documentation &amp; Traceability Capture prompts and model versions Link generated code to requirements Document design rationale Annotate code reviews for auditability ::: notes Emphasize that prompt logging is becoming a best practice. Explain that traceability must be restored manually if AI breaks it. ::: Automated Testing &amp; Analysis Unit, integration, and regression tests Static analysis (SAST) Dynamic analysis (DAST) Dependency and license scanning Continuous validation pipelines ::: notes Explain that automated testing compensates for AI unpredictability. Mention that static analysis tools often catch AI-generated anti-patterns. ::: Risk Management &amp; Change Control Perform impact analysis for AI-generated changes Tag AI-generated code in commits Require approvals for high-risk modules Maintain audit logs of generation events ::: notes Stress that AI-generated changes should be treated as high-risk by default. Explain that tagging AI-generated code helps during audits and investigations. ::: IP &amp; Licensing Safeguards Automated license scanning Code similarity detection Legal review for high-risk components Policies restricting AI use in sensitive areas ::: notes Reinforce that IP risk is real and growing. Encourage teams to integrate license scanning into CI/CD. ::: Best Practices Treat AI tools as validated development tools Require full human review Maintain prompt + output logs Strengthen automated testing Enforce strict change control Integrate risk management into every change Scan for IP and licensing issues ::: notes Summarize the “do this” list. Encourage teams to adopt these as part of their SDLC modernization. ::: Common Pitfalls Allowing AI tools to commit code directly Failing to document prompts or model versions Assuming generated code is correct Mixing AI and human code without tagging Neglecting licensing risks Using AI without tool qualification ::: notes Present these as “avoid these traps.” Mention that most audit findings stem from these exact issues. ::: Conclusion AI-generated code can be used safely in regulated environments — but only with strong governance, traceability, validation, and human oversight. ::: notes Reinforce that AI is not the enemy—lack of controls is. Encourage attendees to view this as an opportunity to modernize compliance. ::: Q&amp;A Thank you for joining the session. ::: notes Invite questions. Offer to share templates, checklists, or deeper dives if requested. :::]]></summary></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning</title><link href="https://blog.pdata.com/AIAGSD6/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning" /><published>2026-03-01T00:00:00-08:00</published><updated>2026-03-01T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD6</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD6/"><![CDATA[<p><strong>TL;DR:</strong> This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution.</p>
 
 <p>We’re moving from architecture into implementation, but first we need a plan that defines tasks, dependencies, and execution order. This post shows how to generate planning artifacts — vertical-slice definitions, Product Requirements Documents (PRDs), workflow models, and dependency diagrams — that create a roadmap for coordinated, predictable slice-by-slice delivery. <a href="https://blog.pdata.com/AIAGSD1/">See earlier posts in the AIAGSD series for context.</a></p>
 
@@ -482,7 +932,523 @@ scope_note: The universe of discourse is Academia Management” and the file “
   <li>Insert a governance checkpoint: After the vertical-slice introduction, add a section validating that the planning artifacts (agent standards, agent profiles, PRD template, and implementation instructions) form a coherent system</li>
   <li>Refactor artifact summaries: Convert feature lists to thesis-first paragraphs where appropriate</li>
   <li>Add a definition of prompt drift</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.]]></summary></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails</title><link href="https://blog.pdata.com/AIAGSD5/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD5</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD5/"><![CDATA[<p>In this post, I’ll shift from <em>architecture-level</em> instructions to <em>technology-level</em> instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.]]></summary></entry><entry><title type="html">AI Pratitioner Resources: A Brief History of the Repository and Its Evolution</title><link href="https://blog.pdata.com/AIPR1/" rel="alternate" type="text/html" title="AI Pratitioner Resources: A Brief History of the Repository and Its Evolution" /><published>2026-03-01T00:00:00-08:00</published><updated>2026-03-01T00:00:00-08:00</updated><id>https://blog.pdata.com/AIPR1</id><content type="html" xml:base="https://blog.pdata.com/AIPR1/"><![CDATA[<p>I’m turning my attention back to the ai-practitioner-resources repository. This project has been my case study in AI-first software development practices. If you’re not familiar, it started as prompt to return a list of resources relevant to AI assisted software developers. Today it is an AI integrated platform with automated resource curation, AI project management, and a fully autonomous issue lifecycle.</p>
+
+<p>Looking back, i regretted not keeping a more detailed journal of the project’s evolution as I thought it might make for an interesting case study in how AI-first development practices evolve under real usage. Then a prompt occured to me that could write that blog post for me.</p>
+
+<p>Below is that post, as generated by AI.</p>
+
+<hr />
+
+<p>A project’s git log tells a story that documentation alone cannot. Over 143 commits and four months, the AI Practitioner Resources repository evolved from a single HTML file into an AI-first development platform — one where GitHub Copilot authors commits, AI reviews every incoming issue, and automated workflows manage the entire resource-curation pipeline. This post traces that evolution commit by commit.</p>
+
+<!--more-->
+
+<h2 id="the-starting-point-october-29-2025">The Starting Point: October 29, 2025</h2>
+
+<p>The project’s first commit landed at 10:31 AM Pacific on October 29, 2025:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>e5b683a 2025-10-29 Add initial HTML and README for AI Practitioner Resources web viewer
+</code></pre></div></div>
+
+<p>Two files. 565 lines. A static HTML page that fetched a JSON resource list from a GitHub Gist and rendered it as a simple card grid. The README described the project’s purpose: a curated collection of AI-powered development resources with a web viewer hosted on GitHub Pages.</p>
+
+<p>Two minutes later, the second commit added the GitHub Actions deployment workflow:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cdf1ecc 2025-10-29 Add GitHub Actions workflow for static content deployment
+</code></pre></div></div>
+
+<p>Within the first three hours, rapid iteration shaped the foundation:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Commit</th>
+      <th>Change</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>12:15 PM</td>
+      <td><code class="language-plaintext highlighter-rouge">9b73d72</code></td>
+      <td>Add JSON schema; restructure HTML for introduction, legend, and analysis sections</td>
+    </tr>
+    <tr>
+      <td>12:19 PM</td>
+      <td><code class="language-plaintext highlighter-rouge">ff6f1bf</code></td>
+      <td>Point GIST_CONFIG to GitHubusercontent URL</td>
+    </tr>
+    <tr>
+      <td>12:26 PM</td>
+      <td><code class="language-plaintext highlighter-rouge">3701574</code></td>
+      <td>Add NEW tag styling for recently added resources</td>
+    </tr>
+    <tr>
+      <td>12:36 PM</td>
+      <td><code class="language-plaintext highlighter-rouge">3c2f854</code></td>
+      <td>Add <code class="language-plaintext highlighter-rouge">blurb</code> property to schema; display resource descriptions</td>
+    </tr>
+    <tr>
+      <td>12:40 PM</td>
+      <td><code class="language-plaintext highlighter-rouge">3695b4c</code></td>
+      <td>Enhance analysis section styling</td>
+    </tr>
+    <tr>
+      <td>12:57 PM</td>
+      <td><code class="language-plaintext highlighter-rouge">909f82c</code></td>
+      <td>Update prompts and HTML for formatting consistency</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>By 1:00 PM on day one, the web viewer was live with schema validation, rich metadata, and visual polish. But the most consequential change of the day was still hours away.</p>
+
+<h2 id="copilots-first-commit-the-ai-first-paradigm-begins">Copilot’s First Commit: The AI-First Paradigm Begins</h2>
+
+<p>At 3:54 PM on October 29, GitHub Copilot made its first commit to the repository:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>f155ee4 2025-10-29 Copilot — Add automation to create GitHub issues from templates (#1)
+</code></pre></div></div>
+
+<p>This was not a suggestion or auto-complete — it was a full pull request authored by Copilot, implementing a Node.js script that parsed YAML frontmatter from issue templates and created GitHub issues via the API. The PR included rate limiting, duplicate detection, error handling, and validation. Copilot followed up with two more PRs the same afternoon:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>9ad8e46 2025-10-29 Copilot — Add footer with GitHub repository links and CODE Magazine attribution (#12)
+d58f972 2025-10-29 Copilot — Remove numerical numbering from analysis points (#13)
+</code></pre></div></div>
+
+<p>Then came the automation backbone. Copilot implemented the complete weekly resource-generation pipeline in a single PR:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a51afc1 2025-10-29 Copilot — Implement automated weekly AI resources generation with Gist management (#14)
+</code></pre></div></div>
+
+<p>The diff tells the story — 8,279 lines added across 34 files:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> .github/workflows/weekly-ai-resources-update.yml   |  64 ++
+ scripts/fetch-current-resources.js                 | 112 +++
+ scripts/generate-resources.js                      | 118 +++
+ scripts/merge-and-update.js                        | 108 +++
+ scripts/update-gist.js                             | 109 +++
+ scripts/validate-schema.js                         | 106 +++
+ scripts/create-summary.js                          | 171 ++++
+ docs/AUTOMATION_SETUP.md                           | 200 +++++
+ docs/IMPLEMENTATION_SUMMARY.md                     | 192 +++++
+ package.json                                       |  24 +
+ schema.json                                        |  75 ++
+ ... (24 more files)
+ 34 files changed, 8,279 insertions(+), 83 deletions(-)
+</code></pre></div></div>
+
+<p>This single PR introduced the six-stage automation pipeline that still forms the project’s core: fetch current resources from Gist → generate new resources via AI → merge with deduplication → validate against JSON schema → update the Gist → create a summary report.</p>
+
+<p>By the end of day one, the project had established a pattern that would define its identity: human direction, AI implementation.</p>
+
+<h2 id="the-ai-model-migration-openai--anthropic-claude">The AI Model Migration: OpenAI → Anthropic Claude</h2>
+
+<p>The evening of October 29 brought a rapid sequence of model changes that reveals a common challenge in AI-integrated systems — finding the right model for the job.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>53b5658 2025-10-29 19:03 — Fix OpenAI model: Update from gpt-4-turbo-preview to gpt-4
+4d5d8c8 2025-10-29 19:09 — Update OpenAI model to gpt-3.5-turbo
+00203c7 2025-10-29 20:09 — Improve JSON parsing robustness in generate-resources.js
+3074b42 2025-10-29 20:12 — Add robust JSON parsing with multiple fallback strategies
+c35748f 2025-10-29 20:30 — Enhance automation to generate comprehensive real resources
+0fb1fee 2025-10-29 20:36 — Migrate from OpenAI to Anthropic Claude API
+dff5988 2025-10-29 20:51 — Upgrade to Claude Sonnet 4.x model
+</code></pre></div></div>
+
+<p>Within two hours, the project went from GPT-4 to GPT-3.5-turbo (likely for cost or reliability), then abandoned OpenAI entirely in favor of Anthropic’s Claude API. The migration diff shows the API endpoint and authentication pattern change:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gd">-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+-      method: 'POST',
+</span><span class="gi">+    const response = await fetch("https://api.anthropic.com/v1/messages", {
++      method: "POST",
+</span>       headers: {
+<span class="gd">-        'x-api-key': ANTHROPIC_API_KEY,
+-        'anthropic-version': '2023-06-01'
+</span><span class="gi">+        "x-api-key": ANTHROPIC_API_KEY,
++        "anthropic-version": "2023-06-01",
+</span>       },
+       body: JSON.stringify({
+<span class="gd">-        model: 'claude-3-5-sonnet-20241022',
+-        max_tokens: 8000,
+</span><span class="gi">+        model: "claude-sonnet-4-20250514",
++        max_tokens: 10000,
+</span></code></pre></div></div>
+
+<p>The JSON parsing commits (<code class="language-plaintext highlighter-rouge">00203c7</code>, <code class="language-plaintext highlighter-rouge">3074b42</code>) are revealing — AI-generated JSON often needed fallback strategies to handle malformed output. This practical problem drove the addition of multiple extraction methods to handle responses that included markdown fences, trailing text, or incomplete objects.</p>
+
+<h2 id="day-three-production-polish-and-the-ui-redesign-october-31">Day Three: Production Polish and the UI Redesign (October 31)</h2>
+
+<p>October 31 brought a series of production-readiness commits:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fafaafd 2025-10-31 — feat: Complete UI redesign with risk-based scoring system
+750bc58 2025-10-31 — feat: Enhance automation pipeline with Claude Sonnet 4 integration
+f30e819 2025-10-31 — refactor: Refine AI prompts and schema for better resource generation
+1a819af 2025-10-31 — feat: Configure production setup and update automation results
+2a3aadd 2025-10-31 — chore: Clean up workspace and organize project structure
+</code></pre></div></div>
+
+<p>The UI redesign was substantial — 994 lines removed and 57 added in <code class="language-plaintext highlighter-rouge">index.html</code> alone — replacing the initial layout with a risk-based scoring system that evaluated resources against seven principal risks of AI-assisted coding:</p>
+
+<ol>
+  <li>Security Vulnerabilities</li>
+  <li>Logic and Quality Issues</li>
+  <li>Data Leakage and Confidentiality</li>
+  <li>Licensing and IP Concerns</li>
+  <li>Maintainability and Traceability</li>
+  <li>Bias and Inconsistent Standards</li>
+  <li>Over-Reliance and Skill Atrophy</li>
+</ol>
+
+<p>Each resource received individual scores (60–100) across these risk dimensions. The schema evolved from a simple <code class="language-plaintext highlighter-rouge">score</code> field to a structured <code class="language-plaintext highlighter-rouge">risk_coverage</code> object with per-risk scoring.</p>
+
+<p>The same day established the project’s domain and contribution model:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>5a0321c 2025-10-31 — feat: Add custom domain configuration and update workflow schedule
+7ec000e 2025-10-31 — feat: Update CNAME to point to ai-resources.codemag.com
+2031d70 2025-10-31 — feat: Add CONTRIBUTORS.md and update contribution guidelines
+c7d9441 2025-10-31 — feat: Add JSON-specific prompt for AI Practitioner Resources
+2f0e579 2025-10-31 — feat: Add markdown-first issue creation process
+</code></pre></div></div>
+
+<p>The CONTRIBUTORS.md established a radical policy: <strong>no traditional pull requests accepted</strong>. Contributors submit issues with detailed prompts; approved issues are assigned to GitHub Copilot for implementation. The project was explicitly an experiment in AI-first development.</p>
+
+<h2 id="the-modularization-copilot-refactors-a-monolith-november-3">The Modularization: Copilot Refactors a Monolith (November 3)</h2>
+
+<p>By November 3, <code class="language-plaintext highlighter-rouge">index.html</code> had grown to 1,155 lines — all HTML, CSS, and JavaScript in a single file. Copilot performed a comprehensive refactoring in PR #43:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>da7b837 2025-11-03 Copilot — Extract testable modules from 1,155-line monolithic HTML structure (#43)
+</code></pre></div></div>
+
+<p>The result: 23 files changed, 4,297 lines added, 1,017 removed. The monolith was decomposed into a clean ES6 module architecture:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>src/
+├── app.js                    # Main coordinator (89 lines)
+├── core/
+│   ├── colors.js             # Color calculations (49 lines)
+│   ├── filters.js            # Filtering logic (58 lines)
+│   └── data-processor.js     # Data transformations (75 lines)
+├── services/
+│   ├── api.js                # GitHub Gist API (64 lines)
+│   └── storage.js            # LocalStorage abstraction (76 lines)
+├── components/
+│   ├── resource-card.js      # Resource cards (87 lines)
+│   ├── filter-panel.js       # Filter buttons (49 lines)
+│   ├── stats.js              # Statistics (39 lines)
+│   ├── introduction.js       # Introduction section (46 lines)
+│   ├── legend.js             # Legend/methodology (14 lines)
+│   ├── analysis.js           # Weekly analysis (61 lines)
+│   └── modal.js              # Modal dialogs (42 lines)
+├── utils/
+│   ├── dom.js                # DOM helpers (85 lines)
+│   └── constants.js          # Configuration (90 lines)
+└── README.md                 # 324 lines of documentation
+</code></pre></div></div>
+
+<p>Average module size dropped to 68 lines. Every function stayed under 20 lines. The refactoring introduced Vitest as a test framework, with 34 passing tests covering core logic, services, and components. The accompanying REFACTORING_SUMMARY.md documented zero security vulnerabilities from CodeQL scanning.</p>
+
+<p>The same day, Copilot set up repository-wide instructions (<code class="language-plaintext highlighter-rouge">33725ea</code>) and performed a comprehensive analysis of all 22 open issues with prioritization recommendations (<code class="language-plaintext highlighter-rouge">03fb37b</code>).</p>
+
+<h2 id="the-project-management-pipeline-ai-reviews-ai-november-411">The Project-Management Pipeline: AI Reviews AI (November 4–11)</h2>
+
+<p>The most architecturally ambitious phase began on November 4. Over eight days, the project built a complete AI-powered project-management system.</p>
+
+<h3 id="phase-1-issue-intake-and-pm-review-november-4">Phase 1: Issue Intake and PM Review (November 4)</h3>
+
+<p>The work started with infrastructure for managing issues through GitHub Projects v2:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>05298bc 2025-11-04 — Refactor issue intake and lane management to utilize Project 1 Status
+def6427 2025-11-04 — Enhance issue intake workflow to optionally manage Project item status
+9fa7586 2025-11-04 — Refactor issue intake workflow for user-level Projects v2 with PAT
+77927e8 2025-11-04 — fix(intake): prefer TOKEN (PAT) over GITHUB_TOKEN for Projects v2
+</code></pre></div></div>
+
+<p>Then came the AI PM review — a workflow that triggers when any issue is opened, sending the issue content to an AI model for structured analysis:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>5aa7945 2025-11-04 — feat(intake): add Copilot PM review on issue open using OpenAI
+</code></pre></div></div>
+
+<p>Within hours, the PM review migrated from OpenAI to Anthropic (following the same pattern as the resource generator):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>d74c2d9 2025-11-04 — chore(pm-review): migrate from OpenAI to Anthropic Messages API
+084fe95 2025-11-04 — feat(pm-review): update model to claude-4.5-sonnet-latest
+815c5be 2025-11-04 — chore(workflow): pin PM model to claude-sonnet-4-5-20250929
+</code></pre></div></div>
+
+<p>The PM review system posts structured checklists to issues, assigns contributors, manages lane assignments (at bat / on deck / in the hole / on the bench), and can even split large issues into sub-issues.</p>
+
+<h3 id="phase-2-session-management-november-4">Phase 2: Session Management (November 4)</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>7dc3dc1 2025-11-04 — feat: Implement session management for GitHub Copilot
+</code></pre></div></div>
+
+<p>This addressed a fundamental limitation: Copilot does not persist context across conversations. The session-management system automatically captures full implementation context when Copilot creates a PR — original issue details, decision rationale, modified files, commit history — and restores it when Copilot needs to address review feedback. This enabled genuine multi-turn implementation loops.</p>
+
+<h3 id="phase-3-issue-lifecycle-test-automation-november-5">Phase 3: Issue Lifecycle Test Automation (November 5)</h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">copilot-swe-agent[bot]</code> authored a batch of commits implementing comprehensive lifecycle testing:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>8d467fb 2025-11-05 copilot-swe-agent[bot] — Add comprehensive issue lifecycle test automation script
+9c7e270 2025-11-05 copilot-swe-agent[bot] — Add shell script, workflow, and execution guide
+4d172cf 2025-11-05 copilot-swe-agent[bot] — Add comprehensive test documentation and quick reference
+1805712 2025-11-05 copilot-swe-agent[bot] — Add master README for test automation suite
+0409c8a 2025-11-05 copilot-swe-agent[bot] — Complete issue lifecycle test automation with execution report
+</code></pre></div></div>
+
+<p>The test suite covers 12 scenarios, 7 gates, 20+ states, and 30+ transitions — validating the entire lifecycle from issue creation through PM triage, lane assignment, PR workflow, code review, and closure with automated rebalancing.</p>
+
+<p>A complete state machine diagram documents the lifecycle:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Issue Created → Auto Validation → Backlog → PM Triage → Lane Assignment
+    → At Bat → Copilot Branch → PR Created → AI Code Review → AC Check
+    → CI/CD → Human Review → Merge → Issue Closed → Lane Rebalance
+</code></pre></div></div>
+
+<h3 id="phase-4-pm-review-refinement-november-11">Phase 4: PM Review Refinement (November 11)</h3>
+
+<p>November 11 was the most commit-dense day in the project’s history, with 25+ commits focused entirely on hardening the PM review system:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>91afe93 — Add automatic sub-issue creation for large issues in PM review
+514db19 — Add intelligent issue reformatting with context-aware suggestions
+5f2a89f — Enhance issue reformatting to support all template types
+80b51d3 — Enhance PM review prompt to ensure needsSplit triggers sub-issue creation
+d56596c — Add explicit JSON examples for needsSplit in PM review prompt
+82c342e — Add debug logging to PM review JSON parsing
+0f32b7d — Enforce strict JSON schema in PM review prompt
+3a1bb72 — Add JSON normalization to handle missing required fields
+b9d5488 — Extract PM review schema into separate JSON Schema file
+e094540 — feat: implement schema validation and pre-framing based on successful resources generation
+</code></pre></div></div>
+
+<p>The pattern is unmistakable: each commit addresses a specific failure mode discovered during real usage. AI-generated JSON had missing fields — add normalization. Sub-issues returned as strings instead of objects — add type coercion. The PM prompt did not reliably trigger issue splitting — add explicit JSON examples. This is pragmatic, test-and-fix evolution driven by production behavior.</p>
+
+<h2 id="the-workflow-architecture-nine-automated-pipelines">The Workflow Architecture: Nine Automated Pipelines</h2>
+
+<p>By mid-November, the repository had accumulated nine GitHub Actions workflows:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Workflow</th>
+      <th>Trigger</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">static.yml</code></td>
+      <td>Push to main</td>
+      <td>Deploy GitHub Pages</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">weekly-ai-resources-update.yml</code></td>
+      <td>Cron (Monday 9 AM UTC) + manual</td>
+      <td>Generate and publish resources</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">issue-intake.yml</code></td>
+      <td>Issue opened</td>
+      <td>Auto-validate + AI PM review</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">rebalance-on-close.yml</code></td>
+      <td>Issue closed</td>
+      <td>Rebalance project lanes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ai-code-review.yml</code></td>
+      <td>PR opened/updated</td>
+      <td>Multi-round AI code review</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">capture-copilot-session.yml</code></td>
+      <td>PR from copilot/* branch</td>
+      <td>Save implementation context</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">handle-copilot-review-changes.yml</code></td>
+      <td>PR review with changes requested</td>
+      <td>Restore context for Copilot</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">create-issues.yml</code></td>
+      <td>Manual</td>
+      <td>Batch-create issues from templates</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test-issue-lifecycle.yml</code></td>
+      <td>Manual</td>
+      <td>Run lifecycle test suite</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Together, these workflows form a closed loop: issues flow in, AI triages them, Copilot implements solutions, AI reviews the code, and on closure, the project board rebalances automatically.</p>
+
+<h2 id="the-quiet-period-and-the-refresh-december-2025--february-2026">The Quiet Period and the Refresh (December 2025 – February 2026)</h2>
+
+<p>After the intense November buildout, the commit frequency dropped. December 28 brought a cleanup:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>76742cb 2025-12-28 — refactor: remove deprecated PM mode files and simplify intake workflow
+198aa54 2025-12-28 — Automated commit of changes in automation-results
+</code></pre></div></div>
+
+<p>January 2026 saw minor maintenance — adding <code class="language-plaintext highlighter-rouge">.clockwork.json</code> to <code class="language-plaintext highlighter-rouge">.gitignore</code>, merging branches, and removing a footer section from <code class="language-plaintext highlighter-rouge">index.html</code>.</p>
+
+<p>February 2026 marked a renewed focus on the resource-generation pipeline:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>670e858 2026-02-20 — chore: update dependencies and refactor resource generation scripts
+71157d0 2026-02-20 — Deploy to test environment: Add metadata tracking and environment-specific gist filenames
+d10477b 2026-02-20 — chore: update resource generation and merge scripts with new prompt template
+ed3b588 2026-02-24 — feat: add configurable resource count and update mode support
+</code></pre></div></div>
+
+<p>The February work introduced environment-specific gist filenames (separating test from production), metadata tracking, a configurable resource count, and updated prompt templates. The DETERMINISM_GUIDE.md added during this period documents temperature controls and stability-focused prompting to improve consistency across generation runs:</p>
+
+<blockquote>
+  <p>The AI generation now uses a configurable temperature parameter to control output randomness. Default: 0.3 (balanced determinism). The prompt has been enhanced to prioritize stable, authoritative resources — OWASP, NIST, AWS, Azure, Google Cloud, O’Reilly, Manning. The merge script now uses flexible matching to handle URL and title variations.</p>
+</blockquote>
+
+<h2 id="by-the-numbers">By the Numbers</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>First commit</td>
+      <td>October 29, 2025</td>
+    </tr>
+    <tr>
+      <td>Most recent commit</td>
+      <td>February 24, 2026</td>
+    </tr>
+    <tr>
+      <td>Total commits</td>
+      <td>143</td>
+    </tr>
+    <tr>
+      <td>Human-authored commits</td>
+      <td>122</td>
+    </tr>
+    <tr>
+      <td>Copilot-authored commits</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <td>copilot-swe-agent[bot] commits</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <td>Unique authors</td>
+      <td>3 (human) + 2 (AI)</td>
+    </tr>
+    <tr>
+      <td>GitHub Actions workflows</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <td>Automation scripts</td>
+      <td>13+</td>
+    </tr>
+    <tr>
+      <td>Lines in initial commit</td>
+      <td>565</td>
+    </tr>
+    <tr>
+      <td>Lines after modularization</td>
+      <td>4,297 added in one PR</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="commit-authorship-human-and-ai">Commit Authorship: Human and AI</h2>
+
+<p>The commit log records five distinct author identities:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Author</th>
+      <th>Commits</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>john Michael Miller / John Miller / John Michael Miller</td>
+      <td>122</td>
+      <td>Project maintainer — direction, integration, debugging</td>
+    </tr>
+    <tr>
+      <td>Copilot</td>
+      <td>11</td>
+      <td>PR-based implementations from GitHub Copilot</td>
+    </tr>
+    <tr>
+      <td>copilot-swe-agent[bot]</td>
+      <td>10</td>
+      <td>Autonomous agent implementations on branches</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The human commits cluster around architecture decisions, model migrations, prompt refinement, and production debugging. The AI commits cluster around feature implementation, documentation generation, and test automation — precisely the pattern the CONTRIBUTORS.md prescribes.</p>
+
+<h2 id="what-the-git-log-reveals">What the Git Log Reveals</h2>
+
+<p>Three patterns emerge from this history:</p>
+
+<p><strong>Rapid model churn stabilizes quickly.</strong> The October 29 evening session shows four model changes in two hours (GPT-4 → GPT-3.5 → Claude 3.5 → Claude Sonnet 4). The PM review repeated the same migration on November 4. After that, the model choices stabilized. AI-integrated projects should expect this early turbulence and plan for API abstraction.</p>
+
+<p><strong>AI-generated output requires defensive parsing.</strong> Multiple commits across both the resource generator and the PM review system add JSON normalization, fallback extraction strategies, type coercion, and schema enforcement. When AI generates structured data, the consuming code must assume the output will be subtly wrong in ways that evolve as models update.</p>
+
+<p><strong>Human effort shifts from writing code to designing systems.</strong> The majority of the 122 human commits are not traditional “write a feature” commits. They are prompt refinements, schema updates, workflow configurations, model migrations, and integration debugging. The code itself is increasingly AI-authored; the human work is architectural and operational.</p>
+
+<h2 id="the-current-state">The Current State</h2>
+
+<p>As of March 2026, the AI Practitioner Resources repository is:</p>
+
+<ul>
+  <li>A <strong>live website</strong> at <a href="https://ai-resources.codemag.com">ai-resources.codemag.com</a> serving curated AI development resources</li>
+  <li>An <strong>automated content pipeline</strong> that generates, validates, and publishes new resources weekly using Claude Sonnet 4</li>
+  <li>An <strong>AI-managed project board</strong> where every incoming issue receives AI PM review, lane assignment, and — if needed — automatic splitting into sub-issues</li>
+  <li>A <strong>modular ES6 application</strong> with 13 focused JavaScript modules, separated CSS, and a Vitest test suite</li>
+  <li>An <strong>experiment in AI-first development</strong> with a documented contribution model that routes all implementation through GitHub Copilot</li>
+</ul>
+
+<p>The project’s own CONTRIBUTORS.md states its philosophy plainly:</p>
+
+<blockquote>
+  <p>This project serves as an experiment in AI-first development, where human contributors provide high-level direction and ideas, AI agents handle the implementation details, code reviews focus on prompt quality and outcomes, and community input drives feature prioritization.</p>
+</blockquote>
+
+<p>143 commits later, that experiment continues.</p>
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>The resource-generation pipeline’s February 2026 updates point toward further determinism and reliability improvements. The test/production environment separation suggests a maturing operational posture. The project’s trajectory — from static HTML to autonomous AI pipeline in four months — offers a concrete case study in how AI-first development practices evolve under real usage.</p>
+
+<h2 id="feedback-loop">Feedback Loop</h2>
+
+<p>Feedback is always welcome. Send your thoughts to <strong>AIPR@pdata.com</strong>.</p>
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<p>Prompts:</p>
+
+<ul>
+  <li>Review the full git log of ai-practitioner-resources with dates and authors to establish a project timeline</li>
+  <li>Examine key diffs (first commit, Copilot’s first PR, OpenAI→Claude migration, modularization, PM review pipeline) to quantify change scope</li>
+  <li>Read all project documentation (README, CONTRIBUTORS, DEV_NOTES, REFACTORING_SUMMARY, IMPLEMENTATION_SUMMARY, DETERMINISM_GUIDE, SESSION_MANAGEMENT_README, QUICK_REFERENCE, scripts/README) for architectural context</li>
+  <li>Draft a chronological blog post following AIAGSD series conventions with evidence from git history</li>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Tracing the evolution of AI Practitioner Resources: from static HTML to AI-first platform with automated workflows and autonomous issue management.]]></summary></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails</title><link href="https://blog.pdata.com/AIAGSD5/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD5</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD5/"><![CDATA[<p>In this post, I’ll shift from <em>architecture-level</em> instructions to <em>technology-level</em> instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
 
 <!--more-->
 
@@ -2338,1251 +3304,4 @@ Assign administrative roles (e.g., Head of Department) to eligible Academics.
   <li>What are benefits of Object Role Modeling?</li>
 </ul>
 
-<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="Software Development" /><category term="AI-Assisted Development" /><category term="Object Role Modeling" /><category term="Requirements Engineering" /><category term="Enterprise Architecture" /><summary type="html"><![CDATA[This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot. In this first installment we’ll look at the initial context provided to Copilot. This will include the initial instructions and the first prompts submitted to Copilot.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-08-30/header-AIAGSD01.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-08-30/header-AIAGSD01.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Sharing Instructions with the Team</title><link href="https://blog.pdata.com/SIWT/" rel="alternate" type="text/html" title="Sharing Instructions with the Team" /><published>2025-08-30T00:00:00-07:00</published><updated>2025-08-30T00:00:00-07:00</updated><id>https://blog.pdata.com/SIWT</id><content type="html" xml:base="https://blog.pdata.com/SIWT/"><![CDATA[<p>When working with GitHub Copilot across multiple projects, you’ll quickly face a common challenge: how do you share generic instructions (ie. coding standards and best practices) with team members working on different projects without duplicating instruction files in every repository? This post walks you through prompting Copilot to implement a solution leveraging symlinks and junction points.</p>
-
-<!--more-->
-
-<p><img src="/assets/images/2025-08-30/header-SIWT.png" alt="Header Image" /></p>
-
-<h2 id="what-are-instruction-files">What Are Instruction Files?</h2>
-
-<p>For those of you new to using GitHub Copilot, instruction files are the blueprint for customizing how Copilot agents behave, respond, and interact with tools. Instruction files include natural language guidance that shapes the agent’s tone, reasoning style, and response formatting, making them essential for tailoring Copilot to specific workflows, domains, or compliance requirements. Instruction files give you granular control over how the agent interprets user intent and executes tasks.</p>
-
-<p>Instruction files for GitHub Copilot agents can be located within the project repository in the <code class="language-plaintext highlighter-rouge">.github</code> folder or a sub-folder of <code class="language-plaintext highlighter-rouge">.github</code>. They can also reside in the user’s home directory in a <code class="language-plaintext highlighter-rouge">.github</code> prompts folder. The project repository location takes precedence over the user home directory location.</p>
-
-<p>Instruction files in the project folder are in scope for that project. Instruction files in the user home directory are available to all projects. Instruction files in the user home directory are limited in that the can only reside in the prompts folder.</p>
-
-<p>For instructions that are not project specific, such as coding standards and practices, it is desirable to share them across multiple projects. However, duplicating these files in each project repository is inefficient and error-prone. Instead, we can use symbolic links (symlinks) on Linux and macOS, and junction points on Windows, to create a single source of truth for shared instructions.</p>
-
-<p>Ideally it would be nice to create a link in the user folder once and have it be used across all projects. Due to the limitations on the user home directory location, creating a link there would require that all of the shared instructions be in a single folder in the source and it would preclude storing any personal instructions.</p>
-
-<p>Therefore, we need to establish these links within each project. Our solution involves creating these links seamlessly.</p>
-
-<h2 id="what-is-a-symlink-and-junction-point">What Is a Symlink and Junction Point?</h2>
-
-<p>A symlink (symbolic link) is a special type of file that points to another file or directory, allowing you to access the target as if it were located at the link’s location. Symlinks are commonly used on Linux and macOS to create shortcuts or shared folders. A junction point is a similar concept used on Windows; it creates a link to a directory, making the contents of the target directory appear in the linked location. Both mechanisms enable you to share or reuse files and folders across different locations without duplicating data, which simplifies maintenance and updates.</p>
-
-<h2 id="the-prompt">The Prompt</h2>
-
-<p>The solution involves creating a repo that contains the instruction files to be shared. Developers on the team can clone the repo locally and pull changes as needed. They can also change or add instructions to the repo and push those changes to the origin. Making them available to other team members.</p>
-
-<p>Once the repo is established, we need to provide guidance for the team in creating the links to the shared instructions. We’ll ask Copilot to create scripts for each OS (Windows, Linux, macOS) that will create the appropriate link from the project repository to the shared instructions folder in the central repo. The scripts will also ensure that the linked folder is added to the project’s <code class="language-plaintext highlighter-rouge">.gitignore</code> file to prevent accidental commits of the shared instructions to the project repository. In addition we’ll ask Copilot to create a README file with instructions on how to use the scripts.</p>
-
-<p>Here is the prompt I gave GitHub Copilot:</p>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Write three scripts to create a symlink or junction point for windows, Linux, and Mac.
-
-Use a symlink for Linux and Mac, and a junction point for Windows using
-the New-Item -ItemType Junction cmdlet.
-
-The symlink or junction point goes to the <span class="sb">`./instructions`</span> folder in this GitHubCopilot repo
-from the <span class="sb">`./github/instructions/shared`</span> folder in the Project repo.
-
-You'll need the paths to both the GitHubCopilot repo and the Project repo in order to proceed.
-
-Ensure that the Project repo's <span class="sb">`./github/instructions/shared`</span> folder is in the Project's <span class="sb">`.gitignore`</span> file.
-Create the file if it doesn't exist. We don't want the shared instructions to be pushed into the project repo.
-
-Create a <span class="sb">`Readme.md`</span> the describes the purpose and use of the scripts.
-
-Put all the files in a <span class="sb">`shared-instructions`</span> folder in the GitHubCopilot repo.
-</code></pre></div></div>
-
-<p>This prompt instructs Copilot (or ChatGPT 5) to automate the process of sharing a set of instruction files across multiple projects by generating platform-specific scripts. The scripts are designed to create either a symbolic link (symlink) or a junction point from a project repository to a central instructions folder in the GitHubCopilot repo. For Linux and macOS, the scripts use symlinks, while on Windows, they use NTFS junctions via PowerShell’s New-Item -ItemType Junction. The prompt also requires the scripts to ensure that the shared instructions folder is listed in the project’s <code class="language-plaintext highlighter-rouge">.gitignore</code> file, preventing accidental commits of shared files.</p>
-
-<p>Copilot and ChatGPT 5 interpret this prompt as a request for practical automation tools that streamline collaboration and maintain consistency across development environments. They recognize the need for cross-platform compatibility, idempotency, and version control hygiene. The prompt’s instructions lead them to generate three scripts (one for each OS) and a README file, all organized in a shared-instructions folder. The resulting solution enables teams to easily link to and update shared instruction files, reducing duplication and simplifying maintenance.</p>
-
-<p>Here is the README.md file generated from the prompt:</p>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh"># Shared Instructions Symlink/Junction Scripts</span>
-
-These scripts create a platform-appropriate link from a Project repository to the shared <span class="sb">`instructions`</span> folder
-that lives in the <span class="sb">`GitHubCopilot`</span> repo. This lets multiple projects reuse a single, centrally maintained set
-of instruction files without copying them.
-</code></pre></div></div>
-
-<p>Link layout created:</p>
-
-<div class="language-md highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;ProjectRepo&gt;</span>/github/instructions/shared -&gt; <span class="nt">&lt;GitHubCopilotRepo&gt;</span>/instructions
-</code></pre></div></div>
-
-<p>Platform behavior:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Platform</th>
-      <th>Mechanism</th>
-      <th>Script</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Windows</td>
-      <td>NTFS Junction</td>
-      <td><code class="language-plaintext highlighter-rouge">create-shared-link-windows.ps1</code></td>
-    </tr>
-    <tr>
-      <td>Linux</td>
-      <td>Symbolic link</td>
-      <td><code class="language-plaintext highlighter-rouge">create-shared-link-linux.sh</code></td>
-    </tr>
-    <tr>
-      <td>macOS</td>
-      <td>Symbolic link</td>
-      <td><code class="language-plaintext highlighter-rouge">create-shared-link-mac.sh</code></td>
-    </tr>
-  </tbody>
-</table>
-
-<p>The destination path inside the Project repo (<code class="language-plaintext highlighter-rouge">github/instructions/shared/</code>) is automatically added (or appended)
-to the Project repository’s <code class="language-plaintext highlighter-rouge">.gitignore</code> so linked files are never committed to the Project repository.</p>
-
-<h2 id="why-a-junction-on-windows">Why a Junction on Windows?</h2>
-
-<p>Junctions avoid some permission / policy issues that can affect symlinks on Windows machines without Developer Mode enabled. They behave like directory symlinks for our purpose.</p>
-
-<h2 id="prerequisites">Prerequisites</h2>
-
-<ul>
-  <li>You have both the Project repo and the <code class="language-plaintext highlighter-rouge">GitHubCopilot</code> repo cloned locally.</li>
-  <li>PowerShell 5+ (Windows script) or bash + Python 3 (for relative path computation) on Linux/macOS. (If Python 3 is not available, omit <code class="language-plaintext highlighter-rouge">--relative</code>.)</li>
-</ul>
-
-<h2 id="parameters">Parameters</h2>
-
-<p>All scripts require the root path of both repositories.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Parameter</th>
-      <th>Windows</th>
-      <th>Linux/macOS</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>GitHubCopilotRepo / –copilot</td>
-      <td>Required</td>
-      <td>Required</td>
-      <td>Path to the <code class="language-plaintext highlighter-rouge">GitHubCopilot</code> repo root (where <code class="language-plaintext highlighter-rouge">./instructions</code> exists).</td>
-    </tr>
-    <tr>
-      <td>ProjectRepo / –project</td>
-      <td>Required</td>
-      <td>Required</td>
-      <td>Path to the Project repo root (where <code class="language-plaintext highlighter-rouge">./github/instructions/shared</code> will be created).</td>
-    </tr>
-    <tr>
-      <td>-Force / –force</td>
-      <td>Optional</td>
-      <td>Optional</td>
-      <td>Replace existing destination (if mismatch or not link).</td>
-    </tr>
-    <tr>
-      <td>–relative</td>
-      <td>n/a</td>
-      <td>Optional</td>
-      <td>Create a relative symlink instead of an absolute one.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="usage-examples">Usage Examples</h2>
-
-<h3 id="windows-powershell">Windows (PowerShell)</h3>
-
-<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cd</span><span class="w"> </span><span class="nx">C:\git\GitHubCopilot\shared-instructions</span><span class="w">
-</span><span class="o">.</span><span class="n">/create-shared-link-windows.ps1</span><span class="w"> </span><span class="nt">-GitHubCopilotRepo</span><span class="w"> </span><span class="nx">C:\git\GitHubCopilot</span><span class="w"> </span><span class="nt">-ProjectRepo</span><span class="w"> </span><span class="nx">C:\git\MyProject</span><span class="w">
-
-</span><span class="c"># Force recreation</span><span class="w">
-</span><span class="o">.</span><span class="n">/create-shared-link-windows.ps1</span><span class="w"> </span><span class="nt">-GitHubCopilotRepo</span><span class="w"> </span><span class="o">..</span><span class="nx">\GitHubCopilot</span><span class="w"> </span><span class="nt">-ProjectRepo</span><span class="w"> </span><span class="nx">C:\git\MyProject</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-</span></code></pre></div></div>
-
-<h3 id="linux">Linux</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/git/GitHubCopilot/shared-instructions
-./create-shared-link-linux.sh <span class="nt">--copilot</span> ~/git/GitHubCopilot <span class="nt">--project</span> ~/git/MyProject
-
-<span class="c"># Relative link, force recreate</span>
-./create-shared-link-linux.sh <span class="nt">--copilot</span> ~/git/GitHubCopilot <span class="nt">--project</span> ~/git/MyProject <span class="nt">--relative</span> <span class="nt">--force</span>
-</code></pre></div></div>
-
-<h3 id="macos">macOS</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/git/GitHubCopilot/shared-instructions
-./create-shared-link-mac.sh <span class="nt">--copilot</span> ~/git/GitHubCopilot <span class="nt">--project</span> ~/git/MyProject
-</code></pre></div></div>
-
-<h2 id="idempotency">Idempotency</h2>
-
-<p>Running a script again will leave an already-correct link untouched (unless <code class="language-plaintext highlighter-rouge">--force</code> / <code class="language-plaintext highlighter-rouge">-Force</code> is specified) and will still ensure the <code class="language-plaintext highlighter-rouge">.gitignore</code> entry exists.</p>
-
-<h2 id="gitignore-handling">.gitignore Handling</h2>
-
-<p>The following entry is ensured inside the Project repo <code class="language-plaintext highlighter-rouge">.gitignore</code> (file created if missing):</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>github/instructions/shared/
-</code></pre></div></div>
-
-<h2 id="troubleshooting">Troubleshooting</h2>
-
-<ul>
-  <li>Destination exists and is not a link: Re-run with <code class="language-plaintext highlighter-rouge">-Force</code> / <code class="language-plaintext highlighter-rouge">--force</code>.</li>
-  <li>Permission errors on Windows: Ensure PowerShell is running with adequate permissions.</li>
-  <li>Symlink creation denied on Windows: Junctions should bypass typical symlink permission issues; if problems persist, check antivirus or corporate policy restrictions.</li>
-</ul>
-
-<h2 id="removal">Removal</h2>
-
-<p>Simply delete the destination path inside the Project repo:</p>
-
-<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Remove-Item</span><span class="w"> </span><span class="err">&lt;</span><span class="nx">ProjectRepo</span><span class="err">&gt;</span><span class="nx">\github\instructions\shared</span><span class="w"> </span><span class="nt">-Recurse</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-</span></code></pre></div></div>
-
-<p>or</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">rm</span> <span class="nt">-rf</span> &lt;ProjectRepo&gt;/github/instructions/shared
-</code></pre></div></div>
-
-<h2 id="maintenance">Maintenance</h2>
-
-<p>If new shared instruction files are added to <code class="language-plaintext highlighter-rouge">GitHubCopilot/instructions</code>, they become available to all linked projects immediately—no changes needed in individual projects.</p>
-
-<p>A small clarification on the maintenance. New shared instruction files added to <code class="language-plaintext highlighter-rouge">GitHubCopilot/instructions</code> will not automatically be available in all linked projects without any additional steps. They become available after a pull from the repo.</p>
-
-<h3 id="linux-script-create-shared-link-linuxsh">Linux Script (<code class="language-plaintext highlighter-rouge">create-shared-link-linux.sh</code>)</h3>
-
-<p>Here is the Linux script generated from the prompt:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/usr/bin/env bash</span>
-<span class="nb">set</span> <span class="nt">-euo</span> pipefail
-
-<span class="c"># Creates (or refreshes) a symbolic link in the Project repo pointing to the</span>
-<span class="c"># ./instructions folder in the GitHubCopilot repo.</span>
-<span class="c">#</span>
-<span class="c"># Destination (link created): &lt;ProjectRepo&gt;/github/instructions/shared</span>
-<span class="c"># Source (link target):       &lt;GitHubCopilotRepo&gt;/instructions</span>
-<span class="c">#</span>
-<span class="c"># Arguments:</span>
-<span class="c">#   --copilot &lt;path&gt;   Path to GitHubCopilot repo root (where ./instructions exists)</span>
-<span class="c">#   --project &lt;path&gt;   Path to Project repo root (where ./github/instructions/shared will be created)</span>
-<span class="c">#   --force            Remove and recreate existing destination if present</span>
-<span class="c">#   --relative         Create a relative symlink (default: absolute)</span>
-<span class="c">#</span>
-<span class="c"># Example:</span>
-<span class="c">#   ./create-shared-link-linux.sh --copilot ../GitHubCopilot --project . --relative</span>
-
-<span class="nb">set</span> +u
-<span class="nv">FORCE</span><span class="o">=</span>0
-<span class="nv">RELATIVE</span><span class="o">=</span>0
-<span class="nv">COPILOT</span><span class="o">=</span><span class="s2">""</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">""</span>
-<span class="nb">set</span> <span class="nt">-u</span>
-
-<span class="k">while</span> <span class="o">[[</span> <span class="nv">$# </span><span class="nt">-gt</span> 0 <span class="o">]]</span><span class="p">;</span> <span class="k">do
-  case</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span> <span class="k">in</span>
-    <span class="nt">--copilot</span><span class="p">)</span> <span class="nv">COPILOT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$2</span><span class="s2">"</span><span class="p">;</span> <span class="nb">shift </span>2<span class="p">;;</span>
-    <span class="nt">--project</span><span class="p">)</span> <span class="nv">PROJECT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$2</span><span class="s2">"</span><span class="p">;</span> <span class="nb">shift </span>2<span class="p">;;</span>
-    <span class="nt">--force</span><span class="p">)</span> <span class="nv">FORCE</span><span class="o">=</span>1<span class="p">;</span> <span class="nb">shift</span><span class="p">;;</span>
-    <span class="nt">--relative</span><span class="p">)</span> <span class="nv">RELATIVE</span><span class="o">=</span>1<span class="p">;</span> <span class="nb">shift</span><span class="p">;;</span>
-    <span class="nt">-h</span><span class="p">|</span><span class="nt">--help</span><span class="p">)</span>
-      <span class="nb">grep</span> <span class="s1">'^#'</span> <span class="s2">"</span><span class="nv">$0</span><span class="s2">"</span> | <span class="nb">sed</span> <span class="s1">'s/^# //'</span>
-      <span class="nb">exit </span>0
-      <span class="p">;;</span>
-    <span class="k">*</span><span class="p">)</span> <span class="nb">echo</span> <span class="s2">"Unknown arg: </span><span class="nv">$1</span><span class="s2">"</span> <span class="o">&gt;</span>&amp;2<span class="p">;</span> <span class="nb">exit </span>1<span class="p">;;</span>
-  <span class="k">esac</span>
-<span class="k">done
-
-if</span> <span class="o">[[</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">"</span> <span class="o">||</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nb">echo</span> <span class="s2">"--copilot and --project are required"</span> <span class="o">&gt;</span>&amp;2
-  <span class="nb">exit </span>1
-<span class="k">fi
-
-</span><span class="nv">COPILOT</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span><span class="si">)</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span><span class="si">)</span>
-
-<span class="nv">SOURCE</span><span class="o">=</span><span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">/instructions"</span>
-<span class="nv">DEST_PARENT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">/github/instructions"</span>
-<span class="nv">DEST</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">/shared"</span>
-
-<span class="k">if</span> <span class="o">[[</span> <span class="o">!</span> <span class="nt">-d</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nb">echo</span> <span class="s2">"Source instructions folder not found: </span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&gt;</span>&amp;2
-  <span class="nb">exit </span>1
-<span class="k">fi
-
-</span><span class="nb">mkdir</span> <span class="nt">-p</span> <span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">"</span>
-
-<span class="k">if</span> <span class="o">[[</span> <span class="nt">-e</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="o">!</span> <span class="nt">-L</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  if</span> <span class="o">[[</span> <span class="nv">$FORCE</span> <span class="nt">-eq</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then
-    </span><span class="nb">rm</span> <span class="nt">-rf</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span>
-  <span class="k">else
-    </span><span class="nb">echo</span> <span class="s2">"Destination exists and is not a symlink: </span><span class="nv">$DEST</span><span class="s2"> (use --force)"</span> <span class="o">&gt;</span>&amp;2
-    <span class="nb">exit </span>1
-  <span class="k">fi
-fi
-
-if</span> <span class="o">[[</span> <span class="nt">-L</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nv">TARGET</span><span class="o">=</span><span class="si">$(</span><span class="nb">readlink</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span><span class="si">)</span>
-  <span class="nv">ABS_TARGET</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="si">$(</span><span class="nb">dirname</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span><span class="si">)</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">cd</span> <span class="s2">"</span><span class="nv">$TARGET</span><span class="s2">"</span> 2&gt;/dev/null <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span> <span class="o">||</span> <span class="nb">true</span><span class="si">)</span>
-  <span class="k">if</span> <span class="o">[[</span> <span class="s2">"</span><span class="nv">$ABS_TARGET</span><span class="s2">"</span> <span class="o">==</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nv">$FORCE</span> <span class="nt">-ne</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then
-    </span><span class="nb">echo</span> <span class="s2">"Symlink already correct. Nothing to do."</span>
-    <span class="nb">exit </span>0
-  <span class="k">else
-    </span><span class="nb">rm</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span>
-  <span class="k">fi
-fi
-
-</span><span class="nv">LINK_TARGET</span><span class="o">=</span><span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span>
-<span class="k">if</span> <span class="o">[[</span> <span class="nv">$RELATIVE</span> <span class="nt">-eq</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
-  <span class="c"># compute relative path from DEST_PARENT to SOURCE</span>
-  <span class="nv">LINK_TARGET</span><span class="o">=</span><span class="si">$(</span>python3 - <span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&lt;&lt;</span><span class="sh">'</span><span class="no">PY</span><span class="sh">'
-import os,sys
-base=sys.argv[1]
-target=sys.argv[2]
-print(os.path.relpath(target, start=base))
-</span><span class="no">PY
-</span>  <span class="si">)</span>
-<span class="k">fi
-
-</span><span class="nb">ln</span> <span class="nt">-s</span> <span class="s2">"</span><span class="nv">$LINK_TARGET</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span>
-<span class="nb">echo</span> <span class="s2">"Created symlink: </span><span class="nv">$DEST</span><span class="s2"> -&gt; </span><span class="nv">$LINK_TARGET</span><span class="s2">"</span>
-
-<span class="c"># Ensure .gitignore entry</span>
-<span class="nv">GI</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">/.gitignore"</span>
-<span class="nv">ENTRY</span><span class="o">=</span><span class="s1">'github/instructions/shared/'</span>
-<span class="k">if</span> <span class="o">[[</span> <span class="nt">-f</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  if</span> <span class="o">!</span> <span class="nb">grep</span> <span class="nt">-Fxq</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span><span class="p">;</span> <span class="k">then
-    </span><span class="nb">printf</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">%s</span><span class="se">\n</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="o">&gt;&gt;</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span>
-    <span class="nb">echo</span> <span class="s2">"Appended to .gitignore: </span><span class="nv">$ENTRY</span><span class="s2">"</span>
-  <span class="k">fi
-else
-  </span><span class="nb">printf</span> <span class="s1">'# Added automatically to ignore shared instructions\n%s\n'</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="o">&gt;</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span>
-  <span class="nb">echo</span> <span class="s2">"Created .gitignore with entry: </span><span class="nv">$ENTRY</span><span class="s2">"</span>
-<span class="k">fi
-
-</span><span class="nb">echo</span> <span class="s2">"Done."</span>
-</code></pre></div></div>
-
-<p>This Bash script automates the creation or refreshing of a symbolic link in a project repository, pointing to an instructions folder in a separate GitHub Copilot repository. Its main purpose is to ensure that the project always has access to shared instructions, without duplicating files.</p>
-
-<p>The script accepts several command-line arguments: –copilot specifies the path to the GitHub Copilot repo, –project specifies the path to the project repo, –force allows overwriting an existing destination, and –relative creates a relative symlink instead of an absolute one. It validates that both source and destination paths are provided and resolves them to absolute paths for reliability.</p>
-
-<p>Before creating the symlink, the script checks if the source directory exists. It then prepares the destination parent directory. If the destination already exists and is not a symlink, it will only remove it if the –force flag is set. If the destination is a symlink but points to the wrong target, it will be replaced. The script can compute a relative path for the symlink using a short Python snippet if requested.</p>
-
-<p>After creating the symlink, the script ensures that the new link is ignored by Git by adding an entry to the project’s <code class="language-plaintext highlighter-rouge">.gitignore</code> file. If the file does not exist, it creates one with the appropriate entry. This prevents accidental commits of the shared instructions link. The script provides clear output messages for each major step, helping users understand what actions were taken.</p>
-
-<h3 id="mac-script-create-shared-link-macsh">Mac Script (<code class="language-plaintext highlighter-rouge">create-shared-link-mac.sh</code>)</h3>
-
-<p>Here is the macOS script generated from the prompt:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/usr/bin/env bash</span>
-<span class="c"># macOS version (identical logic to linux script; kept separate for clarity &amp; customization).</span>
-<span class="nb">set</span> <span class="nt">-euo</span> pipefail
-
-<span class="c"># See linux script for detailed commentary.</span>
-
-<span class="nb">set</span> +u
-<span class="nv">FORCE</span><span class="o">=</span>0
-<span class="nv">RELATIVE</span><span class="o">=</span>0
-<span class="nv">COPILOT</span><span class="o">=</span><span class="s2">""</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">""</span>
-<span class="nb">set</span> <span class="nt">-u</span>
-
-<span class="k">while</span> <span class="o">[[</span> <span class="nv">$# </span><span class="nt">-gt</span> 0 <span class="o">]]</span><span class="p">;</span> <span class="k">do
-  case</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span> <span class="k">in</span>
-    <span class="nt">--copilot</span><span class="p">)</span> <span class="nv">COPILOT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$2</span><span class="s2">"</span><span class="p">;</span> <span class="nb">shift </span>2<span class="p">;;</span>
-    <span class="nt">--project</span><span class="p">)</span> <span class="nv">PROJECT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$2</span><span class="s2">"</span><span class="p">;</span> <span class="nb">shift </span>2<span class="p">;;</span>
-    <span class="nt">--force</span><span class="p">)</span> <span class="nv">FORCE</span><span class="o">=</span>1<span class="p">;</span> <span class="nb">shift</span><span class="p">;;</span>
-    <span class="nt">--relative</span><span class="p">)</span> <span class="nv">RELATIVE</span><span class="o">=</span>1<span class="p">;</span> <span class="nb">shift</span><span class="p">;;</span>
-    <span class="nt">-h</span><span class="p">|</span><span class="nt">--help</span><span class="p">)</span>
-      <span class="nb">grep</span> <span class="s1">'^#'</span> <span class="s2">"</span><span class="nv">$0</span><span class="s2">"</span> | <span class="nb">sed</span> <span class="s1">'s/^# //'</span>
-      <span class="nb">exit </span>0
-      <span class="p">;;</span>
-    <span class="k">*</span><span class="p">)</span> <span class="nb">echo</span> <span class="s2">"Unknown arg: </span><span class="nv">$1</span><span class="s2">"</span> <span class="o">&gt;</span>&amp;2<span class="p">;</span> <span class="nb">exit </span>1<span class="p">;;</span>
-  <span class="k">esac</span>
-<span class="k">done
-
-if</span> <span class="o">[[</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">"</span> <span class="o">||</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nb">echo</span> <span class="s2">"--copilot and --project are required"</span> <span class="o">&gt;</span>&amp;2
-  <span class="nb">exit </span>1
-<span class="k">fi
-
-</span><span class="nv">COPILOT</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span><span class="si">)</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span><span class="si">)</span>
-<span class="nv">SOURCE</span><span class="o">=</span><span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">/instructions"</span>
-<span class="nv">DEST_PARENT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">/github/instructions"</span>
-<span class="nv">DEST</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">/shared"</span>
-
-<span class="o">[[</span> <span class="nt">-d</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">]]</span> <span class="o">||</span> <span class="o">{</span> <span class="nb">echo</span> <span class="s2">"Source instructions folder not found: </span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&gt;</span>&amp;2<span class="p">;</span> <span class="nb">exit </span>1<span class="p">;</span> <span class="o">}</span>
-<span class="nb">mkdir</span> <span class="nt">-p</span> <span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">"</span>
-
-<span class="k">if</span> <span class="o">[[</span> <span class="nt">-e</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="o">!</span> <span class="nt">-L</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  if</span> <span class="o">[[</span> <span class="nv">$FORCE</span> <span class="nt">-eq</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then </span><span class="nb">rm</span> <span class="nt">-rf</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span><span class="p">;</span> <span class="k">else </span><span class="nb">echo</span> <span class="s2">"Destination exists and is not a symlink (use --force): </span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">&gt;</span>&amp;2<span class="p">;</span> <span class="nb">exit </span>1<span class="p">;</span> <span class="k">fi
-fi
-
-if</span> <span class="o">[[</span> <span class="nt">-L</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nv">TARGET</span><span class="o">=</span><span class="si">$(</span><span class="nb">readlink</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span><span class="si">)</span>
-  <span class="nv">ABS_TARGET</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="si">$(</span><span class="nb">dirname</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span><span class="si">)</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">cd</span> <span class="s2">"</span><span class="nv">$TARGET</span><span class="s2">"</span> 2&gt;/dev/null <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span> <span class="o">||</span> <span class="nb">true</span><span class="si">)</span>
-  <span class="k">if</span> <span class="o">[[</span> <span class="s2">"</span><span class="nv">$ABS_TARGET</span><span class="s2">"</span> <span class="o">==</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nv">$FORCE</span> <span class="nt">-ne</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then
-    </span><span class="nb">echo</span> <span class="s2">"Symlink already correct. Nothing to do."</span><span class="p">;</span> <span class="nb">exit </span>0
-  <span class="k">else
-    </span><span class="nb">rm</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span>
-  <span class="k">fi
-fi
-
-</span><span class="nv">LINK_TARGET</span><span class="o">=</span><span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span>
-<span class="k">if</span> <span class="o">[[</span> <span class="nv">$RELATIVE</span> <span class="nt">-eq</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nv">LINK_TARGET</span><span class="o">=</span><span class="si">$(</span>python3 - <span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&lt;&lt;</span><span class="sh">'</span><span class="no">PY</span><span class="sh">'
-import os,sys
-print(os.path.relpath(sys.argv[2], start=sys.argv[1]))
-</span><span class="no">PY
-</span>  <span class="si">)</span>
-<span class="k">fi
-
-</span><span class="nb">ln</span> <span class="nt">-s</span> <span class="s2">"</span><span class="nv">$LINK_TARGET</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span>
-<span class="nb">echo</span> <span class="s2">"Created symlink: </span><span class="nv">$DEST</span><span class="s2"> -&gt; </span><span class="nv">$LINK_TARGET</span><span class="s2">"</span>
-
-<span class="nv">GI</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">/.gitignore"</span>
-<span class="nv">ENTRY</span><span class="o">=</span><span class="s1">'github/instructions/shared/'</span>
-<span class="k">if</span> <span class="o">[[</span> <span class="nt">-f</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nb">grep</span> <span class="nt">-Fxq</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span> <span class="o">||</span> <span class="o">{</span> <span class="nb">printf</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">%s</span><span class="se">\n</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="o">&gt;&gt;</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span><span class="p">;</span> <span class="nb">echo</span> <span class="s2">"Appended to .gitignore: </span><span class="nv">$ENTRY</span><span class="s2">"</span><span class="p">;</span> <span class="o">}</span>
-<span class="k">else
-  </span><span class="nb">printf</span> <span class="s1">'# Added automatically to ignore shared instructions\n%s\n'</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="o">&gt;</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span><span class="p">;</span> <span class="nb">echo</span> <span class="s2">"Created .gitignore with entry: </span><span class="nv">$ENTRY</span><span class="s2">"</span>
-<span class="k">fi
-
-</span><span class="nb">echo</span> <span class="s2">"Done."</span>
-</code></pre></div></div>
-
-<p>The macOS script and the Linux script are functionally identical. The logic, argument parsing, symlink creation, and .gitignore handling are the same. The scripts are kept separate for clarity and potential future customization, but currently, there are no substantive differences in their code or behavior.</p>
-
-<p>Key Points:</p>
-
-<ul>
-  <li>Both scripts use Bash and similar flags (set -euo pipefail).</li>
-  <li>Argument parsing and validation are identical.</li>
-  <li>Symlink creation and .gitignore updates follow the same steps.</li>
-  <li>The only difference is the comment at the top indicating the target OS.</li>
-</ul>
-
-<p><em>Gotcha:</em> If you need OS-specific behavior (e.g., handling macOS quirks), you can customize the macOS script independently without affecting the Linux version.</p>
-
-<h3 id="windows-script-create-shared-link-windowsps1">Windows Script (<code class="language-plaintext highlighter-rouge">create-shared-link-windows.ps1</code>)</h3>
-
-<p>Here is the Windows script generated from the prompt:</p>
-
-<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">&lt;#
-Creates (or refreshes) a junction in a Project repo pointing to the shared ./instructions folder
-inside this GitHubCopilot repo.
-
-Junction (target created): &lt;ProjectRepo&gt;\github\instructions\shared
-Points to (source):        &lt;GitHubCopilotRepo&gt;\instructions
-
-Parameters:
-  -GitHubCopilotRepo   Path to the GitHubCopilot repo root (where the ./instructions folder lives)
-  -ProjectRepo         Path to the target Project repo root (where ./github/instructions/shared will be created)
-  -Force               If specified, will remove any existing file/dir/junction at the destination
-
-Steps performed:
- 1. Validate paths
- 2. Ensure Project repo ./github/instructions parent folders exist
- 3. Ensure destination removed if Force (or is an existing junction to wrong target)
- 4. Create junction via New-Item -ItemType Junction
- 5. Add github/instructions/shared/ to Project .gitignore (create file if needed)
-
-Usage examples:
-  .\create-shared-link-windows.ps1 -GitHubCopilotRepo C:\git\GitHubCopilot -ProjectRepo C:\git\MyProject
-  .\create-shared-link-windows.ps1 -GitHubCopilotRepo ..\GitHubCopilot -ProjectRepo . -Force
-
-#&gt;</span><span class="w">
-</span><span class="p">[</span><span class="n">CmdletBinding</span><span class="p">(</span><span class="bp">SupportsShouldProcess</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="p">)]</span><span class="w">
-</span><span class="kr">param</span><span class="p">(</span><span class="w">
-    </span><span class="p">[</span><span class="n">Parameter</span><span class="p">(</span><span class="n">Mandatory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="p">)]</span><span class="w"> </span><span class="p">[</span><span class="n">string</span><span class="p">]</span><span class="w"> </span><span class="nv">$GitHubCopilotRepo</span><span class="p">,</span><span class="w">
-    </span><span class="p">[</span><span class="n">Parameter</span><span class="p">(</span><span class="n">Mandatory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="p">)]</span><span class="w"> </span><span class="p">[</span><span class="n">string</span><span class="p">]</span><span class="w"> </span><span class="nv">$ProjectRepo</span><span class="p">,</span><span class="w">
-    </span><span class="p">[</span><span class="n">switch</span><span class="p">]</span><span class="w"> </span><span class="nv">$Force</span><span class="w">
-</span><span class="p">)</span><span class="w">
-
-</span><span class="n">Set-StrictMode</span><span class="w"> </span><span class="nt">-Version</span><span class="w"> </span><span class="nx">Latest</span><span class="w">
-</span><span class="bp">$Error</span><span class="n">ActionPreference</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'Stop'</span><span class="w">
-
-</span><span class="kr">function</span><span class="w"> </span><span class="nf">Resolve-FullPath</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="kr">param</span><span class="p">([</span><span class="n">string</span><span class="p">]</span><span class="nv">$Path</span><span class="p">)</span><span class="w">
-    </span><span class="kr">return</span><span class="w"> </span><span class="p">([</span><span class="n">IO.Path</span><span class="p">]::</span><span class="n">GetFullPath</span><span class="p">((</span><span class="n">Resolve-Path</span><span class="w"> </span><span class="nt">-LiteralPath</span><span class="w"> </span><span class="nv">$Path</span><span class="p">)</span><span class="o">.</span><span class="nf">Path</span><span class="p">))</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="kr">function</span><span class="w"> </span><span class="nf">Add-GitIgnoreEntry</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="kr">param</span><span class="p">(</span><span class="w">
-        </span><span class="p">[</span><span class="n">string</span><span class="p">]</span><span class="nv">$RepoRoot</span><span class="p">,</span><span class="w">
-        </span><span class="p">[</span><span class="n">string</span><span class="p">]</span><span class="nv">$RelativeEntry</span><span class="w">
-    </span><span class="p">)</span><span class="w">
-    </span><span class="nv">$gitIgnorePath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Join-Path</span><span class="w"> </span><span class="nv">$RepoRoot</span><span class="w"> </span><span class="s1">'.gitignore'</span><span class="w">
-    </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="o">-not</span><span class="w"> </span><span class="p">(</span><span class="n">Test-Path</span><span class="w"> </span><span class="nv">$gitIgnorePath</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="s2">"# Added automatically to ignore shared instructions</span><span class="se">`n</span><span class="nv">$RelativeEntry</span><span class="se">`n</span><span class="s2">"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">Out-File</span><span class="w"> </span><span class="nt">-FilePath</span><span class="w"> </span><span class="nv">$gitIgnorePath</span><span class="w"> </span><span class="nt">-Encoding</span><span class="w"> </span><span class="nx">utf8</span><span class="w"> </span><span class="nt">-NoNewline</span><span class="w">
-        </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Created .gitignore and added entry: </span><span class="nv">$RelativeEntry</span><span class="s2">"</span><span class="w">
-        </span><span class="kr">return</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-    </span><span class="nv">$content</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Get-Content</span><span class="w"> </span><span class="nv">$gitIgnorePath</span><span class="w"> </span><span class="nt">-Raw</span><span class="w">
-    </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$content</span><span class="w"> </span><span class="o">-notmatch</span><span class="w"> </span><span class="p">[</span><span class="n">regex</span><span class="p">]::</span><span class="n">Escape</span><span class="p">(</span><span class="nv">$RelativeEntry</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="n">Add-Content</span><span class="w"> </span><span class="nt">-Path</span><span class="w"> </span><span class="nv">$gitIgnorePath</span><span class="w"> </span><span class="nt">-Value</span><span class="w"> </span><span class="s2">"</span><span class="se">`n</span><span class="nv">$RelativeEntry</span><span class="s2">"</span><span class="w"> </span><span class="nt">-Encoding</span><span class="w"> </span><span class="nx">utf8</span><span class="w">
-        </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Appended to .gitignore: </span><span class="nv">$RelativeEntry</span><span class="s2">"</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-    </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">".gitignore already contains entry."</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="c"># Resolve absolute paths</span><span class="w">
-</span><span class="nv">$gitHubCopilotRoot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Resolve-FullPath</span><span class="w"> </span><span class="nv">$GitHubCopilotRepo</span><span class="w">
-</span><span class="nv">$projectRoot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Resolve-FullPath</span><span class="w"> </span><span class="nv">$ProjectRepo</span><span class="w">
-
-</span><span class="nv">$source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Join-Path</span><span class="w"> </span><span class="nv">$gitHubCopilotRoot</span><span class="w"> </span><span class="s1">'instructions'</span><span class="w">
-</span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="o">-not</span><span class="w"> </span><span class="p">(</span><span class="n">Test-Path</span><span class="w"> </span><span class="nv">$source</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">throw</span><span class="w"> </span><span class="s2">"Source instructions folder not found: </span><span class="nv">$source</span><span class="s2">"</span><span class="w"> </span><span class="p">}</span><span class="w">
-
-</span><span class="nv">$destParent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Join-Path</span><span class="w"> </span><span class="nv">$projectRoot</span><span class="w"> </span><span class="s1">'github/instructions'</span><span class="w">
-</span><span class="nv">$dest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Join-Path</span><span class="w"> </span><span class="nv">$destParent</span><span class="w"> </span><span class="s1">'shared'</span><span class="w">
-
-</span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="o">-not</span><span class="w"> </span><span class="p">(</span><span class="n">Test-Path</span><span class="w"> </span><span class="nv">$destParent</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Creating parent directories: </span><span class="nv">$destParent</span><span class="s2">"</span><span class="w">
-    </span><span class="n">New-Item</span><span class="w"> </span><span class="nt">-ItemType</span><span class="w"> </span><span class="nx">Directory</span><span class="w"> </span><span class="nt">-Path</span><span class="w"> </span><span class="nv">$destParent</span><span class="w"> </span><span class="nt">-Force</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">Out-Null</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="kr">function</span><span class="w"> </span><span class="nf">Remove-ExistingDestination</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">Test-Path</span><span class="w"> </span><span class="nv">$dest</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nv">$item</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Get-Item</span><span class="w"> </span><span class="nt">-LiteralPath</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-        </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$item</span><span class="o">.</span><span class="nf">Attributes</span><span class="w"> </span><span class="o">-band</span><span class="w"> </span><span class="p">[</span><span class="n">IO.FileAttributes</span><span class="p">]::</span><span class="n">ReparsePoint</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Removing existing junction: </span><span class="nv">$dest</span><span class="s2">"</span><span class="w">
-            </span><span class="n">Remove-Item</span><span class="w"> </span><span class="nt">-LiteralPath</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-        </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$Force</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-                </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Removing existing non-junction item at destination due to -Force: </span><span class="nv">$dest</span><span class="s2">"</span><span class="w">
-                </span><span class="n">Remove-Item</span><span class="w"> </span><span class="nt">-LiteralPath</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nt">-Recurse</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-            </span><span class="p">}</span><span class="w">
-            </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w">
-                </span><span class="kr">throw</span><span class="w"> </span><span class="s2">"Destination exists and is not a junction. Use -Force to remove: </span><span class="nv">$dest</span><span class="s2">"</span><span class="w">
-            </span><span class="p">}</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">Test-Path</span><span class="w"> </span><span class="nv">$dest</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="nv">$existing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Get-Item</span><span class="w"> </span><span class="nt">-LiteralPath</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-    </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$existing</span><span class="o">.</span><span class="nf">Attributes</span><span class="w"> </span><span class="o">-band</span><span class="w"> </span><span class="p">[</span><span class="n">IO.FileAttributes</span><span class="p">]::</span><span class="n">ReparsePoint</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="c"># Try to read target (fsutil works on admin shells; fallback simply recreate if Force)</span><span class="w">
-        </span><span class="nv">$needsReplace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$false</span><span class="w">
-        </span><span class="kr">try</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="nv">$targetInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">fsutil</span><span class="w"> </span><span class="nx">reparsepoint</span><span class="w"> </span><span class="nx">query</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nx">2</span><span class="err">&gt;</span><span class="bp">$null</span><span class="p">)</span><span class="w">
-            </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$targetInfo</span><span class="w"> </span><span class="o">-match</span><span class="w"> </span><span class="s1">'Print Name: (?&lt;t&gt;.+)$'</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-                </span><span class="nv">$currentTarget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$Matches</span><span class="p">[</span><span class="s1">'t'</span><span class="p">]</span><span class="w">
-                </span><span class="kr">if</span><span class="w"> </span><span class="p">((</span><span class="n">Resolve-FullPath</span><span class="w"> </span><span class="nv">$currentTarget</span><span class="p">)</span><span class="w"> </span><span class="o">-ne</span><span class="w"> </span><span class="nv">$source</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">$needsReplace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="w"> </span><span class="p">}</span><span class="w">
-            </span><span class="p">}</span><span class="w">
-            </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">$needsReplace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="w"> </span><span class="p">}</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-        </span><span class="kr">catch</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">$needsReplace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="w"> </span><span class="p">}</span><span class="w">
-        </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$needsReplace</span><span class="w"> </span><span class="o">-or</span><span class="w"> </span><span class="nv">$Force</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="n">Remove-ExistingDestination</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-        </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Junction already points to desired source. Nothing to do."</span><span class="w"> </span><span class="nt">-ForegroundColor</span><span class="w"> </span><span class="nx">Green</span><span class="w">
-            </span><span class="n">Add-GitIgnoreEntry</span><span class="w"> </span><span class="nt">-RepoRoot</span><span class="w"> </span><span class="nv">$projectRoot</span><span class="w"> </span><span class="nt">-RelativeEntry</span><span class="w"> </span><span class="s1">'github/instructions/shared/'</span><span class="w">
-            </span><span class="kr">return</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-    </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="n">Remove-ExistingDestination</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Creating junction: </span><span class="nv">$dest</span><span class="s2"> -&gt; </span><span class="nv">$source</span><span class="s2">"</span><span class="w">
-</span><span class="n">New-Item</span><span class="w"> </span><span class="nt">-ItemType</span><span class="w"> </span><span class="nx">Junction</span><span class="w"> </span><span class="nt">-Path</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nt">-Target</span><span class="w"> </span><span class="nv">$source</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">Out-Null</span><span class="w">
-</span><span class="nx">Write-Host</span><span class="w"> </span><span class="s2">"Junction created successfully."</span><span class="w"> </span><span class="nt">-ForegroundColor</span><span class="w"> </span><span class="nx">Green</span><span class="w">
-
-</span><span class="n">Add-GitIgnoreEntry</span><span class="w"> </span><span class="nt">-RepoRoot</span><span class="w"> </span><span class="nv">$projectRoot</span><span class="w"> </span><span class="nt">-RelativeEntry</span><span class="w"> </span><span class="s1">'github/instructions/shared/'</span><span class="w">
-
-</span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Done."</span><span class="w">
-</span></code></pre></div></div>
-
-<p>The Windows script (<code class="language-plaintext highlighter-rouge">create-shared-link-windows.ps1</code>) and the MacOS script (<code class="language-plaintext highlighter-rouge">create-shared-link-macos.sh</code>) both create a link from a project repo to a shared instructions folder, but they differ in several key ways aside from language and platform-specific commands.</p>
-
-<h4 id="link-type">Link Type</h4>
-
-<p>Windows: Creates a NTFS junction using PowerShell’s New-Item -ItemType Junction.
-MacOS: Creates a symbolic link using <code class="language-plaintext highlighter-rouge">ln -s</code> in Bash.</p>
-
-<h4 id="existing-destination-handling">Existing Destination Handling</h4>
-
-<p>Windows: Checks if the destination is a junction or another file type, removes or throws errors accordingly, supports a <code class="language-plaintext highlighter-rouge">-Force</code> flag.
-MacOS: Removes existing destination with <code class="language-plaintext highlighter-rouge">rm -rf</code> if the <code class="language-plaintext highlighter-rouge">--force</code> flag is set.</p>
-
-<h2 id="summary">Summary</h2>
-
-<p>The Windows script is more complex due to NTFS junctions and PowerShell features, while the MacOS script is simpler, relying on Unix symlinks and shell commands. Both achieve the same goal but are tailored to their respective operating systems.</p>
-
-<p>Running the scripts requires appropriate permissions, especially for creating links and modifying directories. Users should ensure they have the necessary rights to execute these scripts in their environments.</p>
-
-<p>This solution provides a simple way of sharing instruction files across multiple projects without duplication, ensuring consistency and ease of maintenance.</p>
-
-<h2 id="feedback-loop">Feedback Loop</h2>
-
-<p>Feedback is always welcome. Please direct it to <a href="mailto:AIP@pdata.com" target="_blank">AIP@pdata.com</a></p>
-
-<h3 id="disclaimer">Disclaimer</h3>
-
-<p>AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul.</p>
-
-<p>Prompts:</p>
-
-<ul>
-  <li>Write a two paragraph introduction to GitHub copilot instruction files</li>
-  <li>/explain</li>
-  <li>Write a paragraph describing where instruction files can be located and the pros and cons of each location.</li>
-  <li>What is a symlink and junction point?</li>
-  <li>Describe the differences between the Linux script and the maCOS script</li>
-</ul>
-
-<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/SIWT">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="GitHub" /><category term="Copilot" /><category term="DevOps" /><category term="Tips" /><summary type="html"><![CDATA[When working with GitHub Copilot across multiple projects, you’ll quickly face a common challenge: how do you share generic instructions (ie. coding standards and best practices) with team members working on different projects without duplicating instruction files in every repository? This post walks you through prompting Copilot to implement a solution leveraging symlinks and junction points.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-08-30/header-SIWT.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-08-30/header-SIWT.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Modes of Chatting with GitHub Copilot</title><link href="https://blog.pdata.com/GHCPCM/" rel="alternate" type="text/html" title="Modes of Chatting with GitHub Copilot" /><published>2025-07-30T00:00:00-07:00</published><updated>2025-07-30T00:00:00-07:00</updated><id>https://blog.pdata.com/GHCPCM</id><content type="html" xml:base="https://blog.pdata.com/GHCPCM/"><![CDATA[<p>In this post I’ll explore GitHub Copilot chat modes. I’ll cover the built-in chat modes and custom chat modes. We’ll dive into custom chat modes and look at some examples.</p>
-
-<p>To be clear, when I reference Copilot, I’m referring to GitHub Copilot, not any other Microsoft Copilot-branded AI.</p>
-
-<!--more-->
-
-<p><img src="/assets/images/2025-07-30/header-GHCPCM.jpg" alt="Header Image" /></p>
-
-<p>At first, Ask was the only Copilot chat mode. Ask mode only responds to prompts. Edit mode allowed the AI to change files. Agent mode allows Copilot to plan and execute work on it’s own. In addition to these built-in chat modes, Copilot also supports custom chat modes which allow you to focus Copilot on specific tasks. You can have as many custom chat mode files as you like in a project. I’ll discuss the cost of using custom chat modes later in the post.</p>
-
-<h2 id="github-copilot-chat-modes">GitHub Copilot Chat Modes</h2>
-
-<p>These four GitHub Copilot modes in VS Code each serve distinct purposes, and knowing when to use which can dramatically streamline your coding and automation tasks:</p>
-
-<h3 id="-ask-modequick-qa-and-conceptual-guidance">🗣 Ask Mode–Quick Q&amp;A and Conceptual Guidance</h3>
-
-<ul>
-  <li>Purpose: Conversational support for understanding code, tech concepts, or brainstorming.</li>
-  <li>Behavior: Responds to natural language questions using context from your current file or selection.</li>
-  <li>Use cases:
-    <ul>
-      <li>“Explain this PowerShell function.”</li>
-      <li>“What’s the best way to implement RBAC in Azure SQL?”</li>
-      <li>“Give me three ways to optimize this loop.”</li>
-    </ul>
-  </li>
-  <li>Control: No code changes—just suggestions and explanations.</li>
-  <li>Best for: Learning, debugging, and quick clarifications.</li>
-</ul>
-
-<h3 id="️-edit-modetargeted-code-changes-with-review-control">✍️ Edit Mode–Targeted Code Changes with Review Control</h3>
-
-<ul>
-  <li>Purpose: Apply inline edits across selected files based on your instructions.</li>
-  <li>Behavior: You choose the files and describe the change; Copilot proposes edits you can accept or reject.</li>
-  <li>Use cases:
-    <ul>
-      <li>“Refactor this to use async/await.”</li>
-      <li>“Add error handling to this script.”</li>
-      <li>“Write unit tests for this class.”</li>
-    </ul>
-  </li>
-  <li>Control: Full review before applying changes.</li>
-  <li>Best for: Surgical updates, refactoring, and enforcing coding standards.</li>
-</ul>
-
-<h3 id="-agent-modeautonomous-multi-step-execution">🤖 Agent Mode–Autonomous Multi-Step Execution</h3>
-
-<ul>
-  <li>Purpose: Copilot acts as a coding agent, planning and executing complex tasks across your workspace.</li>
-  <li>Behavior: Analyzes your codebase, runs terminal commands, edits files, and iterates until the task is complete.</li>
-  <li>Use cases:
-    <ul>
-      <li>“Migrate this app from React to Vue.”</li>
-      <li>“Audit all scripts for deprecated cmdlets.”</li>
-      <li>“Build a PowerShell script to automate Azure SQL import with error handling.”</li>
-    </ul>
-  </li>
-  <li>Control: Edits are applied automatically, but risky commands require approval.</li>
-  <li>Best for: Large-scale automation, scaffolding, and multi-file refactoring.</li>
-</ul>
-
-<h3 id="-️custom-chat-modepersona-based-ai-behavior">🛠 ️Custom Chat Mode–Persona-Based AI Behavior</h3>
-
-<ul>
-  <li>Purpose: Define reusable modes with tailored instructions, tools, and model preferences.</li>
-  <li>Behavior: You create <code class="language-plaintext highlighter-rouge">.chatmode.md</code> files that shape Copilot’s tone, task focus, and tool access.</li>
-  <li>Use cases:
-    <ul>
-      <li>“Security Scout” mode for vulnerability checks.</li>
-      <li>“Clean Code” mode for refactoring with style guides.</li>
-      <li>“PowerShell Admin” mode for scripting and automation.</li>
-    </ul>
-  </li>
-  <li>Control: You define the persona, tools, and scope.</li>
-  <li>Best for: Consistency across teams, specialized workflows, and repeatable tasks.</li>
-</ul>
-
-<p>Looking at the use cases, you can see that there is a progression of increasingly complex use cases. There is also a progression of cost that you should understand. More on that later. Try to align your uses of Copilot with the mode that is best for your case.</p>
-
-<h3 id="-github-copilot-summary-table">🔍 GitHub Copilot Summary Table</h3>
-
-<p>Here are the differences between the modes at a glance.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Mode</th>
-      <th>Scope</th>
-      <th>Code Changes</th>
-      <th>Best For</th>
-      <th>Control Level</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Ask</td>
-      <td>Current file</td>
-      <td>❌ No</td>
-      <td>Learning, Q&amp;A, brainstorming</td>
-      <td>Full user control</td>
-    </tr>
-    <tr>
-      <td>Edit</td>
-      <td>Selected files</td>
-      <td>✅ Proposed</td>
-      <td>Refactoring, bug fixes, test writing</td>
-      <td>Review required</td>
-    </tr>
-    <tr>
-      <td>Agent</td>
-      <td>Entire workspace</td>
-      <td>✅ Automatic</td>
-      <td>Automation, scaffolding, multi-step</td>
-      <td>Semi-autonomous</td>
-    </tr>
-    <tr>
-      <td>Custom Chat</td>
-      <td>User-defined</td>
-      <td>✅/❌ Varies</td>
-      <td>Specialized tasks, team consistency</td>
-      <td>Fully customizable</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Do what you can to align your use of Copilot with the appropriate mode.</p>
-
-<p>Let’s take a deeper dive into custom chat modes.</p>
-
-<h2 id="-what-is-a-custom-chat-mode">🔧 What Is a Custom Chat Mode?</h2>
-
-<p>It’s essentially a user-defined configuration file (<code class="language-plaintext highlighter-rouge">chatmode.md</code>) that tells Copilot how to think, act, and respond. For example, you can create modes tailored for:</p>
-
-<ul>
-  <li>🔄 Script refactoring with PowerShell best practices</li>
-  <li>🛡️ Compliance audits for RBAC in Azure SQL</li>
-  <li>📚 Clean documentation with markdown linting</li>
-</ul>
-
-<p>Pretty much any repeated workflow or process is a good candidate for a custom chat mode.</p>
-
-<p>Let’s walk through the steps for creating a custom chat mode.</p>
-
-<h2 id="-step-by-step-creating-your-custom-chat-mode">🪜 Step-by-Step: Creating Your Custom Chat Mode</h2>
-
-<ol>
-  <li>Create a <code class="language-plaintext highlighter-rouge">chatmode.md</code> file.</li>
-</ol>
-
-<ul>
-  <li>Open a new file in your repo or workspace and name it <code class="language-plaintext highlighter-rouge">chatmode.md</code>.</li>
-</ul>
-
-<ol>
-  <li>Define the mode’s identity.</li>
-</ol>
-
-<ul>
-  <li>Start with a name and focus area, for example:</li>
-</ul>
-
-<pre><code class="language-txt"># Mode Name: PowerShell Admin
-## Focus: Automation, CLI consistency, error handling
-</code></pre>
-
-<p>The Mode Name will show up in the Set Mode drop-down in the VS Code Copilot Chat UI.</p>
-
-<p><img src="../assets/images/2025-07-30/Custome-Chat-Modes-In-Copilot-UI.png" alt="Custom Chat Modes as shown in the Copilot UI" /></p>
-
-<h3 id="-what-the-chat-mode-focus-does">🎯 What the Chat Mode Focus Does</h3>
-
-<ul>
-  <li>Defines the mode’s core purpose—e.g., automation, refactoring, auditing.</li>
-  <li>Guides Copilot’s response strategy—what to prioritize, what to avoid.</li>
-  <li>Improves consistency—especially when switching between modes or sharing with teammates.</li>
-</ul>
-
-<h4 id="-how-copilot-uses-focus">🧠 How Copilot Uses Focus</h4>
-
-<p>When you load a mode with a Focus section, Copilot interprets it as a high-level directive. For example:</p>
-
-<pre><code class="language-txt">## Focus
-- Automation, error handling, and CLI consistency
-</code></pre>
-
-<p>This tells Copilot to:</p>
-
-<ul>
-  <li>Prefer modular PowerShell scripts</li>
-  <li>Emphasize robust error handling</li>
-  <li>Avoid speculative or overly creative suggestions</li>
-</ul>
-
-<h4 id="-focus-best-practices">🧩 Focus Best Practices</h4>
-
-<p>Here a some practices to keep in mind when setting focus.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Tip</th>
-      <th>Why It Helps</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Use short, clear phrases</td>
-      <td>Keeps the mode readable and scannable</td>
-    </tr>
-    <tr>
-      <td>Align with tools and instructions</td>
-      <td>Ensures coherence across the mode</td>
-    </tr>
-    <tr>
-      <td>Avoid vague goals like “be helpful”</td>
-      <td>Specificity improves output quality</td>
-    </tr>
-  </tbody>
-</table>
-
-<h4 id="-example-comparison">🔍 Example Comparison</h4>
-
-<p>Here are some example foci and how the foci would affect Copilot’s behavior.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Mode Name</th>
-      <th>Focus</th>
-      <th>Resulting Behavior</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>PowerShell Admin</td>
-      <td>Automation, error handling</td>
-      <td>Precise CLI scripts with retries and logging</td>
-    </tr>
-    <tr>
-      <td>Clean Code</td>
-      <td>Refactoring, readability</td>
-      <td>Style-guide compliant suggestions</td>
-    </tr>
-    <tr>
-      <td>Security Scout</td>
-      <td>Vulnerability checks</td>
-      <td>Highlights insecure patterns and recommends fixes</td>
-    </tr>
-  </tbody>
-</table>
-
-<ol>
-  <li>Specify instructions and behavior.</li>
-</ol>
-
-<ul>
-  <li>Set tone, priorities, and response style:</li>
-</ul>
-
-<pre><code class="language-txt">- Be concise, use advanced scripting patterns
-- Always propose modular solutions
-- Prefer `$env:` for environment variables
-</code></pre>
-
-<ol>
-  <li>List the tools Copilot can use.</li>
-</ol>
-
-<ul>
-  <li>Map out relevant tools the mode should invoke:</li>
-</ul>
-
-<pre><code class="language-txt">tools:
-  - PowerShell CLI
-  - Azure SQL API
-  - Markdown Linter
-</code></pre>
-
-<ol>
-  <li>Set model preferences (optional).</li>
-</ol>
-
-<ul>
-  <li>You can guide the underlying model with instructions like:</li>
-</ul>
-
-<pre><code class="language-txt">model:
-  temperature: 0.4  # Less randomness, more precision
-  style: structured
-</code></pre>
-
-<ol>
-  <li>Save, load, and test.</li>
-</ol>
-
-<ul>
-  <li>In VS Code, activate the mode by opening the chat interface and selecting your saved <code class="language-plaintext highlighter-rouge">chatmode.md</code>. Try commands like:</li>
-</ul>
-
-<pre><code class="language-txt">- "Build a CLI script for importing Azure SQL with retry logic."
-- "Audit PowerShell scripts for deprecated cmdlets."
-</code></pre>
-
-<h3 id="-pro-tip-for-modular-workflow">🎯 Pro Tip for Modular Workflow</h3>
-
-<p>Use multiple modes for different task scopes:</p>
-
-<ul>
-  <li>One for RBAC auditing</li>
-  <li>One for documentation linting</li>
-  <li>One for script automation</li>
-</ul>
-
-<p>You can switch between them or embed them in your MCP configs for seamless productivity.</p>
-
-<h2 id="managing-multiple-custom-chat-modes">Managing Multiple Custom Chat Modes</h2>
-
-<p>Managing multiple custom chat mode files is a smart way to modularize your workflows. Here’s how to keep things clean, scalable, and switchable:</p>
-
-<p>🗂️ 1. Organize your chat mode files.</p>
-
-<ul>
-  <li>Create a dedicated folder.</li>
-  <li>Use <code class="language-plaintext highlighter-rouge">.github/chatmodes/</code> in your workspace to store all your <code class="language-plaintext highlighter-rouge">*.chatmode.md</code> files.</li>
-  <li>Example structure:</li>
-</ul>
-
-<pre><code class="language-txt">.github/
-  chatmodes/
-    powershell-admin.chatmode.md
-    security-scout.chatmode.md
-    clean-code.chatmode.md
-</code></pre>
-
-<p>📦 2. Use clear naming conventions.</p>
-
-<ul>
-  <li>Prefix by domain or task: <code class="language-plaintext highlighter-rouge">rbac-audit.chatmode.md</code>, <code class="language-plaintext highlighter-rouge">markdown-linter.chatmode.md</code>.</li>
-  <li>Helps with discoverability and switching modes quickly.</li>
-</ul>
-
-<h2 id="-switching-between-modes-in-vs-code">🔄 Switching Between Modes in VS Code</h2>
-
-<ul>
-  <li>Open the Copilot Chat panel.</li>
-  <li>Click the mode dropdown at the bottom.</li>
-  <li>Select the desired mode from your saved list.</li>
-  <li>Each mode loads its own tools, instructions, and model preferences.</li>
-</ul>
-
-<h2 id="-pro-tips-for-managing-many-modes">🧠 Pro Tips for Managing Many Modes</h2>
-
-<p>Here are some tips on managing multiple custom chat mode files.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Strategy</th>
-      <th>Benefit</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Tag modes by team or task</td>
-      <td>Easier collaboration and onboarding</td>
-    </tr>
-    <tr>
-      <td>Use shared repo for team-wide modes</td>
-      <td>Centralized updates and version control</td>
-    </tr>
-    <tr>
-      <td>Document each mode’s purpose in comments</td>
-      <td>Faster understanding and maintenance</td>
-    </tr>
-    <tr>
-      <td>Group modes by folder if needed</td>
-      <td>e.g., chatmodes/security/, chatmodes/automation/</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3 id="-bonus-mcp-integration">🧩 Bonus: MCP Integration</h3>
-
-<p>If you’re using MCP instruction files, you can reference specific chat modes within those workflows—making it seamless to switch personas mid-task.</p>
-
-<h2 id="custom-chat-mode-examples">Custom Chat Mode Examples</h2>
-
-<p>Here are three examples of custom chat modes.</p>
-
-<h3 id="sample-custom-chat-mode-files">Sample Custom Chat Mode Files</h3>
-
-<p>🧮 1. Structured Git coach for branch discipline.</p>
-
-<ul>
-  <li>Great for repositories with complex Git workflows, rebasing policies, and automation gates.</li>
-</ul>
-
-<pre><code class="language-txt"># Name: Git Flow Strategist
-# Focus: Branching policies, merge style enforcement, and CI/CD hygiene
-# Temperature: 0.3
-# Style: Confident, pragmatic, and slightly opinionated
-
-You help developers navigate complex Git workflows with a focus on clean history and team compliance. You enforce rebase discipline, squash merge standards, and CI policy triggers.
-
-## Capabilities
-- Compare merge strategies and visualize commit impacts
-- Suggest rebase workflows for feature branches
-- Identify potential CI/CD integration gaps
-- Recommend automated checks in GitHub Actions
-
-## Expectations
-When contributors ask about Git:
-- Always provide examples or diagrams showing branching logic
-- Explain tradeoffs clearly and offer team-friendly defaults
-- Respect security and traceability concerns across environments
-</code></pre>
-
-<p>This mode specializes in guiding developers through advanced Git workflows by promoting best practices that maintain clean commit history and ensure team-wide compliance. When supporting contributors, it responds with visual branching examples, clearly outlines tradeoffs in workflow decisions, and tailors guidance to uphold both security standards and traceability across development environments.
-Note the temperature preference that instructs the NLM to be more precise.</p>
-
-<h3 id="️-common-model-preferences">⚙️ Common Model Preferences</h3>
-
-<p>Here is a list of the common model preferences:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Preference</th>
-      <th>Description</th>
-      <th>Typical Use</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Temperature</td>
-      <td>Controls randomness and creativity</td>
-      <td>Lower for precision, higher for brainstorming</td>
-    </tr>
-    <tr>
-      <td>Style</td>
-      <td>Shapes formatting and tone</td>
-      <td>Structured, concise, analytical, etc.</td>
-    </tr>
-    <tr>
-      <td>Top-p (nucleus sampling)</td>
-      <td>Limits token selection to top probability mass</td>
-      <td>Fine-tunes diversity vs. focus</td>
-    </tr>
-    <tr>
-      <td>Frequency penalty</td>
-      <td>Reduces repetition of common tokens</td>
-      <td>Helps avoid redundant output</td>
-    </tr>
-    <tr>
-      <td>Presence penalty</td>
-      <td>Encourages introducing new topics</td>
-      <td>Useful for ideation or exploration</td>
-    </tr>
-    <tr>
-      <td>Max tokens</td>
-      <td>Sets response length limit</td>
-      <td>Prevents overly long or short replies</td>
-    </tr>
-    <tr>
-      <td>Stop sequences</td>
-      <td>Defines where generation should halt</td>
-      <td>Useful for code blocks or markdown</td>
-    </tr>
-    <tr>
-      <td>Tool access</td>
-      <td>Enables specific tools (e.g., CLI, linter)</td>
-      <td>Tailors responses to your workflow</td>
-    </tr>
-    <tr>
-      <td>Persona instructions</td>
-      <td>Guides tone, behavior, and task focus</td>
-      <td>Core to custom chat modes</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>✍️ 2. Markdown doc optimizer with Mermaid Fluenc
-Perfect for technical writing and diagram-rich README generation.</p>
-
-<pre><code class="language-txt"># Name: Doc Design Architect
-# Focus: Technical documentation, diagramming with Mermaid, and readability improvements
-# Temperature: 0.4
-# Style: Friendly, precise, and formatting-conscious
-
-You structure documentation to maximize clarity and impact. You incorporate Mermaid diagrams, annotate flows, and guide contributors on best practices for accessibility and skimmability.
-
-## Capabilities
-- Generate diagrams from architecture or workflow inputs
-- Refactor markdown for better navigation and scanning
-- Suggest formatting changes to improve comprehension
-
-## Expectations
-When asked to document code:
-- Break content into sections with proper headers and lists
-- Use diagrams to illustrate complex concepts
-- Annotate Mermaid output and flag ambiguity in user stories
-</code></pre>
-
-<p>This mode specializes in crafting technical documentation that is both visually structured and easy to absorb, combining markdown precision with fluent Mermaid diagramming. It continuously refines formatting for accessibility and readability, flagging vague areas and guiding contributors toward concise, user-friendly documentation aligned with best practices.
-Note that this mode is asking for less precision and is requesting the response be friendly, precise, and formatting-conscious.</p>
-
-<p>🔐 3. Playwright Compliance Guardian for secure automation</p>
-
-<p>This example focuses Copilot on assisting with securing test automation.</p>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh"># Name: Secure Test Engineer</span>
-
-<span class="gh"># Focus: Playwright MCP automation with risk mitigation and CI pipeline integration</span>
-
-<span class="gh"># Temperature: 0.2</span>
-
-<span class="gh"># Style: Direct, risk-aware, and methodical</span>
-
-You evaluate and strengthen Playwright test scripts for security, isolation, and CI traceability. Your responses prioritize reliability, scalability, and audit compliance.
-
-<span class="gu">## Capabilities</span>
-<span class="p">
--</span> Review selectors and identify flakiness
-<span class="p">-</span> Recommend secure test design and data handling
-<span class="p">-</span> Suggest CI/CD improvements with annotated YAML snippets
-
-<span class="gu">## Expectations</span>
-
-When reviewing test automation:
-<span class="p">
--</span> Flag potential injection risks or environment bleed
-<span class="p">-</span> Encourage modular test architecture and coverage modeling
-<span class="p">-</span> Offer alternatives for flaky or insecure patterns
-</code></pre></div></div>
-
-<p>This mode specializes in enhancing Playwright test scripts by enforcing high standards for security, test isolation, and CI/CD traceability. When reviewing automation, it flags potential vulnerabilities like injection risks or environment bleed, advocates for modular test architecture, and proposes scalable solutions to address brittle or insecure testing patterns—all with a clear emphasis on long-term maintainability.
-This mode is asking for the most precision and is requesting the response be direct, risk-aware, and methodical.</p>
-
-<h2 id="chat-mode-cost-implications">Chat Mode Cost Implications</h2>
-
-<p>It should come as no surprise that the more capable modes are more expensive. The cost implications depend on which mode you use and which model powers the response. Here’s a breakdown based on GitHub Copilot’s current pricing structure as of mid-2025:</p>
-
-<h3 id="-cost-implications-by-mode">💰 Cost Implications by Mode</h3>
-
-<p>Here are the cost implication by chat mode.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Mode</th>
-      <th>Cost Impact</th>
-      <th>Notes</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Ask Mode</td>
-      <td>✅ Free with included models (e.g., GPT‑4o, GPT‑4.1) <br /> ❌ Premium if using GPT‑4.5, Claude, Gemini, etc.</td>
-      <td>Ask mode is cheapest if you stick to default models.</td>
-    </tr>
-    <tr>
-      <td>Edit Mode</td>
-      <td>✅ Same as Ask Mode</td>
-      <td>Charges apply only if premium models are used.</td>
-    </tr>
-    <tr>
-      <td>Agent Mode</td>
-      <td>❌ Always counts as 1 premium request per prompt</td>
-      <td>Even with default models, Agent mode consumes premium quota.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3 id="-monthly-premium-request-allowance">📦 Monthly Premium Request Allowance</h3>
-
-<p>Here are the monthly premium request allowances per plan.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Plan</th>
-      <th>Premium Requests</th>
-      <th>Cost</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Copilot Free</td>
-      <td>50/month</td>
-      <td>$0</td>
-    </tr>
-    <tr>
-      <td>Copilot Pro</td>
-      <td>300/month</td>
-      <td>$10/month</td>
-    </tr>
-    <tr>
-      <td>Copilot Pro+</td>
-      <td>1500/month</td>
-      <td>$39.99/month</td>
-    </tr>
-    <tr>
-      <td>Extra Requests</td>
-      <td>$0.04/request</td>
-      <td>Pay-as-you-go</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3 id="-key-takeaways">🧠 Key Takeaways</h3>
-
-<ul>
-  <li>Ask/edit modes are cost-efficient if you use included models.</li>
-  <li>Agent mode always consumes premium requests—even for simple tasks.</li>
-  <li>If you’re running high-volume automation or multi-step refactoring, Agent mode can burn through your quota quickly.</li>
-  <li>You can monitor usage in VS Code under Copilot › Settings › Billing &amp; Usage.</li>
-</ul>
-
-<h2 id="conclusion">Conclusion</h2>
-
-<p>Effective use of chat modes is a key in both controlling Copilot and in managing costs. Custom chat modes allow you to change hats and tailor Copilot to work efficiently and effectively in different problem domains. Chat modes work in concert with instruction files, which is another way of controlling Copilot. I’ll explore instruction files in another blog post soon.</p>
-
-<h3 id="feedback-loop">Feedback Loop</h3>
-
-<p>Feedback is always welcome. Please direct it to <a href="mailto:AIP@pdata.com" target="_blank">AIP@pdata.com</a></p>
-
-<h4 id="disclaimer">Disclaimer</h4>
-
-<p>AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul.</p>
-
-<p><strong>Prompts:</strong></p>
-
-<ul>
-  <li>Compare and contrast Copilot Ask, Edit, Agent, and Custom chat modes</li>
-  <li>Show me how to create a Custom chat mode</li>
-  <li>Can you show me three sample Custom chat mode files?</li>
-  <li>/explain model preferences - Temperature: 0.4 - Style: Structured</li>
-  <li>what other model preferences are there?</li>
-  <li>If you enter the same “ask” prompt in ask, edit and agent modes, what is the cost implications in terms of the expense to process the prompt</li>
-  <li>/Explain the use of the Focus property in a Copilot custom chat mode</li>
-</ul>
-
-<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/GHCPCM">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="AI" /><category term="GitHub Copilot" /><category term="Productivity" /><summary type="html"><![CDATA[In this post I’ll explore GitHub Copilot chat modes. I’ll cover the built-in chat modes and custom chat modes. We’ll dive into custom chat modes and look at some examples. To be clear, when I reference Copilot, I’m referring to GitHub Copilot, not any other Microsoft Copilot-branded AI.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-07-30/header-GHCPCM.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-07-30/header-GHCPCM.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="Software Development" /><category term="AI-Assisted Development" /><category term="Object Role Modeling" /><category term="Requirements Engineering" /><category term="Enterprise Architecture" /><summary type="html"><![CDATA[This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot. In this first installment we’ll look at the initial context provided to Copilot. This will include the initial instructions and the first prompts submitted to Copilot.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-08-30/header-AIAGSD01.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-08-30/header-AIAGSD01.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
