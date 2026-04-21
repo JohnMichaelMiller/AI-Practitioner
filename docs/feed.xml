@@ -1,4 +1,441 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-04-15T10:52:25-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI Pratitioner Resources: A Brief History of the Repository and Its Evolution</title><link href="https://blog.pdata.com/AIPR1/" rel="alternate" type="text/html" title="AI Pratitioner Resources: A Brief History of the Repository and Its Evolution" /><published>2026-04-14T00:00:00-07:00</published><updated>2026-04-14T00:00:00-07:00</updated><id>https://blog.pdata.com/AIPR1</id><content type="html" xml:base="https://blog.pdata.com/AIPR1/"><![CDATA[<p>I’m turning my attention back to the ai-practitioner-resources repository. This project has been my case study in AI-first software development practices. If you’re not familiar, it started as prompt to return a list of resources relevant to AI assisted software developers. Today it is an AI integrated platform with automated resource curation, AI project management, and a fully autonomous issue lifecycle.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-04-21T08:15:58-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 7: Implementation Prompts</title><link href="https://blog.pdata.com/AIAGSD7/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 7: Implementation Prompts" /><published>2026-04-17T00:00:00-07:00</published><updated>2026-04-17T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD7</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD7/"><![CDATA[<p>This post introduces the working framework for AI-assisted delivery in the Zeus Academia repository. Its purpose is to create the structure needed to plan, specify, and implement work in a disciplined way. The core addition is the repository guidance for custom agents, vertical-slice implementation, and Academia-specific workflow modeling. This provides the context AI needs so that future implementation work can be driven by explicit roles, repeatable prompts, and domain-aware plans instead of ad-hoc instructions.</p>
+
+<!--more-->
+
+<figure>
+  <img src="/assets/images/2026-04-17/AIAGSD7_Header_Large.png" alt="Planning artifacts flowing into implementation prompts and specialized delivery agents" />
+  <figcaption>Implementation prompts connect planning artifacts, agent roles, and verification gates into an execution-ready delivery workflow.</figcaption>
+</figure>
+
+<p>This is the seventh post in the series on AI-assisted greenfield software development. This post builds on the first <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1" target="_blank">AI-Assisted Greenfield Software Development - Part 1: Business Requirements</a> and the subsequent posts in the series. If you have not read those posts, you may want to start there.</p>
+
+<p>We’ll finish the planning phase by creating implementation prompts that guide AI agents through coding work while keeping generated output aligned with our technology-specific instruction files and architectural vision. In this post, I’ll use the planning and persona-agent outputs to define implementation slices with clear dependencies and acceptance criteria. The goal is to move from governance-compliant planning into execution prompts that drive coding tasks with minimal ambiguity.</p>
+
+<p>Up to now, the repository had AI provenance rules and some high-level standards, but it did not yet have a strong model for how AI agents should participate in delivery or how the Academia domain should be decomposed into implementable slices. This post closes that gap by defining the expected agent behavior, formalizing the vertical-slice approach, and documenting the domain workflows those slices are meant to satisfy. That gives both human contributors and AI tools a shared contract: which artifacts matter, how work should be broken down, and what kinds of outputs are acceptable.</p>
+
+<h2 id="why-implementation-prompts-matter">Why Implementation Prompts Matter</h2>
+
+<p>Planning artifacts are necessary, but they are not enough to drive consistent implementation. Requirements describe what the system should do, architecture explains how the solution should be shaped, and workflow models describe the business domain, but none of those artifacts alone tells an AI agent exactly how to execute a bounded slice of work. Without that execution layer, AI tends to fill in gaps with convenience-based assumptions, which usually leads to drift in scope, inconsistent verification, and weak traceability between requirements and code.</p>
+
+<p>Implementation prompts solve that problem by turning planning intent into an operational contract. A strong implementation prompt defines the slice boundary, identifies the right agent roles, sequences the work, names the required artifacts, makes the acceptance criteria observable, and states how the result must be verified and demonstrated. That gives both human contributors and AI agents a concrete delivery plan instead of a vague request.</p>
+
+<p>For Zeus Academia, this step was especially important because the repository had already accumulated architecture guidance, provenance rules, and domain models, but it still needed a disciplined way to convert those artifacts into full-stack slice delivery. The implementation prompts close that gap by binding planning, execution, and verification together in a format that can be reused across the backlog.</p>
+
+<h2 id="one-step-back">One step back</h2>
+
+<p>Before diving into the implementation prompts, I need to tweak some of the previous work. Copilot inferred that the implementation plan and the slices were backend work only. This was not the intent and it led AI to create separate slices for the front-end and the back-end. I needed to update the guidance to implement the backend and the frontend together in the same slice. Look at commit <code class="language-plaintext highlighter-rouge">9fb04</code> for details on these changes.</p>
+
+<h2 id="from-here-to-implementation">From Here to Implementation</h2>
+
+<p>To begin implementation effectively, I first needed implementation prompts. An implementation prompt defines exactly what the AI needs to accomplish to complete a slice, including prerequisites, tasks, validation steps, and delivery expectations. These prompts matter because they directly shape the implementation work, so they need to be precise, scoped, and unambiguous.</p>
+
+<p>Before generating implementation prompts, I needed to define what those prompts should contain. That keeps the resulting implementation plans consistent and actionable. I also needed an execution plan to orchestrate slice delivery and a project overview instruction file to describe what we are building, which technologies we are using, and which standards the implementation needs to follow.</p>
+
+<p>What follows are descriptions of the changes needed to get to the implementation prompts.</p>
+
+<h3 id="new-guidance">New Guidance</h3>
+
+<p>Like any other AI-generated artifact, I want the implementation prompts to follow a standard pattern and to be explicit about both intent and expectations.</p>
+
+<h4 id="project-overviewinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/instructions/project-overview.instructions.md">project-overview.instructions.md</a></h4>
+
+<p>Submitting the <code class="language-plaintext highlighter-rouge">create-project-overview.prompt.md</code> prompt generates the <code class="language-plaintext highlighter-rouge">project-overview.instructions.md</code> instruction file containing repository-wide project overview instructions for zeus.academia that defines the application as a full-stack academic management web app and establishes shared context for AI-assisted work: it captures architecture, coding and testing standards across language, deployment and environment targets, key operational constraints, core implementation patterns, and a curated set of critical instruction files that govern development workflow, branching, custom agents, prompt practices, and provenance requirements.</p>
+
+<h4 id="implementation-prompt-generationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/instructions/implementation-prompt-generation.instructions.md">implementation-prompt-generation.instructions.md</a></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">implementation-prompt-generation.instructions.md</code> file defines the standard for writing implementation prompts for the Academia vertical slices.</p>
+
+<p>Implementation prompts are critical documents that tell the AI what to build and how to build it. To be effective, they need to be clear and unambiguous.</p>
+
+<p>These instructions extend <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code>. Implementation prompts are a specific type of prompt, and the implementation-prompt instructions add requirements for showcasing outcomes and defining acceptance criteria.</p>
+
+<p>Each implementation prompt orchestrates the implementation of its slice. It delegates work to other custom agents based on their specialties..</p>
+
+<p>It specifies the preferred structure for implementation prompts, including objective, scope boundaries, agent plan, implementation steps, behavioral acceptance criteria, verification plan, showcase steps, output artifacts, and a validation checklist. It also makes the quality bar explicit by requiring observable and testable outcomes, human-executable demo steps, concrete verification commands, and disclosure of any missing agent dependencies, so the resulting prompts are concise, executable, and usable by both AI agents and human reviewers.</p>
+
+<h4 id="create-implementation-prompt-generation-instructionspromptmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/create-implementation-prompt-generation-instructions.prompt.md">create-implementation-prompt-generation-instructions.prompt.md</a></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">create-implementation-prompt-generation-instructions.prompt.md</code> file generates the <code class="language-plaintext highlighter-rouge">implementation-prompt-generation.instructions.md</code> instruction file. I usually start with an ad hoc prompt to create the instruction file, and once the result is working, I convert that prompt into a checked-in prompt file so it can be versioned, traced, and reused.</p>
+
+<h4 id="implementation-promptinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/instructions/implementation-prompt.instructions.md">implementation-prompt.instructions.md</a></h4>
+
+<p><code class="language-plaintext highlighter-rouge">implementation-prompt.instructions.md</code> sets the repository standard for authoring vertical-slice implementation prompts: each prompt must cover one bounded slice, be grounded in existing repo evidence (instructions, agents, and prior prompts), define explicit multi-role agent ownership and handoffs (with escalation triggers), follow a fixed section order, provide numbered actionable steps with targets/owners/validation gates, include observable and testable acceptance criteria, separate implementation from verification with required evidence capture, and end with human-run showcase steps proving business value; it also prescribes role preferences (for example using report-projection for reporting-heavy work and data-persistence for schema-heavy work), includes a reusable template plus anti-patterns/checklists, and requires ongoing alignment of prompts with shared agent profiles and project-overview references.</p>
+
+<h4 id="create-implementation-prompt-instructionspromptmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/create-implementation-prompt-instructions.prompt.md">create-implementation-prompt-instructions.prompt.md</a></h4>
+
+<p><code class="language-plaintext highlighter-rouge">create-implementation-prompt-instructions</code> is a meta-prompt that instructs an AI to generate a concise, evidence-grounded implementation-instructions file for slice delivery, requiring strict context review of existing project standards, explicit single-slice scope, role-specialized agent orchestration (including named reusable agents and fallbacks), fixed prompt section ordering, concrete numbered implementation steps with file-level targets and handoffs, observable acceptance criteria, separated verification and showcase workflows, reusable template and anti-pattern coverage, and a final validation checklist; it also mandates provenance-complete metadata, cross-reference updates to project overview, and success criteria centered on executable slice plans that humans and agents can both verify and demo.</p>
+
+<h4 id="create-project-overviewpromptmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/create-project-overview.prompt.md">create-project-overview.prompt.md</a></h4>
+
+<p>Before I could generate slice-level implementation prompts, I needed a repository-wide project overview instruction file that captured the shared architectural and technology context. I used this prompt to create that instruction file in a reusable, provenance-friendly form:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Create a prompt to create a Project Overview instruction file containing the high-level context for the project.
+</code></pre></div></div>
+
+<h3 id="new-artifacts">New Artifacts</h3>
+
+<p>In order to produce the implementation prompts we need to provide clear guidance coordinating the implementation of each slice and there are the implementation prompts that we’ve been driving toward all this time.</p>
+
+<h4 id="academia-execution-planmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/models/workflows/academia-execution-plan.md">academia-execution-plan.md</a></h4>
+
+<p>The project overview and the implementation plan are used to produce an execution plan.</p>
+
+<blockquote>
+  <p>Create a prompt file that generates an execution plan from the #file:project-overview.instructions.md and the #file:academia-implementation-plan.md</p>
+</blockquote>
+
+<p>The <code class="language-plaintext highlighter-rouge">academia-execution-plan</code> is a dependency-driven delivery blueprint for Zeus Academia that sequences the full vertical-slice backlog from Shared Kernel foundations through reference data, registration, core mutations/queries, lifecycle closure, and finally report/projection slices, with explicit phase objectives, blockers, per-slice backlog items, and strict quality governance tying progress to business-rule invariants.</p>
+
+<p>The execution plan differs from the implementation plan in that the implementation plan focuses on delivering features logically, the execution plan is about technical implementation.</p>
+
+<h4 id="academia-implementation-prompts"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/tree/Part-Seven/.github/prompts/academia">Academia Implementation Prompts</a></h4>
+
+<p>The following prompt generates implementation prompts for all of the slices in the implementation plan.</p>
+
+<blockquote>
+  <p>Create an implementation prompt for each slice in the #file:academia-implementation-plan.md</p>
+</blockquote>
+
+<p>The next step was to generate a concrete implementation prompt for each slice in the plan so the backlog could move from architectural intent to execution-ready work items.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Slice</th>
+      <th>File</th>
+      <th>Functional Requirements</th>
+      <th>Non-Functional Requirements</th>
+      <th>Dependencies</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>EP-0-1</td>
+      <td>Shared Kernel</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-0-1-shared-kernel-implementation.prompt.md">ep-0-1-shared-kernel-implementation.prompt.md</a></td>
+      <td>Domain primitives (Academic, Rank, AccessLevel, Degree, University, Extension, AcademicQualification); XOR employment invariant (tenured OR contracted, never both); AccessLevel derived only from Rank; empNr uniqueness; extension uniqueness; Result&lt;T&gt;/Error types; domain event contracts</td>
+      <td>Nullable-enabled C#; aggregate guard methods enforce invariants; persistence rules must not contradict aggregate rules; no feature code in this slice</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>EP-1-1</td>
+      <td>ManageRanks</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-1-manage-ranks-implementation.prompt.md">ep-1-1-manage-ranks-implementation.prompt.md</a></td>
+      <td>Accept only P, SL, L rank codes; reject duplicate codes; list ranks with stable codes and access-level mapping</td>
+      <td>Single canonical source for rank data; no second rank source of truth; downstream slices rely on one approved set</td>
+      <td>EP-0-1</td>
+    </tr>
+    <tr>
+      <td>EP-1-2</td>
+      <td>ManageDegrees</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-2-manage-degrees-implementation.prompt.md">ep-1-2-manage-degrees-implementation.prompt.md</a></td>
+      <td>Add degree with unique code; reject duplicate codes; list degrees with stable contracts for registration lookups</td>
+      <td>Single canonical degree catalog; deterministic list result</td>
+      <td>EP-0-1</td>
+    </tr>
+    <tr>
+      <td>EP-1-3</td>
+      <td>ManageUniversities</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-3-manage-universities-implementation.prompt.md">ep-1-3-manage-universities-implementation.prompt.md</a></td>
+      <td>Add university with unique code; reject duplicates; list universities with stable reference data</td>
+      <td>Single canonical university catalog; deterministic list result</td>
+      <td>EP-0-1</td>
+    </tr>
+    <tr>
+      <td>EP-1-4</td>
+      <td>ProvisionExtension</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-4-provision-extension-implementation.prompt.md">ep-1-4-provision-extension-implementation.prompt.md</a></td>
+      <td>Provision extension (numeric format only, unique); reject duplicate extNr; deprovision only unassigned extensions; reject deprovisioning of assigned extensions</td>
+      <td>Extension uniqueness preserved for all downstream assignment slices; not disposable seed data</td>
+      <td>EP-0-1</td>
+    </tr>
+    <tr>
+      <td>EP-2-1</td>
+      <td>RegisterAcademic</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-2-1-register-academic-implementation.prompt.md">ep-2-1-register-academic-implementation.prompt.md</a></td>
+      <td>Create academic with valid empNr (unique, length-validated), EmpName (≤15 chars), valid rank, ≥1 qualification (valid degree+university), 1 available extension; derive AccessLevel from rank; reject duplicate empNr, invalid rank, missing qualification, unavailable extension</td>
+      <td>Atomic persistence — no partial writes; integration-first test strategy; hard dependency gate — no dependent slices until this passes integration tests</td>
+      <td>EP-1-1, EP-1-2, EP-1-3, EP-1-4</td>
+    </tr>
+    <tr>
+      <td>EP-3-1</td>
+      <td>ViewAcademicProfile</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-1-view-academic-profile-implementation.prompt.md">ep-3-1-view-academic-profile-implementation.prompt.md</a></td>
+      <td>Return empNr, name, rank, derived access level, qualifications, extension, and employment state; not-found returns standard missing-resource response; AccessLevel in response matches current rank-derived rule</td>
+      <td>Read-only projection; no command-side mutation logic; stable response DTOs</td>
+      <td>EP-2-1</td>
+    </tr>
+    <tr>
+      <td>EP-3-2</td>
+      <td>UpdateAcademicName</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-2-update-academic-name-implementation.prompt.md">ep-3-2-update-academic-name-implementation.prompt.md</a></td>
+      <td>Update name for existing academic; reject names &gt;15 chars; not-found fails cleanly; updated name visible in read models</td>
+      <td>Name-length rule must stay aligned with registration; no cross-slice side effects</td>
+      <td>EP-2-1</td>
+    </tr>
+    <tr>
+      <td>EP-3-3</td>
+      <td>SearchListAcademics</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-3-search-list-academics-implementation.prompt.md">ep-3-3-search-list-academics-implementation.prompt.md</a></td>
+      <td>Filter by name, rank, access level, employment status, degree, university; deterministic pagination and sorting; empty result returns valid empty page (not error)</td>
+      <td>Read-optimized; deterministic sort across repeated calls; filter contracts must not diverge from profile/report fields</td>
+      <td>EP-2-1</td>
+    </tr>
+    <tr>
+      <td>EP-3-4</td>
+      <td>GrantTenure</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-4-grant-tenure-implementation.prompt.md">ep-3-4-grant-tenure-implementation.prompt.md</a></td>
+      <td>Set academic to tenured state; clear any existing contract end date; preserve employment XOR rule; missing academic fails cleanly</td>
+      <td>Reuse aggregate guard — do not re-encode XOR logic in handler only</td>
+      <td>EP-2-1</td>
+    </tr>
+    <tr>
+      <td>EP-3-5</td>
+      <td>AssignContract</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-5-assign-contract-implementation.prompt.md">ep-3-5-assign-contract-implementation.prompt.md</a></td>
+      <td>Assign contract with future end date only; reject current or past dates; clear tenured state (XOR); profile/list reflects contracted state</td>
+      <td>Future-date rule must stay aligned with RenewContract semantics</td>
+      <td>EP-2-1</td>
+    </tr>
+    <tr>
+      <td>EP-3-6</td>
+      <td>RemoveEmploymentStatus</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-6-remove-employment-status-implementation.prompt.md">ep-3-6-remove-employment-status-implementation.prompt.md</a></td>
+      <td>Clear both IsTenured and ContractEndDate from either employment state; missing academic fails cleanly; read models show cleared state</td>
+      <td>No stale contract dates or contradictory read-model values after clearing</td>
+      <td>EP-2-1</td>
+    </tr>
+    <tr>
+      <td>EP-3-7</td>
+      <td>ChangeRank</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-7-change-rank-implementation.prompt.md">ep-3-7-change-rank-implementation.prompt.md</a></td>
+      <td>Accept only valid rank codes from ManageRanks; automatically recalculate AccessLevel (P→INT, SL→NAT, L→LOC); reject invalid rank or missing academic; updated rank and access level immediately visible in read models</td>
+      <td>AccessLevel derivation must remain centralized in aggregate — not duplicated in handler</td>
+      <td>EP-2-1, EP-1-1</td>
+    </tr>
+    <tr>
+      <td>EP-3-8</td>
+      <td>RecordDegreeObtained</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-8-record-degree-obtained-implementation.prompt.md">ep-3-8-record-degree-obtained-implementation.prompt.md</a></td>
+      <td>Add qualification (valid degree + valid university) to existing academic; reject invalid degree or university references; reject duplicate Academic+Degree pair (even with different university); qualification visible in reads</td>
+      <td>Duplicate Academic+Degree rule enforced consistently in code and persistence</td>
+      <td>EP-2-1, EP-1-2, EP-1-3</td>
+    </tr>
+    <tr>
+      <td>EP-3-9</td>
+      <td>AssignExtension</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-9-assign-extension-implementation.prompt.md">ep-3-9-assign-extension-implementation.prompt.md</a></td>
+      <td>Assign provisioned, unassigned extension to academic (1:1 uniqueness); reject unprovisioned or already-assigned extensions; current assignment queryable</td>
+      <td>Concurrency-sensitive uniqueness protected at both handler and DB constraint levels</td>
+      <td>EP-2-1, EP-1-4</td>
+    </tr>
+    <tr>
+      <td>EP-4-1</td>
+      <td>RenewContract</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-1-renew-contract-implementation.prompt.md">ep-4-1-renew-contract-implementation.prompt.md</a></td>
+      <td>Renew only currently contracted academics; new end date must be in the future; invalid renewal leaves prior state unchanged; read models reflect updated end date</td>
+      <td>Same future-date semantics as AssignContract; renewal must fail for non-contracted academics</td>
+      <td>EP-3-5</td>
+    </tr>
+    <tr>
+      <td>EP-4-2</td>
+      <td>ConvertContractToTenure</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-2-convert-contract-to-tenure-implementation.prompt.md">ep-4-2-convert-contract-to-tenure-implementation.prompt.md</a></td>
+      <td>Convert only from contracted state; clear ContractEndDate on success; leave academic in tenured state only; read models reflect tenured state; non-contracted academic fails</td>
+      <td>Must be distinguishable from direct tenure grant; XOR rule preserved</td>
+      <td>EP-3-5</td>
+    </tr>
+    <tr>
+      <td>EP-4-3</td>
+      <td>UpdateDegreeUniversity</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-3-update-degree-university-implementation.prompt.md">ep-4-3-update-degree-university-implementation.prompt.md</a></td>
+      <td>Update university on existing qualification record; reject missing qualification target; reject invalid university reference; no duplicate qualification created; qualification reads reflect updated university</td>
+      <td>Preserve one-university-per-academic-degree rule; qualification must be uniquely addressable</td>
+      <td>EP-3-8</td>
+    </tr>
+    <tr>
+      <td>EP-4-4</td>
+      <td>RemoveDegreeRecord</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-4-remove-degree-record-implementation.prompt.md">ep-4-4-remove-degree-record-implementation.prompt.md</a></td>
+      <td>Remove a non-final qualification; reject removal of the last remaining qualification; missing qualification fails cleanly; remaining qualifications stay consistent</td>
+      <td>Minimum-one-qualification invariant enforced at aggregate level</td>
+      <td>EP-3-8</td>
+    </tr>
+    <tr>
+      <td>EP-4-5</td>
+      <td>ListQualifications</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-5-list-qualifications-implementation.prompt.md">ep-4-5-list-qualifications-implementation.prompt.md</a></td>
+      <td>List qualifications by academic, by degree code, and by university code; empty results return clean empty (not error); stable contracts across all three query modes</td>
+      <td>Read-only, read-optimized; deterministic results; three query modes share consistent response shape</td>
+      <td>EP-3-8</td>
+    </tr>
+    <tr>
+      <td>EP-4-6</td>
+      <td>ReassignExtension</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-6-reassign-extension-implementation.prompt.md">ep-4-6-reassign-extension-implementation.prompt.md</a></td>
+      <td>Atomically move academic from one extension to another; reject unavailable target; failed reassignment leaves original assignment intact</td>
+      <td>Atomic transaction — source release and target assignment in one flow; 1:1 uniqueness maintained through success and failure</td>
+      <td>EP-3-9</td>
+    </tr>
+    <tr>
+      <td>EP-4-7</td>
+      <td>ReleaseExtension</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-7-release-extension-implementation.prompt.md">ep-4-7-release-extension-implementation.prompt.md</a></td>
+      <td>Release current extension and clear academic-side reference; released extension returns to available pool; invalid release (no current extension) fails cleanly</td>
+      <td>Both academic state and extension availability updated consistently in one operation</td>
+      <td>EP-3-9</td>
+    </tr>
+    <tr>
+      <td>EP-4-8</td>
+      <td>ListAvailableExtensions</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-8-list-available-extensions-implementation.prompt.md">ep-4-8-list-available-extensions-implementation.prompt.md</a></td>
+      <td>Return only provisioned, unassigned extensions; exclude assigned; include released; empty result returns clean empty response</td>
+      <td>Results must reflect latest assignment lifecycle transitions accurately</td>
+      <td>EP-3-9</td>
+    </tr>
+    <tr>
+      <td>EP-5-1</td>
+      <td>DeregisterAcademic</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-5-1-deregister-academic-implementation.prompt.md">ep-5-1-deregister-academic-implementation.prompt.md</a></td>
+      <td>Deregister existing academic only; release any assigned extension as part of the flow; retain required qualification history; emit deregistration domain event for downstream consumers</td>
+      <td>No orphaned extensions; history retention must not conflict with persistence behavior; downstream report consumers must have required event data</td>
+      <td>EP-2-1, EP-4-7</td>
+    </tr>
+    <tr>
+      <td>EP-6-1</td>
+      <td>AcademicDirectory</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-1-academic-directory-implementation.prompt.md">ep-6-1-academic-directory-implementation.prompt.md</a></td>
+      <td>List active academics with name, rank, access level, extension, and employment status; matches current lifecycle state after mutations; deterministic paging and sorting</td>
+      <td>Read-optimized projections — not command-side aggregate loading; performance meets plan expectations on seeded data</td>
+      <td>EP-2-1 (+ lifecycle slices)</td>
+    </tr>
+    <tr>
+      <td>EP-6-2</td>
+      <td>ByRankReport</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-2-by-rank-report-implementation.prompt.md">ep-6-2-by-rank-report-implementation.prompt.md</a></td>
+      <td>Group academics by rank with counts and listings; include derived access-level context; grouped totals accurate after rank changes</td>
+      <td>Read-optimized; grouped counts must not drift after source data changes</td>
+      <td>EP-2-1, EP-3-7</td>
+    </tr>
+    <tr>
+      <td>EP-6-3</td>
+      <td>ByAccessLevelReport</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-3-by-access-level-report-implementation.prompt.md">ep-6-3-by-access-level-report-implementation.prompt.md</a></td>
+      <td>Group academics by INT, NAT, LOC with counts and listings; group membership changes when rank changes; no direct access-level mutation path introduced</td>
+      <td>Must consume derived access level — not a manually stored field; P→INT, SL→NAT, L→LOC mapping verified in tests</td>
+      <td>EP-3-7</td>
+    </tr>
+    <tr>
+      <td>EP-6-4</td>
+      <td>TenuredAcademicsReport</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-4-tenured-academics-report-implementation.prompt.md">ep-6-4-tenured-academics-report-implementation.prompt.md</a></td>
+      <td>List only tenured academics with rank and qualification summary; contract-converted academics appear correctly; employment-cleared academics excluded</td>
+      <td>Consistent employment-state filtering after multiple transitions (direct grant, conversion, clearing)</td>
+      <td>EP-3-4</td>
+    </tr>
+    <tr>
+      <td>EP-6-5</td>
+      <td>ContractedAcademicsReport</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-5-contracted-academics-report-implementation.prompt.md">ep-6-5-contracted-academics-report-implementation.prompt.md</a></td>
+      <td>List only currently contracted academics sorted by contract end date ascending; renewed contracts show updated date; non-contracted excluded</td>
+      <td>Deterministic ascending sort on end date; stable after renewal</td>
+      <td>EP-3-5</td>
+    </tr>
+    <tr>
+      <td>EP-6-6</td>
+      <td>ExpiringContractsReport</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-6-expiring-contracts-report-implementation.prompt.md">ep-6-6-expiring-contracts-report-implementation.prompt.md</a></td>
+      <td>Filter contracts expiring within configurable window (default 90 days); contracts inside window appear; outside do not; boundary dates handled consistently; supports custom threshold</td>
+      <td>Deterministic date-window behavior; default threshold configurable; boundary cases must be explicitly tested</td>
+      <td>EP-3-5</td>
+    </tr>
+    <tr>
+      <td>EP-6-7</td>
+      <td>QualificationReports</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-7-qualification-reports-implementation.prompt.md">ep-6-7-qualification-reports-implementation.prompt.md</a></td>
+      <td>Grouped report by degree with counts and listings; grouped report by university with counts and listings; counts accurate after add, update, and remove qualification flows</td>
+      <td>Both grouped outputs synchronized with source qualification data; distinct from the operational ListQualifications slice</td>
+      <td>EP-3-8</td>
+    </tr>
+    <tr>
+      <td>EP-6-8</td>
+      <td>AccessLevelDistributionReport</td>
+      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-8-access-level-distribution-report-implementation.prompt.md">ep-6-8-access-level-distribution-report-implementation.prompt.md</a></td>
+      <td>Distribution totals per INT/NAT/LOC for active academics only; totals update after rank changes; deregistered academics excluded from totals</td>
+      <td>Active-only filtering; compact analytical output (counts-only or counts-plus-details TBD by coordinator); no direct access-level mutation path</td>
+      <td>EP-3-7</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>In theory, and hopefully in practice, submitting these prompts will result in an application that meets our requirements, going all the way back to Part-One.</p>
+
+<h4 id="ep-1-1-manage-ranks-implementationpromptmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-1-manage-ranks-implementation.prompt.md">ep-1-1-manage-ranks-implementation.prompt.md</a></h4>
+
+<p>Here is a closer look at one of the implementation prompts. <code class="language-plaintext highlighter-rouge">ep-1-1-manage-ranks-implementation.prompt.md</code> is a slice-scoped implementation prompt for the Phase 1 ManageRanks reference-data capability, directing a coordinated workflow (slice-coordinator, backend-domain, testing-verification) to establish one canonical rank source, implement validated add/list CQRS behavior and endpoints, enforce strict allowed rank codes (P, SL, L) with duplicate prevention, and produce verification evidence through validator/handler/integration tests, while explicitly constraining scope away from unrelated academic/employment/reporting work and requiring a human showcase that proves downstream slices can reliably consume stable rank/access-level reference data rather than hardcoding it.</p>
+
+<h3 id="new-agents">New Agents</h3>
+
+<p>The last preparation step was to build the agents that would implement the solution. The implementation prompts hand off work to the appropriate agents so each slice can be executed with explicit role boundaries.</p>
+
+<h4 id="backend-slice-implementeragentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/backend-slice-implementer.agent.md">backend-slice-implementer.agent.md</a></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">backend-slice-implementer</code> agent is specialized for implementing backend vertical slices in the Zeus Academia system using ASP.NET Core, MediatR, EF Core, FluentValidation, and xUnit, with a strict, evidence-based workflow that starts by reading slice and repo instructions, then implementing only the required backend components, running focused verification, and reporting results in a fixed structure.</p>
+
+<h4 id="slice-verifieragentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/slice-verifier.agent.md">slice-verifier.agent.md</a></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">slice-verifier</code> agent acts as a strict, evidence-first QA owner for individual vertical slices: it verifies implementation against the slice prompt and acceptance criteria, checks changed files and focused tests, runs any missing safe verification commands, and produces a pass/fail assessment.</p>
+
+<h4 id="data-integration-docagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/data-integration-doc.agent.md">data-integration-doc.agent.md</a></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">data-integration-doc</code> agent defines a support-focused Zeus Academia agent that handles slice-adjacent work such as migrations, integration touchpoints, documentation, rollout/showcase notes, and traceability, with a process centered on confirming support scope, identifying impacted artifacts, making only minimal enabling changes, capturing side effects, and handing off evidence plus residual risks to coordination and verification roles.</p>
+
+<h4 id="data-persistenceagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/data-persistence.agent.md">data-persistence.agent.md</a></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">data-persistence</code> agent defines a Zeus Academia persistence-focused implementation agent responsible for making minimal, high-integrity EF Core changes that support slice-level domain rules, with a workflow that starts by validating slice rules and current persistence context, then applies targeted mappings/constraints/indexes/migrations, verifies database behavior aligns with aggregate and validator invariants, and hands off assumptions and risks to coordination/testing roles.</p>
+
+<h4 id="backend-domainagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/backend-domain.agent.md">backend-domain.agent.md</a></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">backend-domain</code> agent defines a Zeus Academia backend/domain implementation persona that owns slice-scoped ASP.NET Core CQRS work across commands, queries, validators, handlers, endpoints, and required persistence updates, with a strict workflow of reviewing prompt and standards, confirming target feature/contracts/domain rules, implementing in dependency order, validating behavior, and handing off API contracts and edge cases to coordinator/frontend/testing/doc roles.</p>
+
+<h4 id="frontend-workflowagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/frontend-workflow.agent.md">frontend-workflow.agent.md</a></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">frontend-workflow</code> agent defines a Zeus Academia frontend implementation persona responsible for slice-scoped Vue 3 workflows with strict TypeScript typing and Pinia state patterns, following a process of reviewing slice/API context, confirming flow and state ownership, implementing minimal UI/store/composable changes, validating loading/success/empty/failure behavior against backend contracts, and handing off notes to verification.</p>
+
+<h4 id="report-projectionagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/report-projection.agent.md">report-projection.agent.md</a></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">report-projection</code> agent defines a specialized Zeus Academia agent for report and projection work, focused on building read models, grouped/analytical queries, projection-backed endpoints, and report DTO contracts while keeping outputs aligned with canonical source-of-truth domain rules; it prescribes a minimal-change workflow (validate reporting dependencies and semantics, implement targeted query-side changes, verify grouped/projection accuracy after lifecycle state changes, and hand off.</p>
+
+<h4 id="slice-coordinatoragentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/slice-coordinator.agent.md">slice-coordinator.agent.md</a></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">slice-coordinator</code> agent defines a coordination-focused Zeus Academia persona that manages vertical-slice delivery by confirming scope and prerequisites, identifying required repo context, sequencing work with explicit role handoffs, escalating blockers or pattern conflicts early, and finishing with verification gates plus unresolved risks.</p>
+
+<h4 id="testing-verificationagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/testing-verification.agent.md">testing-verification.agent.md</a></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">testing-verification</code> agent defines a Zeus Academia verification-focused persona that treats evidence as the gate for slice completion: it reviews acceptance criteria and changed surfaces, derives minimal high-value checks, executes or specifies backend/frontend/data/contract validation, captures pass/fail proof and unresolved gaps, and returns a verdict based on observed outcomes rather than implementation intent; it emphasizes advanced strengths in criteria analysis, integration and failure-mode testing, strict escalation when criteria or prerequisites are missing, and hard boundaries against masking flaky or incomplete verification, signing off with partial evidence, or changing broad app behavior just to make tests pass.</p>
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>At this point, the repository has enough structure to move from planning into disciplined implementation. The requirements, architecture guidance, project overview, execution plan, implementation prompts, and agent roles now form a connected delivery system rather than a loose collection of artifacts. In the next post, I’ll begin implementing the earliest slices in dependency order so we can see whether this workflow holds up under real coding work.</p>
+
+<p>If you’re interested in the files, you can find them in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b" target="_blank">Academia GitHub repository</a>. If you’d like to follow along with your own implementation, fork the repository and use the fork to build your own version.</p>
+
+<h2 id="feedback-loop">Feedback Loop</h2>
+
+<p>Feedback is always welcome. Send your thoughts to <a href="mailto:john.miller@codemag.com">john.miller@codemag.com</a>.</p>
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<p>Prompts:</p>
+
+<ul>
+  <li>Examine the changes made on the Part-Seven branch and describe in prose targeted for human consumption, the intent of the change, the justification for the change, and the implementation.</li>
+  <li>Summarize this file in one paragraph.</li>
+  <li>List all of the slices in a Markdown table. Include a link to the file on GitHub. Also include the slice number, the functional and non-functional requirements, and the slice numbers this slice depends on.</li>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="prompts" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><category term="implementation-prompts" /><summary type="html"><![CDATA[This post shows how I moved from architecture and planning guidance to implementation-ready prompts for Zeus Academia, including project overview instructions, execution planning, slice-level prompts, and agent handoffs.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-04-17/AIAGSD7_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-04-17/AIAGSD7_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI Pratitioner Resources: A Brief History of the Repository and Its Evolution</title><link href="https://blog.pdata.com/AIPR1/" rel="alternate" type="text/html" title="AI Pratitioner Resources: A Brief History of the Repository and Its Evolution" /><published>2026-04-14T00:00:00-07:00</published><updated>2026-04-14T00:00:00-07:00</updated><id>https://blog.pdata.com/AIPR1</id><content type="html" xml:base="https://blog.pdata.com/AIPR1/"><![CDATA[<p>I’m turning my attention back to the ai-practitioner-resources repository. This project has been my case study in AI-first software development practices. If you’re not familiar, it started as prompt to return a list of resources relevant to AI assisted software developers. Today it is an AI integrated platform with automated resource curation, AI project management, and a fully autonomous issue lifecycle.</p>
 
 <p>Looking back, i regretted not keeping a more detailed journal of the project’s evolution as I thought it might make for an interesting case study in how AI-first development practices evolve under real usage. Then a prompt occured to me that could write that blog post for me.</p>
 
@@ -514,7 +951,18 @@ ed3b588 2026-02-24 — feat: add configurable resource count and update mode sup
   <li>Examine key diffs (first commit, Copilot’s first PR, OpenAI→Claude migration, modularization, PM review pipeline) to quantify change scope</li>
   <li>Read all project documentation (README, CONTRIBUTORS, DEV_NOTES, REFACTORING_SUMMARY, IMPLEMENTATION_SUMMARY, DETERMINISM_GUIDE, SESSION_MANAGEMENT_README, QUICK_REFERENCE, scripts/README) for architectural context</li>
   <li>Draft a chronological blog post following AIAGSD series conventions with evidence from git history</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Tracing the evolution of AI Practitioner Resources: from static HTML to AI-first platform with automated workflows and autonomous issue management.]]></summary></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning</title><link href="https://blog.pdata.com/AIAGSD6/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning" /><published>2026-03-01T00:00:00-08:00</published><updated>2026-03-01T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD6</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD6/"><![CDATA[<p><strong>TL;DR:</strong> This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Tracing the evolution of AI Practitioner Resources: from static HTML to AI-first platform with automated workflows and autonomous issue management.]]></summary></entry><entry><title type="html">Aiagsd6</title><link href="https://blog.pdata.com/AIAGSD6/" rel="alternate" type="text/html" title="Aiagsd6" /><published>2026-03-01T00:00:00-08:00</published><updated>2026-03-01T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD6</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD6/"><![CDATA[<p>and—
+layout: post
+title: “AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning”
+date: 2026-03-01
+categories: AIAGSD
+tags: [vertical-slice, agents, planning, meta-prompts, workflow-modeling, implementation-planning]
+excerpt: “Learn how to generate planning artifacts—vertical-slice definitions, workflow models, and dependency diagrams—that guide coordinated slice-by-slice delivery using AI and meta-prompts.”
+description: “Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.”
+image:
+—</p>
+
+<p><strong>TL;DR:</strong> This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution.</p>
 
 <p>We’re moving from architecture into implementation, but first we need a plan that defines tasks, dependencies, and execution order. This post shows how to generate planning artifacts — vertical-slice definitions, Product Requirements Documents (PRDs), workflow models, and dependency diagrams — that create a roadmap for coordinated, predictable slice-by-slice delivery. <a href="https://blog.pdata.com/AIAGSD1/">See earlier posts in the AIAGSD series for context.</a></p>
 
@@ -998,7 +1446,7 @@ scope_note: The universe of discourse is Academia Management” and the file “
   <li>Insert a governance checkpoint: After the vertical-slice introduction, add a section validating that the planning artifacts (agent standards, agent profiles, PRD template, and implementation instructions) form a coherent system</li>
   <li>Refactor artifact summaries: Convert feature lists to thesis-first paragraphs where appropriate</li>
   <li>Add a definition of prompt drift</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.]]></summary></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails</title><link href="https://blog.pdata.com/AIAGSD5/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD5</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD5/"><![CDATA[<p>In this post, I’ll shift from <em>architecture-level</em> instructions to <em>technology-level</em> instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><summary type="html"><![CDATA[and— layout: post title: “AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning” date: 2026-03-01 categories: AIAGSD tags: [vertical-slice, agents, planning, meta-prompts, workflow-modeling, implementation-planning] excerpt: “Learn how to generate planning artifacts—vertical-slice definitions, workflow models, and dependency diagrams—that guide coordinated slice-by-slice delivery using AI and meta-prompts.” description: “Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.” image: — TL;DR: This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution. We’re moving from architecture into implementation, but first we need a plan that defines tasks, dependencies, and execution order. This post shows how to generate planning artifacts — vertical-slice definitions, Product Requirements Documents (PRDs), workflow models, and dependency diagrams — that create a roadmap for coordinated, predictable slice-by-slice delivery. See earlier posts in the AIAGSD series for context.]]></summary></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails</title><link href="https://blog.pdata.com/AIAGSD5/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD5</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD5/"><![CDATA[<p>In this post, I’ll shift from <em>architecture-level</em> instructions to <em>technology-level</em> instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
 
 <!--more-->
 
@@ -2718,611 +3166,7 @@ project_purpose: Academic Management System</li>
   <li>Insert the contents of the <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> file with an introductory paragraph, summary paragraphs, and a transition to the conclusion.</li>
 </ul>
 
-<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD2">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="copilot" /><category term="best-practices" /><category term="instruction-files" /><summary type="html"><![CDATA[This is the second post in the series on AI assisted greenfield software development. This post builds on the first post AI-Assisted Greenfield Software Development - Part 1 Business Requirements. If you haven’t read that post, you might want to start there. In this post I’ll cover the instructions, prompts, and chat modes I used to start to lay down the guidance for turning requirements into code. These files are critical for controlling the AI output and having a comprehensive set of instructions, prompts, and chat modes greatly increase the chances of getting AI to produce something usable.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-09-24/header-AIAGSD2.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-09-24/header-AIAGSD2.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Sharing Instructions with the Team</title><link href="https://blog.pdata.com/SIWT/" rel="alternate" type="text/html" title="Sharing Instructions with the Team" /><published>2025-08-30T00:00:00-07:00</published><updated>2025-08-30T00:00:00-07:00</updated><id>https://blog.pdata.com/SIWT</id><content type="html" xml:base="https://blog.pdata.com/SIWT/"><![CDATA[<p>When working with GitHub Copilot across multiple projects, you’ll quickly face a common challenge: how do you share generic instructions (ie. coding standards and best practices) with team members working on different projects without duplicating instruction files in every repository? This post walks you through prompting Copilot to implement a solution leveraging symlinks and junction points.</p>
-
-<!--more-->
-
-<p><img src="/assets/images/2025-08-30/header-SIWT.png" alt="Header Image" /></p>
-
-<h2 id="what-are-instruction-files">What Are Instruction Files?</h2>
-
-<p>For those of you new to using GitHub Copilot, instruction files are the blueprint for customizing how Copilot agents behave, respond, and interact with tools. Instruction files include natural language guidance that shapes the agent’s tone, reasoning style, and response formatting, making them essential for tailoring Copilot to specific workflows, domains, or compliance requirements. Instruction files give you granular control over how the agent interprets user intent and executes tasks.</p>
-
-<p>Instruction files for GitHub Copilot agents can be located within the project repository in the <code class="language-plaintext highlighter-rouge">.github</code> folder or a sub-folder of <code class="language-plaintext highlighter-rouge">.github</code>. They can also reside in the user’s home directory in a <code class="language-plaintext highlighter-rouge">.github</code> prompts folder. The project repository location takes precedence over the user home directory location.</p>
-
-<p>Instruction files in the project folder are in scope for that project. Instruction files in the user home directory are available to all projects. Instruction files in the user home directory are limited in that the can only reside in the prompts folder.</p>
-
-<p>For instructions that are not project specific, such as coding standards and practices, it is desirable to share them across multiple projects. However, duplicating these files in each project repository is inefficient and error-prone. Instead, we can use symbolic links (symlinks) on Linux and macOS, and junction points on Windows, to create a single source of truth for shared instructions.</p>
-
-<p>Ideally it would be nice to create a link in the user folder once and have it be used across all projects. Due to the limitations on the user home directory location, creating a link there would require that all of the shared instructions be in a single folder in the source and it would preclude storing any personal instructions.</p>
-
-<p>Therefore, we need to establish these links within each project. Our solution involves creating these links seamlessly.</p>
-
-<h2 id="what-is-a-symlink-and-junction-point">What Is a Symlink and Junction Point?</h2>
-
-<p>A symlink (symbolic link) is a special type of file that points to another file or directory, allowing you to access the target as if it were located at the link’s location. Symlinks are commonly used on Linux and macOS to create shortcuts or shared folders. A junction point is a similar concept used on Windows; it creates a link to a directory, making the contents of the target directory appear in the linked location. Both mechanisms enable you to share or reuse files and folders across different locations without duplicating data, which simplifies maintenance and updates.</p>
-
-<h2 id="the-prompt">The Prompt</h2>
-
-<p>The solution involves creating a repo that contains the instruction files to be shared. Developers on the team can clone the repo locally and pull changes as needed. They can also change or add instructions to the repo and push those changes to the origin. Making them available to other team members.</p>
-
-<p>Once the repo is established, we need to provide guidance for the team in creating the links to the shared instructions. We’ll ask Copilot to create scripts for each OS (Windows, Linux, macOS) that will create the appropriate link from the project repository to the shared instructions folder in the central repo. The scripts will also ensure that the linked folder is added to the project’s <code class="language-plaintext highlighter-rouge">.gitignore</code> file to prevent accidental commits of the shared instructions to the project repository. In addition we’ll ask Copilot to create a README file with instructions on how to use the scripts.</p>
-
-<p>Here is the prompt I gave GitHub Copilot:</p>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Write three scripts to create a symlink or junction point for windows, Linux, and Mac.
-
-Use a symlink for Linux and Mac, and a junction point for Windows using
-the New-Item -ItemType Junction cmdlet.
-
-The symlink or junction point goes to the <span class="sb">`./instructions`</span> folder in this GitHubCopilot repo
-from the <span class="sb">`./github/instructions/shared`</span> folder in the Project repo.
-
-You'll need the paths to both the GitHubCopilot repo and the Project repo in order to proceed.
-
-Ensure that the Project repo's <span class="sb">`./github/instructions/shared`</span> folder is in the Project's <span class="sb">`.gitignore`</span> file.
-Create the file if it doesn't exist. We don't want the shared instructions to be pushed into the project repo.
-
-Create a <span class="sb">`Readme.md`</span> the describes the purpose and use of the scripts.
-
-Put all the files in a <span class="sb">`shared-instructions`</span> folder in the GitHubCopilot repo.
-</code></pre></div></div>
-
-<p>This prompt instructs Copilot (or ChatGPT 5) to automate the process of sharing a set of instruction files across multiple projects by generating platform-specific scripts. The scripts are designed to create either a symbolic link (symlink) or a junction point from a project repository to a central instructions folder in the GitHubCopilot repo. For Linux and macOS, the scripts use symlinks, while on Windows, they use NTFS junctions via PowerShell’s New-Item -ItemType Junction. The prompt also requires the scripts to ensure that the shared instructions folder is listed in the project’s <code class="language-plaintext highlighter-rouge">.gitignore</code> file, preventing accidental commits of shared files.</p>
-
-<p>Copilot and ChatGPT 5 interpret this prompt as a request for practical automation tools that streamline collaboration and maintain consistency across development environments. They recognize the need for cross-platform compatibility, idempotency, and version control hygiene. The prompt’s instructions lead them to generate three scripts (one for each OS) and a README file, all organized in a shared-instructions folder. The resulting solution enables teams to easily link to and update shared instruction files, reducing duplication and simplifying maintenance.</p>
-
-<p>Here is the README.md file generated from the prompt:</p>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh"># Shared Instructions Symlink/Junction Scripts</span>
-
-These scripts create a platform-appropriate link from a Project repository to the shared <span class="sb">`instructions`</span> folder
-that lives in the <span class="sb">`GitHubCopilot`</span> repo. This lets multiple projects reuse a single, centrally maintained set
-of instruction files without copying them.
-</code></pre></div></div>
-
-<p>Link layout created:</p>
-
-<div class="language-md highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;ProjectRepo&gt;</span>/github/instructions/shared -&gt; <span class="nt">&lt;GitHubCopilotRepo&gt;</span>/instructions
-</code></pre></div></div>
-
-<p>Platform behavior:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Platform</th>
-      <th>Mechanism</th>
-      <th>Script</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Windows</td>
-      <td>NTFS Junction</td>
-      <td><code class="language-plaintext highlighter-rouge">create-shared-link-windows.ps1</code></td>
-    </tr>
-    <tr>
-      <td>Linux</td>
-      <td>Symbolic link</td>
-      <td><code class="language-plaintext highlighter-rouge">create-shared-link-linux.sh</code></td>
-    </tr>
-    <tr>
-      <td>macOS</td>
-      <td>Symbolic link</td>
-      <td><code class="language-plaintext highlighter-rouge">create-shared-link-mac.sh</code></td>
-    </tr>
-  </tbody>
-</table>
-
-<p>The destination path inside the Project repo (<code class="language-plaintext highlighter-rouge">github/instructions/shared/</code>) is automatically added (or appended)
-to the Project repository’s <code class="language-plaintext highlighter-rouge">.gitignore</code> so linked files are never committed to the Project repository.</p>
-
-<h2 id="why-a-junction-on-windows">Why a Junction on Windows?</h2>
-
-<p>Junctions avoid some permission / policy issues that can affect symlinks on Windows machines without Developer Mode enabled. They behave like directory symlinks for our purpose.</p>
-
-<h2 id="prerequisites">Prerequisites</h2>
-
-<ul>
-  <li>You have both the Project repo and the <code class="language-plaintext highlighter-rouge">GitHubCopilot</code> repo cloned locally.</li>
-  <li>PowerShell 5+ (Windows script) or bash + Python 3 (for relative path computation) on Linux/macOS. (If Python 3 is not available, omit <code class="language-plaintext highlighter-rouge">--relative</code>.)</li>
-</ul>
-
-<h2 id="parameters">Parameters</h2>
-
-<p>All scripts require the root path of both repositories.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Parameter</th>
-      <th>Windows</th>
-      <th>Linux/macOS</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>GitHubCopilotRepo / –copilot</td>
-      <td>Required</td>
-      <td>Required</td>
-      <td>Path to the <code class="language-plaintext highlighter-rouge">GitHubCopilot</code> repo root (where <code class="language-plaintext highlighter-rouge">./instructions</code> exists).</td>
-    </tr>
-    <tr>
-      <td>ProjectRepo / –project</td>
-      <td>Required</td>
-      <td>Required</td>
-      <td>Path to the Project repo root (where <code class="language-plaintext highlighter-rouge">./github/instructions/shared</code> will be created).</td>
-    </tr>
-    <tr>
-      <td>-Force / –force</td>
-      <td>Optional</td>
-      <td>Optional</td>
-      <td>Replace existing destination (if mismatch or not link).</td>
-    </tr>
-    <tr>
-      <td>–relative</td>
-      <td>n/a</td>
-      <td>Optional</td>
-      <td>Create a relative symlink instead of an absolute one.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="usage-examples">Usage Examples</h2>
-
-<h3 id="windows-powershell">Windows (PowerShell)</h3>
-
-<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cd</span><span class="w"> </span><span class="nx">C:\git\GitHubCopilot\shared-instructions</span><span class="w">
-</span><span class="o">.</span><span class="n">/create-shared-link-windows.ps1</span><span class="w"> </span><span class="nt">-GitHubCopilotRepo</span><span class="w"> </span><span class="nx">C:\git\GitHubCopilot</span><span class="w"> </span><span class="nt">-ProjectRepo</span><span class="w"> </span><span class="nx">C:\git\MyProject</span><span class="w">
-
-</span><span class="c"># Force recreation</span><span class="w">
-</span><span class="o">.</span><span class="n">/create-shared-link-windows.ps1</span><span class="w"> </span><span class="nt">-GitHubCopilotRepo</span><span class="w"> </span><span class="o">..</span><span class="nx">\GitHubCopilot</span><span class="w"> </span><span class="nt">-ProjectRepo</span><span class="w"> </span><span class="nx">C:\git\MyProject</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-</span></code></pre></div></div>
-
-<h3 id="linux">Linux</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/git/GitHubCopilot/shared-instructions
-./create-shared-link-linux.sh <span class="nt">--copilot</span> ~/git/GitHubCopilot <span class="nt">--project</span> ~/git/MyProject
-
-<span class="c"># Relative link, force recreate</span>
-./create-shared-link-linux.sh <span class="nt">--copilot</span> ~/git/GitHubCopilot <span class="nt">--project</span> ~/git/MyProject <span class="nt">--relative</span> <span class="nt">--force</span>
-</code></pre></div></div>
-
-<h3 id="macos">macOS</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ~/git/GitHubCopilot/shared-instructions
-./create-shared-link-mac.sh <span class="nt">--copilot</span> ~/git/GitHubCopilot <span class="nt">--project</span> ~/git/MyProject
-</code></pre></div></div>
-
-<h2 id="idempotency">Idempotency</h2>
-
-<p>Running a script again will leave an already-correct link untouched (unless <code class="language-plaintext highlighter-rouge">--force</code> / <code class="language-plaintext highlighter-rouge">-Force</code> is specified) and will still ensure the <code class="language-plaintext highlighter-rouge">.gitignore</code> entry exists.</p>
-
-<h2 id="gitignore-handling">.gitignore Handling</h2>
-
-<p>The following entry is ensured inside the Project repo <code class="language-plaintext highlighter-rouge">.gitignore</code> (file created if missing):</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>github/instructions/shared/
-</code></pre></div></div>
-
-<h2 id="troubleshooting">Troubleshooting</h2>
-
-<ul>
-  <li>Destination exists and is not a link: Re-run with <code class="language-plaintext highlighter-rouge">-Force</code> / <code class="language-plaintext highlighter-rouge">--force</code>.</li>
-  <li>Permission errors on Windows: Ensure PowerShell is running with adequate permissions.</li>
-  <li>Symlink creation denied on Windows: Junctions should bypass typical symlink permission issues; if problems persist, check antivirus or corporate policy restrictions.</li>
-</ul>
-
-<h2 id="removal">Removal</h2>
-
-<p>Simply delete the destination path inside the Project repo:</p>
-
-<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Remove-Item</span><span class="w"> </span><span class="err">&lt;</span><span class="nx">ProjectRepo</span><span class="err">&gt;</span><span class="nx">\github\instructions\shared</span><span class="w"> </span><span class="nt">-Recurse</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-</span></code></pre></div></div>
-
-<p>or</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">rm</span> <span class="nt">-rf</span> &lt;ProjectRepo&gt;/github/instructions/shared
-</code></pre></div></div>
-
-<h2 id="maintenance">Maintenance</h2>
-
-<p>If new shared instruction files are added to <code class="language-plaintext highlighter-rouge">GitHubCopilot/instructions</code>, they become available to all linked projects immediately—no changes needed in individual projects.</p>
-
-<p>A small clarification on the maintenance. New shared instruction files added to <code class="language-plaintext highlighter-rouge">GitHubCopilot/instructions</code> will not automatically be available in all linked projects without any additional steps. They become available after a pull from the repo.</p>
-
-<h3 id="linux-script-create-shared-link-linuxsh">Linux Script (<code class="language-plaintext highlighter-rouge">create-shared-link-linux.sh</code>)</h3>
-
-<p>Here is the Linux script generated from the prompt:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/usr/bin/env bash</span>
-<span class="nb">set</span> <span class="nt">-euo</span> pipefail
-
-<span class="c"># Creates (or refreshes) a symbolic link in the Project repo pointing to the</span>
-<span class="c"># ./instructions folder in the GitHubCopilot repo.</span>
-<span class="c">#</span>
-<span class="c"># Destination (link created): &lt;ProjectRepo&gt;/github/instructions/shared</span>
-<span class="c"># Source (link target):       &lt;GitHubCopilotRepo&gt;/instructions</span>
-<span class="c">#</span>
-<span class="c"># Arguments:</span>
-<span class="c">#   --copilot &lt;path&gt;   Path to GitHubCopilot repo root (where ./instructions exists)</span>
-<span class="c">#   --project &lt;path&gt;   Path to Project repo root (where ./github/instructions/shared will be created)</span>
-<span class="c">#   --force            Remove and recreate existing destination if present</span>
-<span class="c">#   --relative         Create a relative symlink (default: absolute)</span>
-<span class="c">#</span>
-<span class="c"># Example:</span>
-<span class="c">#   ./create-shared-link-linux.sh --copilot ../GitHubCopilot --project . --relative</span>
-
-<span class="nb">set</span> +u
-<span class="nv">FORCE</span><span class="o">=</span>0
-<span class="nv">RELATIVE</span><span class="o">=</span>0
-<span class="nv">COPILOT</span><span class="o">=</span><span class="s2">""</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">""</span>
-<span class="nb">set</span> <span class="nt">-u</span>
-
-<span class="k">while</span> <span class="o">[[</span> <span class="nv">$# </span><span class="nt">-gt</span> 0 <span class="o">]]</span><span class="p">;</span> <span class="k">do
-  case</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span> <span class="k">in</span>
-    <span class="nt">--copilot</span><span class="p">)</span> <span class="nv">COPILOT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$2</span><span class="s2">"</span><span class="p">;</span> <span class="nb">shift </span>2<span class="p">;;</span>
-    <span class="nt">--project</span><span class="p">)</span> <span class="nv">PROJECT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$2</span><span class="s2">"</span><span class="p">;</span> <span class="nb">shift </span>2<span class="p">;;</span>
-    <span class="nt">--force</span><span class="p">)</span> <span class="nv">FORCE</span><span class="o">=</span>1<span class="p">;</span> <span class="nb">shift</span><span class="p">;;</span>
-    <span class="nt">--relative</span><span class="p">)</span> <span class="nv">RELATIVE</span><span class="o">=</span>1<span class="p">;</span> <span class="nb">shift</span><span class="p">;;</span>
-    <span class="nt">-h</span><span class="p">|</span><span class="nt">--help</span><span class="p">)</span>
-      <span class="nb">grep</span> <span class="s1">'^#'</span> <span class="s2">"</span><span class="nv">$0</span><span class="s2">"</span> | <span class="nb">sed</span> <span class="s1">'s/^# //'</span>
-      <span class="nb">exit </span>0
-      <span class="p">;;</span>
-    <span class="k">*</span><span class="p">)</span> <span class="nb">echo</span> <span class="s2">"Unknown arg: </span><span class="nv">$1</span><span class="s2">"</span> <span class="o">&gt;</span>&amp;2<span class="p">;</span> <span class="nb">exit </span>1<span class="p">;;</span>
-  <span class="k">esac</span>
-<span class="k">done
-
-if</span> <span class="o">[[</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">"</span> <span class="o">||</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nb">echo</span> <span class="s2">"--copilot and --project are required"</span> <span class="o">&gt;</span>&amp;2
-  <span class="nb">exit </span>1
-<span class="k">fi
-
-</span><span class="nv">COPILOT</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span><span class="si">)</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span><span class="si">)</span>
-
-<span class="nv">SOURCE</span><span class="o">=</span><span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">/instructions"</span>
-<span class="nv">DEST_PARENT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">/github/instructions"</span>
-<span class="nv">DEST</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">/shared"</span>
-
-<span class="k">if</span> <span class="o">[[</span> <span class="o">!</span> <span class="nt">-d</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nb">echo</span> <span class="s2">"Source instructions folder not found: </span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&gt;</span>&amp;2
-  <span class="nb">exit </span>1
-<span class="k">fi
-
-</span><span class="nb">mkdir</span> <span class="nt">-p</span> <span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">"</span>
-
-<span class="k">if</span> <span class="o">[[</span> <span class="nt">-e</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="o">!</span> <span class="nt">-L</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  if</span> <span class="o">[[</span> <span class="nv">$FORCE</span> <span class="nt">-eq</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then
-    </span><span class="nb">rm</span> <span class="nt">-rf</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span>
-  <span class="k">else
-    </span><span class="nb">echo</span> <span class="s2">"Destination exists and is not a symlink: </span><span class="nv">$DEST</span><span class="s2"> (use --force)"</span> <span class="o">&gt;</span>&amp;2
-    <span class="nb">exit </span>1
-  <span class="k">fi
-fi
-
-if</span> <span class="o">[[</span> <span class="nt">-L</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nv">TARGET</span><span class="o">=</span><span class="si">$(</span><span class="nb">readlink</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span><span class="si">)</span>
-  <span class="nv">ABS_TARGET</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="si">$(</span><span class="nb">dirname</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span><span class="si">)</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">cd</span> <span class="s2">"</span><span class="nv">$TARGET</span><span class="s2">"</span> 2&gt;/dev/null <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span> <span class="o">||</span> <span class="nb">true</span><span class="si">)</span>
-  <span class="k">if</span> <span class="o">[[</span> <span class="s2">"</span><span class="nv">$ABS_TARGET</span><span class="s2">"</span> <span class="o">==</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nv">$FORCE</span> <span class="nt">-ne</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then
-    </span><span class="nb">echo</span> <span class="s2">"Symlink already correct. Nothing to do."</span>
-    <span class="nb">exit </span>0
-  <span class="k">else
-    </span><span class="nb">rm</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span>
-  <span class="k">fi
-fi
-
-</span><span class="nv">LINK_TARGET</span><span class="o">=</span><span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span>
-<span class="k">if</span> <span class="o">[[</span> <span class="nv">$RELATIVE</span> <span class="nt">-eq</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
-  <span class="c"># compute relative path from DEST_PARENT to SOURCE</span>
-  <span class="nv">LINK_TARGET</span><span class="o">=</span><span class="si">$(</span>python3 - <span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&lt;&lt;</span><span class="sh">'</span><span class="no">PY</span><span class="sh">'
-import os,sys
-base=sys.argv[1]
-target=sys.argv[2]
-print(os.path.relpath(target, start=base))
-</span><span class="no">PY
-</span>  <span class="si">)</span>
-<span class="k">fi
-
-</span><span class="nb">ln</span> <span class="nt">-s</span> <span class="s2">"</span><span class="nv">$LINK_TARGET</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span>
-<span class="nb">echo</span> <span class="s2">"Created symlink: </span><span class="nv">$DEST</span><span class="s2"> -&gt; </span><span class="nv">$LINK_TARGET</span><span class="s2">"</span>
-
-<span class="c"># Ensure .gitignore entry</span>
-<span class="nv">GI</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">/.gitignore"</span>
-<span class="nv">ENTRY</span><span class="o">=</span><span class="s1">'github/instructions/shared/'</span>
-<span class="k">if</span> <span class="o">[[</span> <span class="nt">-f</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  if</span> <span class="o">!</span> <span class="nb">grep</span> <span class="nt">-Fxq</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span><span class="p">;</span> <span class="k">then
-    </span><span class="nb">printf</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">%s</span><span class="se">\n</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="o">&gt;&gt;</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span>
-    <span class="nb">echo</span> <span class="s2">"Appended to .gitignore: </span><span class="nv">$ENTRY</span><span class="s2">"</span>
-  <span class="k">fi
-else
-  </span><span class="nb">printf</span> <span class="s1">'# Added automatically to ignore shared instructions\n%s\n'</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="o">&gt;</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span>
-  <span class="nb">echo</span> <span class="s2">"Created .gitignore with entry: </span><span class="nv">$ENTRY</span><span class="s2">"</span>
-<span class="k">fi
-
-</span><span class="nb">echo</span> <span class="s2">"Done."</span>
-</code></pre></div></div>
-
-<p>This Bash script automates the creation or refreshing of a symbolic link in a project repository, pointing to an instructions folder in a separate GitHub Copilot repository. Its main purpose is to ensure that the project always has access to shared instructions, without duplicating files.</p>
-
-<p>The script accepts several command-line arguments: –copilot specifies the path to the GitHub Copilot repo, –project specifies the path to the project repo, –force allows overwriting an existing destination, and –relative creates a relative symlink instead of an absolute one. It validates that both source and destination paths are provided and resolves them to absolute paths for reliability.</p>
-
-<p>Before creating the symlink, the script checks if the source directory exists. It then prepares the destination parent directory. If the destination already exists and is not a symlink, it will only remove it if the –force flag is set. If the destination is a symlink but points to the wrong target, it will be replaced. The script can compute a relative path for the symlink using a short Python snippet if requested.</p>
-
-<p>After creating the symlink, the script ensures that the new link is ignored by Git by adding an entry to the project’s <code class="language-plaintext highlighter-rouge">.gitignore</code> file. If the file does not exist, it creates one with the appropriate entry. This prevents accidental commits of the shared instructions link. The script provides clear output messages for each major step, helping users understand what actions were taken.</p>
-
-<h3 id="mac-script-create-shared-link-macsh">Mac Script (<code class="language-plaintext highlighter-rouge">create-shared-link-mac.sh</code>)</h3>
-
-<p>Here is the macOS script generated from the prompt:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/usr/bin/env bash</span>
-<span class="c"># macOS version (identical logic to linux script; kept separate for clarity &amp; customization).</span>
-<span class="nb">set</span> <span class="nt">-euo</span> pipefail
-
-<span class="c"># See linux script for detailed commentary.</span>
-
-<span class="nb">set</span> +u
-<span class="nv">FORCE</span><span class="o">=</span>0
-<span class="nv">RELATIVE</span><span class="o">=</span>0
-<span class="nv">COPILOT</span><span class="o">=</span><span class="s2">""</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">""</span>
-<span class="nb">set</span> <span class="nt">-u</span>
-
-<span class="k">while</span> <span class="o">[[</span> <span class="nv">$# </span><span class="nt">-gt</span> 0 <span class="o">]]</span><span class="p">;</span> <span class="k">do
-  case</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span> <span class="k">in</span>
-    <span class="nt">--copilot</span><span class="p">)</span> <span class="nv">COPILOT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$2</span><span class="s2">"</span><span class="p">;</span> <span class="nb">shift </span>2<span class="p">;;</span>
-    <span class="nt">--project</span><span class="p">)</span> <span class="nv">PROJECT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$2</span><span class="s2">"</span><span class="p">;</span> <span class="nb">shift </span>2<span class="p">;;</span>
-    <span class="nt">--force</span><span class="p">)</span> <span class="nv">FORCE</span><span class="o">=</span>1<span class="p">;</span> <span class="nb">shift</span><span class="p">;;</span>
-    <span class="nt">--relative</span><span class="p">)</span> <span class="nv">RELATIVE</span><span class="o">=</span>1<span class="p">;</span> <span class="nb">shift</span><span class="p">;;</span>
-    <span class="nt">-h</span><span class="p">|</span><span class="nt">--help</span><span class="p">)</span>
-      <span class="nb">grep</span> <span class="s1">'^#'</span> <span class="s2">"</span><span class="nv">$0</span><span class="s2">"</span> | <span class="nb">sed</span> <span class="s1">'s/^# //'</span>
-      <span class="nb">exit </span>0
-      <span class="p">;;</span>
-    <span class="k">*</span><span class="p">)</span> <span class="nb">echo</span> <span class="s2">"Unknown arg: </span><span class="nv">$1</span><span class="s2">"</span> <span class="o">&gt;</span>&amp;2<span class="p">;</span> <span class="nb">exit </span>1<span class="p">;;</span>
-  <span class="k">esac</span>
-<span class="k">done
-
-if</span> <span class="o">[[</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">"</span> <span class="o">||</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nb">echo</span> <span class="s2">"--copilot and --project are required"</span> <span class="o">&gt;</span>&amp;2
-  <span class="nb">exit </span>1
-<span class="k">fi
-
-</span><span class="nv">COPILOT</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span><span class="si">)</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span><span class="si">)</span>
-<span class="nv">SOURCE</span><span class="o">=</span><span class="s2">"</span><span class="nv">$COPILOT</span><span class="s2">/instructions"</span>
-<span class="nv">DEST_PARENT</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">/github/instructions"</span>
-<span class="nv">DEST</span><span class="o">=</span><span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">/shared"</span>
-
-<span class="o">[[</span> <span class="nt">-d</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">]]</span> <span class="o">||</span> <span class="o">{</span> <span class="nb">echo</span> <span class="s2">"Source instructions folder not found: </span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&gt;</span>&amp;2<span class="p">;</span> <span class="nb">exit </span>1<span class="p">;</span> <span class="o">}</span>
-<span class="nb">mkdir</span> <span class="nt">-p</span> <span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">"</span>
-
-<span class="k">if</span> <span class="o">[[</span> <span class="nt">-e</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="o">!</span> <span class="nt">-L</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  if</span> <span class="o">[[</span> <span class="nv">$FORCE</span> <span class="nt">-eq</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then </span><span class="nb">rm</span> <span class="nt">-rf</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span><span class="p">;</span> <span class="k">else </span><span class="nb">echo</span> <span class="s2">"Destination exists and is not a symlink (use --force): </span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">&gt;</span>&amp;2<span class="p">;</span> <span class="nb">exit </span>1<span class="p">;</span> <span class="k">fi
-fi
-
-if</span> <span class="o">[[</span> <span class="nt">-L</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nv">TARGET</span><span class="o">=</span><span class="si">$(</span><span class="nb">readlink</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span><span class="si">)</span>
-  <span class="nv">ABS_TARGET</span><span class="o">=</span><span class="si">$(</span><span class="nb">cd</span> <span class="s2">"</span><span class="si">$(</span><span class="nb">dirname</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span><span class="si">)</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nb">cd</span> <span class="s2">"</span><span class="nv">$TARGET</span><span class="s2">"</span> 2&gt;/dev/null <span class="o">&amp;&amp;</span> <span class="nb">pwd</span> <span class="nt">-P</span> <span class="o">||</span> <span class="nb">true</span><span class="si">)</span>
-  <span class="k">if</span> <span class="o">[[</span> <span class="s2">"</span><span class="nv">$ABS_TARGET</span><span class="s2">"</span> <span class="o">==</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nv">$FORCE</span> <span class="nt">-ne</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then
-    </span><span class="nb">echo</span> <span class="s2">"Symlink already correct. Nothing to do."</span><span class="p">;</span> <span class="nb">exit </span>0
-  <span class="k">else
-    </span><span class="nb">rm</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span>
-  <span class="k">fi
-fi
-
-</span><span class="nv">LINK_TARGET</span><span class="o">=</span><span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span>
-<span class="k">if</span> <span class="o">[[</span> <span class="nv">$RELATIVE</span> <span class="nt">-eq</span> 1 <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nv">LINK_TARGET</span><span class="o">=</span><span class="si">$(</span>python3 - <span class="s2">"</span><span class="nv">$DEST_PARENT</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">"</span> <span class="o">&lt;&lt;</span><span class="sh">'</span><span class="no">PY</span><span class="sh">'
-import os,sys
-print(os.path.relpath(sys.argv[2], start=sys.argv[1]))
-</span><span class="no">PY
-</span>  <span class="si">)</span>
-<span class="k">fi
-
-</span><span class="nb">ln</span> <span class="nt">-s</span> <span class="s2">"</span><span class="nv">$LINK_TARGET</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$DEST</span><span class="s2">"</span>
-<span class="nb">echo</span> <span class="s2">"Created symlink: </span><span class="nv">$DEST</span><span class="s2"> -&gt; </span><span class="nv">$LINK_TARGET</span><span class="s2">"</span>
-
-<span class="nv">GI</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PROJECT</span><span class="s2">/.gitignore"</span>
-<span class="nv">ENTRY</span><span class="o">=</span><span class="s1">'github/instructions/shared/'</span>
-<span class="k">if</span> <span class="o">[[</span> <span class="nt">-f</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nb">grep</span> <span class="nt">-Fxq</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span> <span class="o">||</span> <span class="o">{</span> <span class="nb">printf</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">%s</span><span class="se">\n</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="o">&gt;&gt;</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span><span class="p">;</span> <span class="nb">echo</span> <span class="s2">"Appended to .gitignore: </span><span class="nv">$ENTRY</span><span class="s2">"</span><span class="p">;</span> <span class="o">}</span>
-<span class="k">else
-  </span><span class="nb">printf</span> <span class="s1">'# Added automatically to ignore shared instructions\n%s\n'</span> <span class="s2">"</span><span class="nv">$ENTRY</span><span class="s2">"</span> <span class="o">&gt;</span> <span class="s2">"</span><span class="nv">$GI</span><span class="s2">"</span><span class="p">;</span> <span class="nb">echo</span> <span class="s2">"Created .gitignore with entry: </span><span class="nv">$ENTRY</span><span class="s2">"</span>
-<span class="k">fi
-
-</span><span class="nb">echo</span> <span class="s2">"Done."</span>
-</code></pre></div></div>
-
-<p>The macOS script and the Linux script are functionally identical. The logic, argument parsing, symlink creation, and .gitignore handling are the same. The scripts are kept separate for clarity and potential future customization, but currently, there are no substantive differences in their code or behavior.</p>
-
-<p>Key Points:</p>
-
-<ul>
-  <li>Both scripts use Bash and similar flags (set -euo pipefail).</li>
-  <li>Argument parsing and validation are identical.</li>
-  <li>Symlink creation and .gitignore updates follow the same steps.</li>
-  <li>The only difference is the comment at the top indicating the target OS.</li>
-</ul>
-
-<p><em>Gotcha:</em> If you need OS-specific behavior (e.g., handling macOS quirks), you can customize the macOS script independently without affecting the Linux version.</p>
-
-<h3 id="windows-script-create-shared-link-windowsps1">Windows Script (<code class="language-plaintext highlighter-rouge">create-shared-link-windows.ps1</code>)</h3>
-
-<p>Here is the Windows script generated from the prompt:</p>
-
-<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">&lt;#
-Creates (or refreshes) a junction in a Project repo pointing to the shared ./instructions folder
-inside this GitHubCopilot repo.
-
-Junction (target created): &lt;ProjectRepo&gt;\github\instructions\shared
-Points to (source):        &lt;GitHubCopilotRepo&gt;\instructions
-
-Parameters:
-  -GitHubCopilotRepo   Path to the GitHubCopilot repo root (where the ./instructions folder lives)
-  -ProjectRepo         Path to the target Project repo root (where ./github/instructions/shared will be created)
-  -Force               If specified, will remove any existing file/dir/junction at the destination
-
-Steps performed:
- 1. Validate paths
- 2. Ensure Project repo ./github/instructions parent folders exist
- 3. Ensure destination removed if Force (or is an existing junction to wrong target)
- 4. Create junction via New-Item -ItemType Junction
- 5. Add github/instructions/shared/ to Project .gitignore (create file if needed)
-
-Usage examples:
-  .\create-shared-link-windows.ps1 -GitHubCopilotRepo C:\git\GitHubCopilot -ProjectRepo C:\git\MyProject
-  .\create-shared-link-windows.ps1 -GitHubCopilotRepo ..\GitHubCopilot -ProjectRepo . -Force
-
-#&gt;</span><span class="w">
-</span><span class="p">[</span><span class="n">CmdletBinding</span><span class="p">(</span><span class="bp">SupportsShouldProcess</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="p">)]</span><span class="w">
-</span><span class="kr">param</span><span class="p">(</span><span class="w">
-    </span><span class="p">[</span><span class="n">Parameter</span><span class="p">(</span><span class="n">Mandatory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="p">)]</span><span class="w"> </span><span class="p">[</span><span class="n">string</span><span class="p">]</span><span class="w"> </span><span class="nv">$GitHubCopilotRepo</span><span class="p">,</span><span class="w">
-    </span><span class="p">[</span><span class="n">Parameter</span><span class="p">(</span><span class="n">Mandatory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="p">)]</span><span class="w"> </span><span class="p">[</span><span class="n">string</span><span class="p">]</span><span class="w"> </span><span class="nv">$ProjectRepo</span><span class="p">,</span><span class="w">
-    </span><span class="p">[</span><span class="n">switch</span><span class="p">]</span><span class="w"> </span><span class="nv">$Force</span><span class="w">
-</span><span class="p">)</span><span class="w">
-
-</span><span class="n">Set-StrictMode</span><span class="w"> </span><span class="nt">-Version</span><span class="w"> </span><span class="nx">Latest</span><span class="w">
-</span><span class="bp">$Error</span><span class="n">ActionPreference</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'Stop'</span><span class="w">
-
-</span><span class="kr">function</span><span class="w"> </span><span class="nf">Resolve-FullPath</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="kr">param</span><span class="p">([</span><span class="n">string</span><span class="p">]</span><span class="nv">$Path</span><span class="p">)</span><span class="w">
-    </span><span class="kr">return</span><span class="w"> </span><span class="p">([</span><span class="n">IO.Path</span><span class="p">]::</span><span class="n">GetFullPath</span><span class="p">((</span><span class="n">Resolve-Path</span><span class="w"> </span><span class="nt">-LiteralPath</span><span class="w"> </span><span class="nv">$Path</span><span class="p">)</span><span class="o">.</span><span class="nf">Path</span><span class="p">))</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="kr">function</span><span class="w"> </span><span class="nf">Add-GitIgnoreEntry</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="kr">param</span><span class="p">(</span><span class="w">
-        </span><span class="p">[</span><span class="n">string</span><span class="p">]</span><span class="nv">$RepoRoot</span><span class="p">,</span><span class="w">
-        </span><span class="p">[</span><span class="n">string</span><span class="p">]</span><span class="nv">$RelativeEntry</span><span class="w">
-    </span><span class="p">)</span><span class="w">
-    </span><span class="nv">$gitIgnorePath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Join-Path</span><span class="w"> </span><span class="nv">$RepoRoot</span><span class="w"> </span><span class="s1">'.gitignore'</span><span class="w">
-    </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="o">-not</span><span class="w"> </span><span class="p">(</span><span class="n">Test-Path</span><span class="w"> </span><span class="nv">$gitIgnorePath</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="s2">"# Added automatically to ignore shared instructions</span><span class="se">`n</span><span class="nv">$RelativeEntry</span><span class="se">`n</span><span class="s2">"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">Out-File</span><span class="w"> </span><span class="nt">-FilePath</span><span class="w"> </span><span class="nv">$gitIgnorePath</span><span class="w"> </span><span class="nt">-Encoding</span><span class="w"> </span><span class="nx">utf8</span><span class="w"> </span><span class="nt">-NoNewline</span><span class="w">
-        </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Created .gitignore and added entry: </span><span class="nv">$RelativeEntry</span><span class="s2">"</span><span class="w">
-        </span><span class="kr">return</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-    </span><span class="nv">$content</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Get-Content</span><span class="w"> </span><span class="nv">$gitIgnorePath</span><span class="w"> </span><span class="nt">-Raw</span><span class="w">
-    </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$content</span><span class="w"> </span><span class="o">-notmatch</span><span class="w"> </span><span class="p">[</span><span class="n">regex</span><span class="p">]::</span><span class="n">Escape</span><span class="p">(</span><span class="nv">$RelativeEntry</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="n">Add-Content</span><span class="w"> </span><span class="nt">-Path</span><span class="w"> </span><span class="nv">$gitIgnorePath</span><span class="w"> </span><span class="nt">-Value</span><span class="w"> </span><span class="s2">"</span><span class="se">`n</span><span class="nv">$RelativeEntry</span><span class="s2">"</span><span class="w"> </span><span class="nt">-Encoding</span><span class="w"> </span><span class="nx">utf8</span><span class="w">
-        </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Appended to .gitignore: </span><span class="nv">$RelativeEntry</span><span class="s2">"</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-    </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">".gitignore already contains entry."</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="c"># Resolve absolute paths</span><span class="w">
-</span><span class="nv">$gitHubCopilotRoot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Resolve-FullPath</span><span class="w"> </span><span class="nv">$GitHubCopilotRepo</span><span class="w">
-</span><span class="nv">$projectRoot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Resolve-FullPath</span><span class="w"> </span><span class="nv">$ProjectRepo</span><span class="w">
-
-</span><span class="nv">$source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Join-Path</span><span class="w"> </span><span class="nv">$gitHubCopilotRoot</span><span class="w"> </span><span class="s1">'instructions'</span><span class="w">
-</span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="o">-not</span><span class="w"> </span><span class="p">(</span><span class="n">Test-Path</span><span class="w"> </span><span class="nv">$source</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">throw</span><span class="w"> </span><span class="s2">"Source instructions folder not found: </span><span class="nv">$source</span><span class="s2">"</span><span class="w"> </span><span class="p">}</span><span class="w">
-
-</span><span class="nv">$destParent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Join-Path</span><span class="w"> </span><span class="nv">$projectRoot</span><span class="w"> </span><span class="s1">'github/instructions'</span><span class="w">
-</span><span class="nv">$dest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Join-Path</span><span class="w"> </span><span class="nv">$destParent</span><span class="w"> </span><span class="s1">'shared'</span><span class="w">
-
-</span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="o">-not</span><span class="w"> </span><span class="p">(</span><span class="n">Test-Path</span><span class="w"> </span><span class="nv">$destParent</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Creating parent directories: </span><span class="nv">$destParent</span><span class="s2">"</span><span class="w">
-    </span><span class="n">New-Item</span><span class="w"> </span><span class="nt">-ItemType</span><span class="w"> </span><span class="nx">Directory</span><span class="w"> </span><span class="nt">-Path</span><span class="w"> </span><span class="nv">$destParent</span><span class="w"> </span><span class="nt">-Force</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">Out-Null</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="kr">function</span><span class="w"> </span><span class="nf">Remove-ExistingDestination</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">Test-Path</span><span class="w"> </span><span class="nv">$dest</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="nv">$item</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Get-Item</span><span class="w"> </span><span class="nt">-LiteralPath</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-        </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$item</span><span class="o">.</span><span class="nf">Attributes</span><span class="w"> </span><span class="o">-band</span><span class="w"> </span><span class="p">[</span><span class="n">IO.FileAttributes</span><span class="p">]::</span><span class="n">ReparsePoint</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Removing existing junction: </span><span class="nv">$dest</span><span class="s2">"</span><span class="w">
-            </span><span class="n">Remove-Item</span><span class="w"> </span><span class="nt">-LiteralPath</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-        </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$Force</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-                </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Removing existing non-junction item at destination due to -Force: </span><span class="nv">$dest</span><span class="s2">"</span><span class="w">
-                </span><span class="n">Remove-Item</span><span class="w"> </span><span class="nt">-LiteralPath</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nt">-Recurse</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-            </span><span class="p">}</span><span class="w">
-            </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w">
-                </span><span class="kr">throw</span><span class="w"> </span><span class="s2">"Destination exists and is not a junction. Use -Force to remove: </span><span class="nv">$dest</span><span class="s2">"</span><span class="w">
-            </span><span class="p">}</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">Test-Path</span><span class="w"> </span><span class="nv">$dest</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="nv">$existing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Get-Item</span><span class="w"> </span><span class="nt">-LiteralPath</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nt">-Force</span><span class="w">
-    </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$existing</span><span class="o">.</span><span class="nf">Attributes</span><span class="w"> </span><span class="o">-band</span><span class="w"> </span><span class="p">[</span><span class="n">IO.FileAttributes</span><span class="p">]::</span><span class="n">ReparsePoint</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="c"># Try to read target (fsutil works on admin shells; fallback simply recreate if Force)</span><span class="w">
-        </span><span class="nv">$needsReplace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$false</span><span class="w">
-        </span><span class="kr">try</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="nv">$targetInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">fsutil</span><span class="w"> </span><span class="nx">reparsepoint</span><span class="w"> </span><span class="nx">query</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nx">2</span><span class="err">&gt;</span><span class="bp">$null</span><span class="p">)</span><span class="w">
-            </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$targetInfo</span><span class="w"> </span><span class="o">-match</span><span class="w"> </span><span class="s1">'Print Name: (?&lt;t&gt;.+)$'</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-                </span><span class="nv">$currentTarget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$Matches</span><span class="p">[</span><span class="s1">'t'</span><span class="p">]</span><span class="w">
-                </span><span class="kr">if</span><span class="w"> </span><span class="p">((</span><span class="n">Resolve-FullPath</span><span class="w"> </span><span class="nv">$currentTarget</span><span class="p">)</span><span class="w"> </span><span class="o">-ne</span><span class="w"> </span><span class="nv">$source</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">$needsReplace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="w"> </span><span class="p">}</span><span class="w">
-            </span><span class="p">}</span><span class="w">
-            </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">$needsReplace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="w"> </span><span class="p">}</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-        </span><span class="kr">catch</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">$needsReplace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$true</span><span class="w"> </span><span class="p">}</span><span class="w">
-        </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nv">$needsReplace</span><span class="w"> </span><span class="o">-or</span><span class="w"> </span><span class="nv">$Force</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="n">Remove-ExistingDestination</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-        </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w">
-            </span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Junction already points to desired source. Nothing to do."</span><span class="w"> </span><span class="nt">-ForegroundColor</span><span class="w"> </span><span class="nx">Green</span><span class="w">
-            </span><span class="n">Add-GitIgnoreEntry</span><span class="w"> </span><span class="nt">-RepoRoot</span><span class="w"> </span><span class="nv">$projectRoot</span><span class="w"> </span><span class="nt">-RelativeEntry</span><span class="w"> </span><span class="s1">'github/instructions/shared/'</span><span class="w">
-            </span><span class="kr">return</span><span class="w">
-        </span><span class="p">}</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-    </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="n">Remove-ExistingDestination</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Creating junction: </span><span class="nv">$dest</span><span class="s2"> -&gt; </span><span class="nv">$source</span><span class="s2">"</span><span class="w">
-</span><span class="n">New-Item</span><span class="w"> </span><span class="nt">-ItemType</span><span class="w"> </span><span class="nx">Junction</span><span class="w"> </span><span class="nt">-Path</span><span class="w"> </span><span class="nv">$dest</span><span class="w"> </span><span class="nt">-Target</span><span class="w"> </span><span class="nv">$source</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">Out-Null</span><span class="w">
-</span><span class="nx">Write-Host</span><span class="w"> </span><span class="s2">"Junction created successfully."</span><span class="w"> </span><span class="nt">-ForegroundColor</span><span class="w"> </span><span class="nx">Green</span><span class="w">
-
-</span><span class="n">Add-GitIgnoreEntry</span><span class="w"> </span><span class="nt">-RepoRoot</span><span class="w"> </span><span class="nv">$projectRoot</span><span class="w"> </span><span class="nt">-RelativeEntry</span><span class="w"> </span><span class="s1">'github/instructions/shared/'</span><span class="w">
-
-</span><span class="n">Write-Host</span><span class="w"> </span><span class="s2">"Done."</span><span class="w">
-</span></code></pre></div></div>
-
-<p>The Windows script (<code class="language-plaintext highlighter-rouge">create-shared-link-windows.ps1</code>) and the MacOS script (<code class="language-plaintext highlighter-rouge">create-shared-link-macos.sh</code>) both create a link from a project repo to a shared instructions folder, but they differ in several key ways aside from language and platform-specific commands.</p>
-
-<h4 id="link-type">Link Type</h4>
-
-<p>Windows: Creates a NTFS junction using PowerShell’s New-Item -ItemType Junction.
-MacOS: Creates a symbolic link using <code class="language-plaintext highlighter-rouge">ln -s</code> in Bash.</p>
-
-<h4 id="existing-destination-handling">Existing Destination Handling</h4>
-
-<p>Windows: Checks if the destination is a junction or another file type, removes or throws errors accordingly, supports a <code class="language-plaintext highlighter-rouge">-Force</code> flag.
-MacOS: Removes existing destination with <code class="language-plaintext highlighter-rouge">rm -rf</code> if the <code class="language-plaintext highlighter-rouge">--force</code> flag is set.</p>
-
-<h2 id="summary">Summary</h2>
-
-<p>The Windows script is more complex due to NTFS junctions and PowerShell features, while the MacOS script is simpler, relying on Unix symlinks and shell commands. Both achieve the same goal but are tailored to their respective operating systems.</p>
-
-<p>Running the scripts requires appropriate permissions, especially for creating links and modifying directories. Users should ensure they have the necessary rights to execute these scripts in their environments.</p>
-
-<p>This solution provides a simple way of sharing instruction files across multiple projects without duplication, ensuring consistency and ease of maintenance.</p>
-
-<h2 id="feedback-loop">Feedback Loop</h2>
-
-<p>Feedback is always welcome. Please direct it to <a href="mailto:AIP@pdata.com" target="_blank">AIP@pdata.com</a></p>
-
-<h3 id="disclaimer">Disclaimer</h3>
-
-<p>AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul.</p>
-
-<p>Prompts:</p>
-
-<ul>
-  <li>Write a two paragraph introduction to GitHub copilot instruction files</li>
-  <li>/explain</li>
-  <li>Write a paragraph describing where instruction files can be located and the pros and cons of each location.</li>
-  <li>What is a symlink and junction point?</li>
-  <li>Describe the differences between the Linux script and the maCOS script</li>
-</ul>
-
-<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/SIWT">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="GitHub" /><category term="Copilot" /><category term="DevOps" /><category term="Tips" /><summary type="html"><![CDATA[When working with GitHub Copilot across multiple projects, you’ll quickly face a common challenge: how do you share generic instructions (ie. coding standards and best practices) with team members working on different projects without duplicating instruction files in every repository? This post walks you through prompting Copilot to implement a solution leveraging symlinks and junction points.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-08-30/header-SIWT.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-08-30/header-SIWT.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 1: Business Requirements</title><link href="https://blog.pdata.com/AIAGSD1/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 1: Business Requirements" /><published>2025-08-30T00:00:00-07:00</published><updated>2025-08-30T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD1</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD1/"><![CDATA[<p>This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot.</p>
+<p><small><small><small>Original <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD2">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="copilot" /><category term="best-practices" /><category term="instruction-files" /><summary type="html"><![CDATA[This is the second post in the series on AI assisted greenfield software development. This post builds on the first post AI-Assisted Greenfield Software Development - Part 1 Business Requirements. If you haven’t read that post, you might want to start there. In this post I’ll cover the instructions, prompts, and chat modes I used to start to lay down the guidance for turning requirements into code. These files are critical for controlling the AI output and having a comprehensive set of instructions, prompts, and chat modes greatly increase the chances of getting AI to produce something usable.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-09-24/header-AIAGSD2.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-09-24/header-AIAGSD2.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 1: Business Requirements</title><link href="https://blog.pdata.com/AIAGSD1/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 1: Business Requirements" /><published>2025-08-30T00:00:00-07:00</published><updated>2025-08-30T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD1</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD1/"><![CDATA[<p>This post starts a new series on greenfield software development. The goal is to show the development of a solution starting with the initial context and adding to the solution incrementally. Hopefully you’ll get a sense for what it’s like to build real-world solutions with the assistance of Copilot.</p>
 
 <p>In this first installment we’ll look at the initial context provided to Copilot. This will include the initial instructions and the first prompts submitted to Copilot.</p>
 
