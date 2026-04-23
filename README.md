@@ -59,6 +59,18 @@ jMM's AI Practitioner Blog
    ```
    Visit http://localhost:4000 in your browser.
 
+---
+   ```powershell
+   cd jekyll-src
+   bundle install
+   bundle exec jekyll build --destination ../docs
+   git add jekyll-src/ docs/
+   git commit -m "Transfer repo to j0hnnymiller"
+   git push origin main
+   ```
+
+---
+
 ### Publishing Changes
 
 1. Build the site using the command above
