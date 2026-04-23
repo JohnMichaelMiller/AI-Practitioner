@@ -60,14 +60,15 @@ jMM's AI Practitioner Blog
    Visit http://localhost:4000 in your browser.
 
 ---
-   ```powershell
-   cd jekyll-src
-   bundle install
-   bundle exec jekyll build --destination ../docs
-   git add jekyll-src/ docs/
-   git commit -m "Transfer repo to j0hnnymiller"
-   git push origin main
-   ```
+
+```powershell
+cd jekyll-src
+bundle install
+bundle exec jekyll build --destination ../docs
+git add jekyll-src/ docs/
+git commit -m "Transfer repo to j0hnnymiller"
+git push origin main
+```
 
 ---
 
@@ -126,3 +127,7 @@ This repository includes tools for managing multiple GitHub accounts:
 ## Copilot Prompts
 
 - **[.github/prompts/create-blog-section.prompt.md](.github/prompts/create-blog-section.prompt.md)**: Reusable prompt to generate or revise a single AIAGSD-style blog section with explicit constraints and scope.
+
+## CODE Publication Copies
+
+- **[CODE/2026-04-17-AIAGSD7.md](CODE/2026-04-17-AIAGSD7.md)**: CODE Magazine publication copy of AIAGSD Part 7 with CODE links/contact details preserved for publication workflow.
