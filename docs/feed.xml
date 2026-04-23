@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-04-21T08:15:58-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 7: Implementation Prompts</title><link href="https://blog.pdata.com/AIAGSD7/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 7: Implementation Prompts" /><published>2026-04-17T00:00:00-07:00</published><updated>2026-04-17T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD7</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD7/"><![CDATA[<p>This post introduces the working framework for AI-assisted delivery in the Zeus Academia repository. Its purpose is to create the structure needed to plan, specify, and implement work in a disciplined way. The core addition is the repository guidance for custom agents, vertical-slice implementation, and Academia-specific workflow modeling. This provides the context AI needs so that future implementation work can be driven by explicit roles, repeatable prompts, and domain-aware plans instead of ad-hoc instructions.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-04-22T10:36:17-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 7: Implementation Prompts</title><link href="https://blog.pdata.com/AIAGSD7/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 7: Implementation Prompts" /><published>2026-04-17T00:00:00-07:00</published><updated>2026-04-17T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD7</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD7/"><![CDATA[<p>This post introduces the working framework for AI-assisted delivery in the Zeus Academia repository. Its purpose is to create the structure needed to plan, specify, and implement work in a disciplined way. The core addition is the repository guidance for custom agents, vertical-slice implementation, and Academia-specific workflow modeling. This provides the context AI needs so that future implementation work can be driven by explicit roles, repeatable prompts, and domain-aware plans instead of ad-hoc instructions.</p>
 
 <!--more-->
 
@@ -37,11 +37,11 @@
 
 <p>Like any other AI-generated artifact, I want the implementation prompts to follow a standard pattern and to be explicit about both intent and expectations.</p>
 
-<h4 id="project-overviewinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/instructions/project-overview.instructions.md">project-overview.instructions.md</a></h4>
+<h4 id="project-overviewinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/instructions/project-overview.instructions.md">project-overview.instructions.md</a></h4>
 
 <p>Submitting the <code class="language-plaintext highlighter-rouge">create-project-overview.prompt.md</code> prompt generates the <code class="language-plaintext highlighter-rouge">project-overview.instructions.md</code> instruction file containing repository-wide project overview instructions for zeus.academia that defines the application as a full-stack academic management web app and establishes shared context for AI-assisted work: it captures architecture, coding and testing standards across language, deployment and environment targets, key operational constraints, core implementation patterns, and a curated set of critical instruction files that govern development workflow, branching, custom agents, prompt practices, and provenance requirements.</p>
 
-<h4 id="implementation-prompt-generationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/instructions/implementation-prompt-generation.instructions.md">implementation-prompt-generation.instructions.md</a></h4>
+<h4 id="implementation-prompt-generationinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/instructions/implementation-prompt-generation.instructions.md">implementation-prompt-generation.instructions.md</a></h4>
 
 <p>The <code class="language-plaintext highlighter-rouge">implementation-prompt-generation.instructions.md</code> file defines the standard for writing implementation prompts for the Academia vertical slices.</p>
 
@@ -53,19 +53,19 @@
 
 <p>It specifies the preferred structure for implementation prompts, including objective, scope boundaries, agent plan, implementation steps, behavioral acceptance criteria, verification plan, showcase steps, output artifacts, and a validation checklist. It also makes the quality bar explicit by requiring observable and testable outcomes, human-executable demo steps, concrete verification commands, and disclosure of any missing agent dependencies, so the resulting prompts are concise, executable, and usable by both AI agents and human reviewers.</p>
 
-<h4 id="create-implementation-prompt-generation-instructionspromptmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/create-implementation-prompt-generation-instructions.prompt.md">create-implementation-prompt-generation-instructions.prompt.md</a></h4>
+<h4 id="create-implementation-prompt-generation-instructionspromptmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/create-implementation-prompt-generation-instructions.prompt.md">create-implementation-prompt-generation-instructions.prompt.md</a></h4>
 
 <p>The <code class="language-plaintext highlighter-rouge">create-implementation-prompt-generation-instructions.prompt.md</code> file generates the <code class="language-plaintext highlighter-rouge">implementation-prompt-generation.instructions.md</code> instruction file. I usually start with an ad hoc prompt to create the instruction file, and once the result is working, I convert that prompt into a checked-in prompt file so it can be versioned, traced, and reused.</p>
 
-<h4 id="implementation-promptinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/instructions/implementation-prompt.instructions.md">implementation-prompt.instructions.md</a></h4>
+<h4 id="implementation-promptinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/instructions/implementation-prompt.instructions.md">implementation-prompt.instructions.md</a></h4>
 
 <p><code class="language-plaintext highlighter-rouge">implementation-prompt.instructions.md</code> sets the repository standard for authoring vertical-slice implementation prompts: each prompt must cover one bounded slice, be grounded in existing repo evidence (instructions, agents, and prior prompts), define explicit multi-role agent ownership and handoffs (with escalation triggers), follow a fixed section order, provide numbered actionable steps with targets/owners/validation gates, include observable and testable acceptance criteria, separate implementation from verification with required evidence capture, and end with human-run showcase steps proving business value; it also prescribes role preferences (for example using report-projection for reporting-heavy work and data-persistence for schema-heavy work), includes a reusable template plus anti-patterns/checklists, and requires ongoing alignment of prompts with shared agent profiles and project-overview references.</p>
 
-<h4 id="create-implementation-prompt-instructionspromptmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/create-implementation-prompt-instructions.prompt.md">create-implementation-prompt-instructions.prompt.md</a></h4>
+<h4 id="create-implementation-prompt-instructionspromptmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/create-implementation-prompt-instructions.prompt.md">create-implementation-prompt-instructions.prompt.md</a></h4>
 
 <p><code class="language-plaintext highlighter-rouge">create-implementation-prompt-instructions</code> is a meta-prompt that instructs an AI to generate a concise, evidence-grounded implementation-instructions file for slice delivery, requiring strict context review of existing project standards, explicit single-slice scope, role-specialized agent orchestration (including named reusable agents and fallbacks), fixed prompt section ordering, concrete numbered implementation steps with file-level targets and handoffs, observable acceptance criteria, separated verification and showcase workflows, reusable template and anti-pattern coverage, and a final validation checklist; it also mandates provenance-complete metadata, cross-reference updates to project overview, and success criteria centered on executable slice plans that humans and agents can both verify and demo.</p>
 
-<h4 id="create-project-overviewpromptmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/create-project-overview.prompt.md">create-project-overview.prompt.md</a></h4>
+<h4 id="create-project-overviewpromptmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/create-project-overview.prompt.md">create-project-overview.prompt.md</a></h4>
 
 <p>Before I could generate slice-level implementation prompts, I needed a repository-wide project overview instruction file that captured the shared architectural and technology context. I used this prompt to create that instruction file in a reusable, provenance-friendly form:</p>
 
@@ -76,7 +76,7 @@
 
 <p>In order to produce the implementation prompts we need to provide clear guidance coordinating the implementation of each slice and there are the implementation prompts that we’ve been driving toward all this time.</p>
 
-<h4 id="academia-execution-planmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/models/workflows/academia-execution-plan.md">academia-execution-plan.md</a></h4>
+<h4 id="academia-execution-planmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/models/workflows/academia-execution-plan.md">academia-execution-plan.md</a></h4>
 
 <p>The project overview and the implementation plan are used to produce an execution plan.</p>
 
@@ -88,7 +88,7 @@
 
 <p>The execution plan differs from the implementation plan in that the implementation plan focuses on delivering features logically, the execution plan is about technical implementation.</p>
 
-<h4 id="academia-implementation-prompts"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/tree/Part-Seven/.github/prompts/academia">Academia Implementation Prompts</a></h4>
+<h4 id="academia-implementation-prompts"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/tree/Part-Seven/.github/prompts/academia">Academia Implementation Prompts</a></h4>
 
 <p>The following prompt generates implementation prompts for all of the slices in the implementation plan.</p>
 
@@ -113,7 +113,7 @@
     <tr>
       <td>EP-0-1</td>
       <td>Shared Kernel</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-0-1-shared-kernel-implementation.prompt.md">ep-0-1-shared-kernel-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-0-1-shared-kernel-implementation.prompt.md">ep-0-1-shared-kernel-implementation.prompt.md</a></td>
       <td>Domain primitives (Academic, Rank, AccessLevel, Degree, University, Extension, AcademicQualification); XOR employment invariant (tenured OR contracted, never both); AccessLevel derived only from Rank; empNr uniqueness; extension uniqueness; Result&lt;T&gt;/Error types; domain event contracts</td>
       <td>Nullable-enabled C#; aggregate guard methods enforce invariants; persistence rules must not contradict aggregate rules; no feature code in this slice</td>
       <td>None</td>
@@ -121,7 +121,7 @@
     <tr>
       <td>EP-1-1</td>
       <td>ManageRanks</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-1-manage-ranks-implementation.prompt.md">ep-1-1-manage-ranks-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-1-manage-ranks-implementation.prompt.md">ep-1-1-manage-ranks-implementation.prompt.md</a></td>
       <td>Accept only P, SL, L rank codes; reject duplicate codes; list ranks with stable codes and access-level mapping</td>
       <td>Single canonical source for rank data; no second rank source of truth; downstream slices rely on one approved set</td>
       <td>EP-0-1</td>
@@ -129,7 +129,7 @@
     <tr>
       <td>EP-1-2</td>
       <td>ManageDegrees</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-2-manage-degrees-implementation.prompt.md">ep-1-2-manage-degrees-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-2-manage-degrees-implementation.prompt.md">ep-1-2-manage-degrees-implementation.prompt.md</a></td>
       <td>Add degree with unique code; reject duplicate codes; list degrees with stable contracts for registration lookups</td>
       <td>Single canonical degree catalog; deterministic list result</td>
       <td>EP-0-1</td>
@@ -137,7 +137,7 @@
     <tr>
       <td>EP-1-3</td>
       <td>ManageUniversities</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-3-manage-universities-implementation.prompt.md">ep-1-3-manage-universities-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-3-manage-universities-implementation.prompt.md">ep-1-3-manage-universities-implementation.prompt.md</a></td>
       <td>Add university with unique code; reject duplicates; list universities with stable reference data</td>
       <td>Single canonical university catalog; deterministic list result</td>
       <td>EP-0-1</td>
@@ -145,7 +145,7 @@
     <tr>
       <td>EP-1-4</td>
       <td>ProvisionExtension</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-4-provision-extension-implementation.prompt.md">ep-1-4-provision-extension-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-4-provision-extension-implementation.prompt.md">ep-1-4-provision-extension-implementation.prompt.md</a></td>
       <td>Provision extension (numeric format only, unique); reject duplicate extNr; deprovision only unassigned extensions; reject deprovisioning of assigned extensions</td>
       <td>Extension uniqueness preserved for all downstream assignment slices; not disposable seed data</td>
       <td>EP-0-1</td>
@@ -153,7 +153,7 @@
     <tr>
       <td>EP-2-1</td>
       <td>RegisterAcademic</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-2-1-register-academic-implementation.prompt.md">ep-2-1-register-academic-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-2-1-register-academic-implementation.prompt.md">ep-2-1-register-academic-implementation.prompt.md</a></td>
       <td>Create academic with valid empNr (unique, length-validated), EmpName (≤15 chars), valid rank, ≥1 qualification (valid degree+university), 1 available extension; derive AccessLevel from rank; reject duplicate empNr, invalid rank, missing qualification, unavailable extension</td>
       <td>Atomic persistence — no partial writes; integration-first test strategy; hard dependency gate — no dependent slices until this passes integration tests</td>
       <td>EP-1-1, EP-1-2, EP-1-3, EP-1-4</td>
@@ -161,7 +161,7 @@
     <tr>
       <td>EP-3-1</td>
       <td>ViewAcademicProfile</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-1-view-academic-profile-implementation.prompt.md">ep-3-1-view-academic-profile-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-1-view-academic-profile-implementation.prompt.md">ep-3-1-view-academic-profile-implementation.prompt.md</a></td>
       <td>Return empNr, name, rank, derived access level, qualifications, extension, and employment state; not-found returns standard missing-resource response; AccessLevel in response matches current rank-derived rule</td>
       <td>Read-only projection; no command-side mutation logic; stable response DTOs</td>
       <td>EP-2-1</td>
@@ -169,7 +169,7 @@
     <tr>
       <td>EP-3-2</td>
       <td>UpdateAcademicName</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-2-update-academic-name-implementation.prompt.md">ep-3-2-update-academic-name-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-2-update-academic-name-implementation.prompt.md">ep-3-2-update-academic-name-implementation.prompt.md</a></td>
       <td>Update name for existing academic; reject names &gt;15 chars; not-found fails cleanly; updated name visible in read models</td>
       <td>Name-length rule must stay aligned with registration; no cross-slice side effects</td>
       <td>EP-2-1</td>
@@ -177,7 +177,7 @@
     <tr>
       <td>EP-3-3</td>
       <td>SearchListAcademics</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-3-search-list-academics-implementation.prompt.md">ep-3-3-search-list-academics-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-3-search-list-academics-implementation.prompt.md">ep-3-3-search-list-academics-implementation.prompt.md</a></td>
       <td>Filter by name, rank, access level, employment status, degree, university; deterministic pagination and sorting; empty result returns valid empty page (not error)</td>
       <td>Read-optimized; deterministic sort across repeated calls; filter contracts must not diverge from profile/report fields</td>
       <td>EP-2-1</td>
@@ -185,7 +185,7 @@
     <tr>
       <td>EP-3-4</td>
       <td>GrantTenure</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-4-grant-tenure-implementation.prompt.md">ep-3-4-grant-tenure-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-4-grant-tenure-implementation.prompt.md">ep-3-4-grant-tenure-implementation.prompt.md</a></td>
       <td>Set academic to tenured state; clear any existing contract end date; preserve employment XOR rule; missing academic fails cleanly</td>
       <td>Reuse aggregate guard — do not re-encode XOR logic in handler only</td>
       <td>EP-2-1</td>
@@ -193,7 +193,7 @@
     <tr>
       <td>EP-3-5</td>
       <td>AssignContract</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-5-assign-contract-implementation.prompt.md">ep-3-5-assign-contract-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-5-assign-contract-implementation.prompt.md">ep-3-5-assign-contract-implementation.prompt.md</a></td>
       <td>Assign contract with future end date only; reject current or past dates; clear tenured state (XOR); profile/list reflects contracted state</td>
       <td>Future-date rule must stay aligned with RenewContract semantics</td>
       <td>EP-2-1</td>
@@ -201,7 +201,7 @@
     <tr>
       <td>EP-3-6</td>
       <td>RemoveEmploymentStatus</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-6-remove-employment-status-implementation.prompt.md">ep-3-6-remove-employment-status-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-6-remove-employment-status-implementation.prompt.md">ep-3-6-remove-employment-status-implementation.prompt.md</a></td>
       <td>Clear both IsTenured and ContractEndDate from either employment state; missing academic fails cleanly; read models show cleared state</td>
       <td>No stale contract dates or contradictory read-model values after clearing</td>
       <td>EP-2-1</td>
@@ -209,7 +209,7 @@
     <tr>
       <td>EP-3-7</td>
       <td>ChangeRank</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-7-change-rank-implementation.prompt.md">ep-3-7-change-rank-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-7-change-rank-implementation.prompt.md">ep-3-7-change-rank-implementation.prompt.md</a></td>
       <td>Accept only valid rank codes from ManageRanks; automatically recalculate AccessLevel (P→INT, SL→NAT, L→LOC); reject invalid rank or missing academic; updated rank and access level immediately visible in read models</td>
       <td>AccessLevel derivation must remain centralized in aggregate — not duplicated in handler</td>
       <td>EP-2-1, EP-1-1</td>
@@ -217,7 +217,7 @@
     <tr>
       <td>EP-3-8</td>
       <td>RecordDegreeObtained</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-8-record-degree-obtained-implementation.prompt.md">ep-3-8-record-degree-obtained-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-8-record-degree-obtained-implementation.prompt.md">ep-3-8-record-degree-obtained-implementation.prompt.md</a></td>
       <td>Add qualification (valid degree + valid university) to existing academic; reject invalid degree or university references; reject duplicate Academic+Degree pair (even with different university); qualification visible in reads</td>
       <td>Duplicate Academic+Degree rule enforced consistently in code and persistence</td>
       <td>EP-2-1, EP-1-2, EP-1-3</td>
@@ -225,7 +225,7 @@
     <tr>
       <td>EP-3-9</td>
       <td>AssignExtension</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-9-assign-extension-implementation.prompt.md">ep-3-9-assign-extension-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-3-9-assign-extension-implementation.prompt.md">ep-3-9-assign-extension-implementation.prompt.md</a></td>
       <td>Assign provisioned, unassigned extension to academic (1:1 uniqueness); reject unprovisioned or already-assigned extensions; current assignment queryable</td>
       <td>Concurrency-sensitive uniqueness protected at both handler and DB constraint levels</td>
       <td>EP-2-1, EP-1-4</td>
@@ -233,7 +233,7 @@
     <tr>
       <td>EP-4-1</td>
       <td>RenewContract</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-1-renew-contract-implementation.prompt.md">ep-4-1-renew-contract-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-1-renew-contract-implementation.prompt.md">ep-4-1-renew-contract-implementation.prompt.md</a></td>
       <td>Renew only currently contracted academics; new end date must be in the future; invalid renewal leaves prior state unchanged; read models reflect updated end date</td>
       <td>Same future-date semantics as AssignContract; renewal must fail for non-contracted academics</td>
       <td>EP-3-5</td>
@@ -241,7 +241,7 @@
     <tr>
       <td>EP-4-2</td>
       <td>ConvertContractToTenure</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-2-convert-contract-to-tenure-implementation.prompt.md">ep-4-2-convert-contract-to-tenure-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-2-convert-contract-to-tenure-implementation.prompt.md">ep-4-2-convert-contract-to-tenure-implementation.prompt.md</a></td>
       <td>Convert only from contracted state; clear ContractEndDate on success; leave academic in tenured state only; read models reflect tenured state; non-contracted academic fails</td>
       <td>Must be distinguishable from direct tenure grant; XOR rule preserved</td>
       <td>EP-3-5</td>
@@ -249,7 +249,7 @@
     <tr>
       <td>EP-4-3</td>
       <td>UpdateDegreeUniversity</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-3-update-degree-university-implementation.prompt.md">ep-4-3-update-degree-university-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-3-update-degree-university-implementation.prompt.md">ep-4-3-update-degree-university-implementation.prompt.md</a></td>
       <td>Update university on existing qualification record; reject missing qualification target; reject invalid university reference; no duplicate qualification created; qualification reads reflect updated university</td>
       <td>Preserve one-university-per-academic-degree rule; qualification must be uniquely addressable</td>
       <td>EP-3-8</td>
@@ -257,7 +257,7 @@
     <tr>
       <td>EP-4-4</td>
       <td>RemoveDegreeRecord</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-4-remove-degree-record-implementation.prompt.md">ep-4-4-remove-degree-record-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-4-remove-degree-record-implementation.prompt.md">ep-4-4-remove-degree-record-implementation.prompt.md</a></td>
       <td>Remove a non-final qualification; reject removal of the last remaining qualification; missing qualification fails cleanly; remaining qualifications stay consistent</td>
       <td>Minimum-one-qualification invariant enforced at aggregate level</td>
       <td>EP-3-8</td>
@@ -265,7 +265,7 @@
     <tr>
       <td>EP-4-5</td>
       <td>ListQualifications</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-5-list-qualifications-implementation.prompt.md">ep-4-5-list-qualifications-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-5-list-qualifications-implementation.prompt.md">ep-4-5-list-qualifications-implementation.prompt.md</a></td>
       <td>List qualifications by academic, by degree code, and by university code; empty results return clean empty (not error); stable contracts across all three query modes</td>
       <td>Read-only, read-optimized; deterministic results; three query modes share consistent response shape</td>
       <td>EP-3-8</td>
@@ -273,7 +273,7 @@
     <tr>
       <td>EP-4-6</td>
       <td>ReassignExtension</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-6-reassign-extension-implementation.prompt.md">ep-4-6-reassign-extension-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-6-reassign-extension-implementation.prompt.md">ep-4-6-reassign-extension-implementation.prompt.md</a></td>
       <td>Atomically move academic from one extension to another; reject unavailable target; failed reassignment leaves original assignment intact</td>
       <td>Atomic transaction — source release and target assignment in one flow; 1:1 uniqueness maintained through success and failure</td>
       <td>EP-3-9</td>
@@ -281,7 +281,7 @@
     <tr>
       <td>EP-4-7</td>
       <td>ReleaseExtension</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-7-release-extension-implementation.prompt.md">ep-4-7-release-extension-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-7-release-extension-implementation.prompt.md">ep-4-7-release-extension-implementation.prompt.md</a></td>
       <td>Release current extension and clear academic-side reference; released extension returns to available pool; invalid release (no current extension) fails cleanly</td>
       <td>Both academic state and extension availability updated consistently in one operation</td>
       <td>EP-3-9</td>
@@ -289,7 +289,7 @@
     <tr>
       <td>EP-4-8</td>
       <td>ListAvailableExtensions</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-8-list-available-extensions-implementation.prompt.md">ep-4-8-list-available-extensions-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-4-8-list-available-extensions-implementation.prompt.md">ep-4-8-list-available-extensions-implementation.prompt.md</a></td>
       <td>Return only provisioned, unassigned extensions; exclude assigned; include released; empty result returns clean empty response</td>
       <td>Results must reflect latest assignment lifecycle transitions accurately</td>
       <td>EP-3-9</td>
@@ -297,7 +297,7 @@
     <tr>
       <td>EP-5-1</td>
       <td>DeregisterAcademic</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-5-1-deregister-academic-implementation.prompt.md">ep-5-1-deregister-academic-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-5-1-deregister-academic-implementation.prompt.md">ep-5-1-deregister-academic-implementation.prompt.md</a></td>
       <td>Deregister existing academic only; release any assigned extension as part of the flow; retain required qualification history; emit deregistration domain event for downstream consumers</td>
       <td>No orphaned extensions; history retention must not conflict with persistence behavior; downstream report consumers must have required event data</td>
       <td>EP-2-1, EP-4-7</td>
@@ -305,7 +305,7 @@
     <tr>
       <td>EP-6-1</td>
       <td>AcademicDirectory</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-1-academic-directory-implementation.prompt.md">ep-6-1-academic-directory-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-1-academic-directory-implementation.prompt.md">ep-6-1-academic-directory-implementation.prompt.md</a></td>
       <td>List active academics with name, rank, access level, extension, and employment status; matches current lifecycle state after mutations; deterministic paging and sorting</td>
       <td>Read-optimized projections — not command-side aggregate loading; performance meets plan expectations on seeded data</td>
       <td>EP-2-1 (+ lifecycle slices)</td>
@@ -313,7 +313,7 @@
     <tr>
       <td>EP-6-2</td>
       <td>ByRankReport</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-2-by-rank-report-implementation.prompt.md">ep-6-2-by-rank-report-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-2-by-rank-report-implementation.prompt.md">ep-6-2-by-rank-report-implementation.prompt.md</a></td>
       <td>Group academics by rank with counts and listings; include derived access-level context; grouped totals accurate after rank changes</td>
       <td>Read-optimized; grouped counts must not drift after source data changes</td>
       <td>EP-2-1, EP-3-7</td>
@@ -321,7 +321,7 @@
     <tr>
       <td>EP-6-3</td>
       <td>ByAccessLevelReport</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-3-by-access-level-report-implementation.prompt.md">ep-6-3-by-access-level-report-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-3-by-access-level-report-implementation.prompt.md">ep-6-3-by-access-level-report-implementation.prompt.md</a></td>
       <td>Group academics by INT, NAT, LOC with counts and listings; group membership changes when rank changes; no direct access-level mutation path introduced</td>
       <td>Must consume derived access level — not a manually stored field; P→INT, SL→NAT, L→LOC mapping verified in tests</td>
       <td>EP-3-7</td>
@@ -329,7 +329,7 @@
     <tr>
       <td>EP-6-4</td>
       <td>TenuredAcademicsReport</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-4-tenured-academics-report-implementation.prompt.md">ep-6-4-tenured-academics-report-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-4-tenured-academics-report-implementation.prompt.md">ep-6-4-tenured-academics-report-implementation.prompt.md</a></td>
       <td>List only tenured academics with rank and qualification summary; contract-converted academics appear correctly; employment-cleared academics excluded</td>
       <td>Consistent employment-state filtering after multiple transitions (direct grant, conversion, clearing)</td>
       <td>EP-3-4</td>
@@ -337,7 +337,7 @@
     <tr>
       <td>EP-6-5</td>
       <td>ContractedAcademicsReport</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-5-contracted-academics-report-implementation.prompt.md">ep-6-5-contracted-academics-report-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-5-contracted-academics-report-implementation.prompt.md">ep-6-5-contracted-academics-report-implementation.prompt.md</a></td>
       <td>List only currently contracted academics sorted by contract end date ascending; renewed contracts show updated date; non-contracted excluded</td>
       <td>Deterministic ascending sort on end date; stable after renewal</td>
       <td>EP-3-5</td>
@@ -345,7 +345,7 @@
     <tr>
       <td>EP-6-6</td>
       <td>ExpiringContractsReport</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-6-expiring-contracts-report-implementation.prompt.md">ep-6-6-expiring-contracts-report-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-6-expiring-contracts-report-implementation.prompt.md">ep-6-6-expiring-contracts-report-implementation.prompt.md</a></td>
       <td>Filter contracts expiring within configurable window (default 90 days); contracts inside window appear; outside do not; boundary dates handled consistently; supports custom threshold</td>
       <td>Deterministic date-window behavior; default threshold configurable; boundary cases must be explicitly tested</td>
       <td>EP-3-5</td>
@@ -353,7 +353,7 @@
     <tr>
       <td>EP-6-7</td>
       <td>QualificationReports</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-7-qualification-reports-implementation.prompt.md">ep-6-7-qualification-reports-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-7-qualification-reports-implementation.prompt.md">ep-6-7-qualification-reports-implementation.prompt.md</a></td>
       <td>Grouped report by degree with counts and listings; grouped report by university with counts and listings; counts accurate after add, update, and remove qualification flows</td>
       <td>Both grouped outputs synchronized with source qualification data; distinct from the operational ListQualifications slice</td>
       <td>EP-3-8</td>
@@ -361,7 +361,7 @@
     <tr>
       <td>EP-6-8</td>
       <td>AccessLevelDistributionReport</td>
-      <td><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-8-access-level-distribution-report-implementation.prompt.md">ep-6-8-access-level-distribution-report-implementation.prompt.md</a></td>
+      <td><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-6-8-access-level-distribution-report-implementation.prompt.md">ep-6-8-access-level-distribution-report-implementation.prompt.md</a></td>
       <td>Distribution totals per INT/NAT/LOC for active academics only; totals update after rank changes; deregistered academics excluded from totals</td>
       <td>Active-only filtering; compact analytical output (counts-only or counts-plus-details TBD by coordinator); no direct access-level mutation path</td>
       <td>EP-3-7</td>
@@ -371,7 +371,7 @@
 
 <p>In theory, and hopefully in practice, submitting these prompts will result in an application that meets our requirements, going all the way back to Part-One.</p>
 
-<h4 id="ep-1-1-manage-ranks-implementationpromptmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-1-manage-ranks-implementation.prompt.md">ep-1-1-manage-ranks-implementation.prompt.md</a></h4>
+<h4 id="ep-1-1-manage-ranks-implementationpromptmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/prompts/academia-implementation/ep-1-1-manage-ranks-implementation.prompt.md">ep-1-1-manage-ranks-implementation.prompt.md</a></h4>
 
 <p>Here is a closer look at one of the implementation prompts. <code class="language-plaintext highlighter-rouge">ep-1-1-manage-ranks-implementation.prompt.md</code> is a slice-scoped implementation prompt for the Phase 1 ManageRanks reference-data capability, directing a coordinated workflow (slice-coordinator, backend-domain, testing-verification) to establish one canonical rank source, implement validated add/list CQRS behavior and endpoints, enforce strict allowed rank codes (P, SL, L) with duplicate prevention, and produce verification evidence through validator/handler/integration tests, while explicitly constraining scope away from unrelated academic/employment/reporting work and requiring a human showcase that proves downstream slices can reliably consume stable rank/access-level reference data rather than hardcoding it.</p>
 
@@ -379,39 +379,39 @@
 
 <p>The last preparation step was to build the agents that would implement the solution. The implementation prompts hand off work to the appropriate agents so each slice can be executed with explicit role boundaries.</p>
 
-<h4 id="backend-slice-implementeragentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/backend-slice-implementer.agent.md">backend-slice-implementer.agent.md</a></h4>
+<h4 id="backend-slice-implementeragentmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/agents/backend-slice-implementer.agent.md">backend-slice-implementer.agent.md</a></h4>
 
 <p>The <code class="language-plaintext highlighter-rouge">backend-slice-implementer</code> agent is specialized for implementing backend vertical slices in the Zeus Academia system using ASP.NET Core, MediatR, EF Core, FluentValidation, and xUnit, with a strict, evidence-based workflow that starts by reading slice and repo instructions, then implementing only the required backend components, running focused verification, and reporting results in a fixed structure.</p>
 
-<h4 id="slice-verifieragentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/slice-verifier.agent.md">slice-verifier.agent.md</a></h4>
+<h4 id="slice-verifieragentmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/agents/slice-verifier.agent.md">slice-verifier.agent.md</a></h4>
 
 <p>The <code class="language-plaintext highlighter-rouge">slice-verifier</code> agent acts as a strict, evidence-first QA owner for individual vertical slices: it verifies implementation against the slice prompt and acceptance criteria, checks changed files and focused tests, runs any missing safe verification commands, and produces a pass/fail assessment.</p>
 
-<h4 id="data-integration-docagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/data-integration-doc.agent.md">data-integration-doc.agent.md</a></h4>
+<h4 id="data-integration-docagentmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/agents/data-integration-doc.agent.md">data-integration-doc.agent.md</a></h4>
 
 <p>The <code class="language-plaintext highlighter-rouge">data-integration-doc</code> agent defines a support-focused Zeus Academia agent that handles slice-adjacent work such as migrations, integration touchpoints, documentation, rollout/showcase notes, and traceability, with a process centered on confirming support scope, identifying impacted artifacts, making only minimal enabling changes, capturing side effects, and handing off evidence plus residual risks to coordination and verification roles.</p>
 
-<h4 id="data-persistenceagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/data-persistence.agent.md">data-persistence.agent.md</a></h4>
+<h4 id="data-persistenceagentmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/agents/data-persistence.agent.md">data-persistence.agent.md</a></h4>
 
 <p>The <code class="language-plaintext highlighter-rouge">data-persistence</code> agent defines a Zeus Academia persistence-focused implementation agent responsible for making minimal, high-integrity EF Core changes that support slice-level domain rules, with a workflow that starts by validating slice rules and current persistence context, then applies targeted mappings/constraints/indexes/migrations, verifies database behavior aligns with aggregate and validator invariants, and hands off assumptions and risks to coordination/testing roles.</p>
 
-<h4 id="backend-domainagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/backend-domain.agent.md">backend-domain.agent.md</a></h4>
+<h4 id="backend-domainagentmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/agents/backend-domain.agent.md">backend-domain.agent.md</a></h4>
 
 <p>The <code class="language-plaintext highlighter-rouge">backend-domain</code> agent defines a Zeus Academia backend/domain implementation persona that owns slice-scoped ASP.NET Core CQRS work across commands, queries, validators, handlers, endpoints, and required persistence updates, with a strict workflow of reviewing prompt and standards, confirming target feature/contracts/domain rules, implementing in dependency order, validating behavior, and handing off API contracts and edge cases to coordinator/frontend/testing/doc roles.</p>
 
-<h4 id="frontend-workflowagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/frontend-workflow.agent.md">frontend-workflow.agent.md</a></h4>
+<h4 id="frontend-workflowagentmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/agents/frontend-workflow.agent.md">frontend-workflow.agent.md</a></h4>
 
 <p>The <code class="language-plaintext highlighter-rouge">frontend-workflow</code> agent defines a Zeus Academia frontend implementation persona responsible for slice-scoped Vue 3 workflows with strict TypeScript typing and Pinia state patterns, following a process of reviewing slice/API context, confirming flow and state ownership, implementing minimal UI/store/composable changes, validating loading/success/empty/failure behavior against backend contracts, and handing off notes to verification.</p>
 
-<h4 id="report-projectionagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/report-projection.agent.md">report-projection.agent.md</a></h4>
+<h4 id="report-projectionagentmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/agents/report-projection.agent.md">report-projection.agent.md</a></h4>
 
 <p>The <code class="language-plaintext highlighter-rouge">report-projection</code> agent defines a specialized Zeus Academia agent for report and projection work, focused on building read models, grouped/analytical queries, projection-backed endpoints, and report DTO contracts while keeping outputs aligned with canonical source-of-truth domain rules; it prescribes a minimal-change workflow (validate reporting dependencies and semantics, implement targeted query-side changes, verify grouped/projection accuracy after lifecycle state changes, and hand off.</p>
 
-<h4 id="slice-coordinatoragentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/slice-coordinator.agent.md">slice-coordinator.agent.md</a></h4>
+<h4 id="slice-coordinatoragentmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/agents/slice-coordinator.agent.md">slice-coordinator.agent.md</a></h4>
 
 <p>The <code class="language-plaintext highlighter-rouge">slice-coordinator</code> agent defines a coordination-focused Zeus Academia persona that manages vertical-slice delivery by confirming scope and prerequisites, identifying required repo context, sequencing work with explicit role handoffs, escalating blockers or pattern conflicts early, and finishing with verification gates plus unresolved risks.</p>
 
-<h4 id="testing-verificationagentmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Seven/.github/agents/testing-verification.agent.md">testing-verification.agent.md</a></h4>
+<h4 id="testing-verificationagentmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Seven/.github/agents/testing-verification.agent.md">testing-verification.agent.md</a></h4>
 
 <p>The <code class="language-plaintext highlighter-rouge">testing-verification</code> agent defines a Zeus Academia verification-focused persona that treats evidence as the gate for slice completion: it reviews acceptance criteria and changed surfaces, derives minimal high-value checks, executes or specifies backend/frontend/data/contract validation, captures pass/fail proof and unresolved gaps, and returns a verdict based on observed outcomes rather than implementation intent; it emphasizes advanced strengths in criteria analysis, integration and failure-mode testing, strict escalation when criteria or prerequisites are missing, and hard boundaries against masking flaky or incomplete verification, signing off with partial evidence, or changing broad app behavior just to make tests pass.</p>
 
@@ -419,7 +419,7 @@
 
 <p>At this point, the repository has enough structure to move from planning into disciplined implementation. The requirements, architecture guidance, project overview, execution plan, implementation prompts, and agent roles now form a connected delivery system rather than a loose collection of artifacts. In the next post, I’ll begin implementing the earliest slices in dependency order so we can see whether this workflow holds up under real coding work.</p>
 
-<p>If you’re interested in the files, you can find them in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b" target="_blank">Academia GitHub repository</a>. If you’d like to follow along with your own implementation, fork the repository and use the fork to build your own version.</p>
+<p>If you’re interested in the files, you can find them in the <a href="https://github.com/j0hnnymiller/zeus.academia.3b" target="_blank">Academia GitHub repository</a>. If you’d like to follow along with your own implementation, fork the repository and use the fork to build your own version.</p>
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 
@@ -436,6 +436,13 @@
   <li>Summarize this file in one paragraph.</li>
   <li>List all of the slices in a Markdown table. Include a link to the file on GitHub. Also include the slice number, the functional and non-functional requirements, and the slice numbers this slice depends on.</li>
 </ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="prompts" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><category term="implementation-prompts" /><summary type="html"><![CDATA[This post shows how I moved from architecture and planning guidance to implementation-ready prompts for Zeus Academia, including project overview instructions, execution planning, slice-level prompts, and agent handoffs.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-04-17/AIAGSD7_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-04-17/AIAGSD7_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI Pratitioner Resources: A Brief History of the Repository and Its Evolution</title><link href="https://blog.pdata.com/AIPR1/" rel="alternate" type="text/html" title="AI Pratitioner Resources: A Brief History of the Repository and Its Evolution" /><published>2026-04-14T00:00:00-07:00</published><updated>2026-04-14T00:00:00-07:00</updated><id>https://blog.pdata.com/AIPR1</id><content type="html" xml:base="https://blog.pdata.com/AIPR1/"><![CDATA[<p>I’m turning my attention back to the ai-practitioner-resources repository. This project has been my case study in AI-first software development practices. If you’re not familiar, it started as prompt to return a list of resources relevant to AI assisted software developers. Today it is an AI integrated platform with automated resource curation, AI project management, and a fully autonomous issue lifecycle.</p>
+
+<!--more-->
+
+<figure>
+  <img src="/assets/images/2026-04-14/AIPR1_Header_Large.png" alt="Wide banner illustrating the AI Practitioner Resources repository evolving from a basic static site into an AI-first platform with commit history, modular code, automation workflows, and AI-managed development." />
+  <figcaption>A visual history of the AI Practitioner Resources repository, tracing its evolution from static site to AI-first platform with modular code, workflow automation, and AI-driven project management.</figcaption>
+</figure>
 
 <p>Looking back, i regretted not keeping a more detailed journal of the project’s evolution as I thought it might make for an interesting case study in how AI-first development practices evolve under real usage. Then a prompt occured to me that could write that blog post for me.</p>
 
@@ -959,8 +966,9 @@ categories: AIAGSD
 tags: [vertical-slice, agents, planning, meta-prompts, workflow-modeling, implementation-planning]
 excerpt: “Learn how to generate planning artifacts—vertical-slice definitions, workflow models, and dependency diagrams—that guide coordinated slice-by-slice delivery using AI and meta-prompts.”
 description: “Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.”
-image:
-—</p>
+image:</p>
+
+<hr />
 
 <p><strong>TL;DR:</strong> This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution.</p>
 
@@ -1029,6 +1037,7 @@ image:
 <h2 id="what-are-vertical-slices">What are vertical slices?</h2>
 
 <p>A vertical slice is a narrow, end-to-end feature that delivers user value and can be built, tested, and deployed independently. Instead of building horizontally (e.g., database → API → UI for the entire system), you build vertically through all layers but only for a small piece of functionality. For example, a “Course Discovery” slice in an academia management system might include:</p>
+
 <ul>
   <li>A database query to list active courses</li>
   <li>An API endpoint to serve that data</li>
@@ -1047,6 +1056,7 @@ image:
 <p><strong>Problem</strong>: Registrars need to search for and view active courses before enrollment opens; stakeholders need visibility into what’s offered.</p>
 
 <p><strong>Acceptance Criteria</strong>:</p>
+
 <ul>
   <li>List all active courses (paginated, 10 per page)</li>
   <li>Filter by department and term</li>
@@ -1055,6 +1065,7 @@ image:
 </ul>
 
 <p><strong>Minimal Tasks</strong>:</p>
+
 <ol>
   <li>Add course search endpoint (filter by department, term, status)</li>
   <li>Create course list UI component</li>
@@ -1104,7 +1115,7 @@ image:
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>using https://docs.github.com/en/copilot/reference/custom-agents-configuration, https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents, https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents create a prompt that will create an instruction file for creating agents.
 </code></pre></div></div>
 
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md">create-custom-agents-instructions.prompt.md</a></p>
+<p><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md">create-custom-agents-instructions.prompt.md</a></p>
 
 <p>This is a meta-prompt: instead of directly generating an agent profile, it generates a reusable prompt that can produce a full instruction file for agent authors. In practice, we’re creating a repeatable tool, not a one-off output.</p>
 
@@ -1161,7 +1172,7 @@ agent_scope: repository
 include_ide_notes: true
 </code></pre></div></div>
 
-<p>Submitting the prompt with these arguments generates the actual instruction file that defines repository standards for authoring <code class="language-plaintext highlighter-rouge">.agent.md</code> profiles. The prior step created the generator; this step produces the generated artifact <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md">custom-agents.instructions.md</a></p>
+<p>Submitting the prompt with these arguments generates the actual instruction file that defines repository standards for authoring <code class="language-plaintext highlighter-rouge">.agent.md</code> profiles. The prior step created the generator; this step produces the generated artifact <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md">custom-agents.instructions.md</a></p>
 
 <p>This is the execution step where the reusable prompt is run with concrete project settings. The first step produced the tool; this step applies it to generate repository-ready standards.</p>
 
@@ -1207,7 +1218,7 @@ include_ide_notes: true
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create a prompt file that creates an agent for the product manager persona
 </code></pre></div></div>
 
-<p>This generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md">create-product-manager-agent.prompt.md</a> prompt file. This is a prompt-generation step, not an agent-generation step. The purpose is to produce a reusable authoring prompt that can consistently generate or refine a PM persona agent as requirements evolve.</p>
+<p>This generates the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md">create-product-manager-agent.prompt.md</a> prompt file. This is a prompt-generation step, not an agent-generation step. The purpose is to produce a reusable authoring prompt that can consistently generate or refine a PM persona agent as requirements evolve.</p>
 
 <p>What this prompt produces:</p>
 
@@ -1234,7 +1245,7 @@ include_execute_tool: false
 scope_note: The universe of discourse is Academia Management
 </code></pre></div></div>
 
-<p>The generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md">product-manager.agent.md</a> custom agent.</p>
+<p>The generates the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md">product-manager.agent.md</a> custom agent.</p>
 
 <p>This is the execution step that converts the reusable PM-agent prompt into a concrete, repository-ready persona agent file. In other words, the prior step created the generator, and this step produced the generated artifact.</p>
 
@@ -1262,7 +1273,7 @@ scope_note: The universe of discourse is Academia Management
 
 <p>The is is another prompt-generation step that strengthens planning quality before implementation begins. Instead of drafting PRDs ad hoc, we now have a reusable prompt artifact that drives a consistent PRD structure across slices.</p>
 
-<p>This prompt generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md">create-prd.prompt.md</a> file :</p>
+<p>This prompt generates the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md">create-prd.prompt.md</a> file :</p>
 
 <ul>
   <li>A reusable PRD prompt file with explicit section requirements</li>
@@ -1283,7 +1294,7 @@ scope_note: The universe of discourse is Academia Management
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create a new prompt file, that creates an instruction file, that provides guidance for implementing applications in vertical slices
 </code></pre></div></div>
 
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md">create-vertical-slice-implementation-instructions.prompt.md</a></p>
+<p><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md">create-vertical-slice-implementation-instructions.prompt.md</a></p>
 
 <p>This request is one level more specific than a general implementation prompt: it creates a prompt artifact whose job is to generate instruction files for vertical-slice execution. That distinction helps keep planning guidance and implementation governance synchronized as the project grows.</p>
 
@@ -1308,7 +1319,7 @@ scope_note: The universe of discourse is Academia Management
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit #file:create-vertical-slice-implementation-instructions.prompt.md
 </code></pre></div></div>
 
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md">vertical-slice-implementation.instructions.md</a></p>
+<p><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md">vertical-slice-implementation.instructions.md</a></p>
 
 <p>This is the execution step that produces the instruction file used to guide slice-by-slice implementation work. The previous step created the generator prompt; this step produced the concrete implementation-governance artifact.</p>
 
@@ -1333,7 +1344,7 @@ scope_note: The universe of discourse is Academia Management
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>given these #file:academia.txt facts create a comprehensive list, in markdown, of the workflows needed for the zeus.academia management system. put the file in the models/workflows folder
 </code></pre></div></div>
 
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md">academia-workflows.md</a></p>
+<p><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md">academia-workflows.md</a></p>
 
 <p>This step converts domain facts into an implementation-facing workflow catalog. Instead of inferring workflows ad hoc during coding, the team gets an explicit markdown inventory that can be mapped to vertical slices and prioritized systematically.</p>
 
@@ -1358,7 +1369,7 @@ scope_note: The universe of discourse is Academia Management
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create an implementation plan that implements the workflows #file:academia-workflows.md and the business rules #file:academia.txt. include a portrait mermaid diagram that shows the slices and their dependencies
 </code></pre></div></div>
 
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md">academia-implementation-plan.md</a></p>
+<p><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md">academia-implementation-plan.md</a></p>
 
 <p>This step converts workflow modeling into an executable delivery plan. Instead of planning slices from memory, it uses explicit workflow and rule inputs and adds a visual dependency model to make sequencing decisions easier to review.</p>
 
@@ -1390,6 +1401,7 @@ scope_note: The universe of discourse is Academia Management
 </ul>
 
 <p>In the example:</p>
+
 <ol>
   <li>“Course Discovery” has no dependencies → build first</li>
   <li>“Enrollment”, “Waitlist”, and “Cancellation” all depend on “Course Discovery” → build after</li>
@@ -1408,7 +1420,7 @@ scope_note: The universe of discourse is Academia Management
 
 <p>We’ll finish this phase by creating implementation prompts that guide AI agents through coding work while keeping generated output aligned with our technology-specific instruction files and architectural vision. In the next step, I’ll use the planning and persona-agent outputs to define implementation slices with clear dependencies and acceptance criteria. The goal is to move from governance-compliant planning into execution prompts that drive coding tasks with minimal ambiguity.</p>
 
-<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
+<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/j0hnnymiller/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
 
 <hr />
 
@@ -1425,28 +1437,28 @@ scope_note: The universe of discourse is Academia Management
 <p>Prompts:</p>
 
 <ul>
-  <li>Expand on this post with descriptions of this prompt: “using (https://docs.github.com/en/copilot/reference/custom-agents-configuration), https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents, https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents create a prompt that will create an instruction file for creating agents” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md” created by the prompt</li>
+  <li>Expand on this post with descriptions of this prompt: “using (https://docs.github.com/en/copilot/reference/custom-agents-configuration), https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents, https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents create a prompt that will create an instruction file for creating agents” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md” created by the prompt</li>
   <li>Expand this post with a description of this prompt: “Prompt: submit this prompt #file:create-custom-agents-instructions.prompt.md with these arguments:
 instruction*filename: custom-agents.instructions.md
 apply_to: .github/agents/**/_.agent.md
 agent_scope: repository
-include_ide_notes: true” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a prompt file that creates an agent for the product manager persona” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md” created by the prompt</li>
+include_ide_notes: true” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a prompt file that creates an agent for the product manager persona” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md” created by the prompt</li>
   <li>Add a section to this post with a description of this prompt: “submit the #file:create-product-manager-agent.prompt.md prompt file with these arguments:
 agent_filename: product-manager.agent.md
 target: omit
 include_execute_tool: false
-scope_note: The universe of discourse is Academia Management” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing the steps to create a structured PRD with problem, goals, non-goals, and success metrics” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing guidance for implementing applications in vertical slices” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a new prompt file, that creates an instruction file, that provides guidance for implementing applications in vertical slices” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “submit #file:create-vertical-slice-implementation-instructions.prompt.md” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “given these #file:academia.txt facts create a comprehensive list, in markdown, of the workflows needed for the zeus.academia management system. put the file in the models/workflows folder” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create an implementation plan that implements the workflows #file:academia-workflows.md and the business rules #file:academia.txt. include a portrait mermaid diagram that shows the slices and their dependencies” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md” created by the prompt</li>
+scope_note: The universe of discourse is Academia Management” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing the steps to create a structured PRD with problem, goals, non-goals, and success metrics” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing guidance for implementing applications in vertical slices” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a new prompt file, that creates an instruction file, that provides guidance for implementing applications in vertical slices” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “submit #file:create-vertical-slice-implementation-instructions.prompt.md” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “given these #file:academia.txt facts create a comprehensive list, in markdown, of the workflows needed for the zeus.academia management system. put the file in the models/workflows folder” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create an implementation plan that implements the workflows #file:academia-workflows.md and the business rules #file:academia.txt. include a portrait mermaid diagram that shows the slices and their dependencies” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md” created by the prompt</li>
   <li>Insert a governance checkpoint: After the vertical-slice introduction, add a section validating that the planning artifacts (agent standards, agent profiles, PRD template, and implementation instructions) form a coherent system</li>
   <li>Refactor artifact summaries: Convert feature lists to thesis-first paragraphs where appropriate</li>
   <li>Add a definition of prompt drift</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><summary type="html"><![CDATA[and— layout: post title: “AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning” date: 2026-03-01 categories: AIAGSD tags: [vertical-slice, agents, planning, meta-prompts, workflow-modeling, implementation-planning] excerpt: “Learn how to generate planning artifacts—vertical-slice definitions, workflow models, and dependency diagrams—that guide coordinated slice-by-slice delivery using AI and meta-prompts.” description: “Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.” image: — TL;DR: This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution. We’re moving from architecture into implementation, but first we need a plan that defines tasks, dependencies, and execution order. This post shows how to generate planning artifacts — vertical-slice definitions, Product Requirements Documents (PRDs), workflow models, and dependency diagrams — that create a roadmap for coordinated, predictable slice-by-slice delivery. See earlier posts in the AIAGSD series for context.]]></summary></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails</title><link href="https://blog.pdata.com/AIAGSD5/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD5</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD5/"><![CDATA[<p>In this post, I’ll shift from <em>architecture-level</em> instructions to <em>technology-level</em> instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><summary type="html"><![CDATA[and— layout: post title: “AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning” date: 2026-03-01 categories: AIAGSD tags: [vertical-slice, agents, planning, meta-prompts, workflow-modeling, implementation-planning] excerpt: “Learn how to generate planning artifacts—vertical-slice definitions, workflow models, and dependency diagrams—that guide coordinated slice-by-slice delivery using AI and meta-prompts.” description: “Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.” image: TL;DR: This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution. We’re moving from architecture into implementation, but first we need a plan that defines tasks, dependencies, and execution order. This post shows how to generate planning artifacts — vertical-slice definitions, Product Requirements Documents (PRDs), workflow models, and dependency diagrams — that create a roadmap for coordinated, predictable slice-by-slice delivery. See earlier posts in the AIAGSD series for context.]]></summary></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails</title><link href="https://blog.pdata.com/AIAGSD5/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD5</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD5/"><![CDATA[<p>In this post, I’ll shift from <em>architecture-level</em> instructions to <em>technology-level</em> instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
 
 <!--more-->
 
@@ -1496,7 +1508,7 @@ project_purpose: Academic Management System
 
 <p>Running this prompt ensures that anyone joining the project-whether human developers or AI agents-has an accurate, up-to-date understanding of what we’re building and how we’re building it. This foundational clarity becomes especially important as we implement more complex architectural patterns like CQRS.</p>
 
-<h2 id="project-overview-instructions"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/project-overview.instructions.md">Project Overview Instructions</a></h2>
+<h2 id="project-overview-instructions"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/instructions/project-overview.instructions.md">Project Overview Instructions</a></h2>
 
 <p>The <code class="language-plaintext highlighter-rouge">project-overview.instructions.md</code> file serves as the foundational context document for the Zeus Academia project, providing AI assistants with essential project information needed to work effectively across the entire codebase. This instruction file is marked to apply globally (<code class="language-plaintext highlighter-rouge">applyTo: "**"</code>), meaning it’s automatically loaded as context whenever you interact with any file in the repository. It acts as a “project primer” that ensures AI assistants understand the project’s identity (Academic Management System), architecture (monorepo with Vue 3 frontend and ASP.NET Core backend), technology stack (C#, TypeScript, MediatR, Pinia, FluentValidation), and core constraints (OAuth 2.0 authentication, WCAG 2.1 AA accessibility, FERPA/GDPR compliance, 80% test coverage).</p>
 
@@ -1655,7 +1667,7 @@ project_purpose: Academic Management System
 
 <p>Each generated instruction file contains specific implementation rules, code templates, anti-pattern prevention, and integration guidance that ensures AI agents produce consistent, high-quality code aligned with our architectural Vision.</p>
 
-<h3 id="aspnetcore-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/aspnetcore-implementation.instructions.md">aspnetcore-implementation.instructions.md</a></h3>
+<h3 id="aspnetcore-implementationinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/instructions/aspnetcore-implementation.instructions.md">aspnetcore-implementation.instructions.md</a></h3>
 
 <p>The ASP.NET Core Implementation standards instruction file establishes comprehensive guidelines for building the backend API layer of the Zeus Academia Academic Management System using ASP.NET Core 8.0+. It mandates a clean architecture approach with minimal APIs for simple endpoints and MVC controllers for complex logic, while enforcing async/await patterns, constructor-based dependency injection, and nullable reference types throughout.</p>
 
@@ -1664,6 +1676,7 @@ project_purpose: Academic Management System
 <p>The standards ensure that all backend code follows consistent patterns for Azure AD B2C authentication, Entity Framework Core data access, proper error handling with ProblemDetails responses, and comprehensive OpenAPI documentation for all endpoints.</p>
 
 <p>At this point, the AI has:</p>
+
 <ul>
   <li>C# Implementation standards instruction file</li>
   <li>FluentValidation Implementation standards instruction file</li>
@@ -1677,7 +1690,7 @@ project_purpose: Academic Management System
 
 <p>Details are described below.</p>
 
-<h3 id="csharp-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/csharp-implementation.instructions.md">csharp-implementation.instructions.md</a></h3>
+<h3 id="csharp-implementationinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/instructions/csharp-implementation.instructions.md">csharp-implementation.instructions.md</a></h3>
 
 <p>The C# Implementation standards instruction file establishes comprehensive modern C# coding guidelines for the Zeus Academia project, mandating .NET 8+ with nullable reference types enabled, file-scoped namespaces, and strict adherence to SOLID principles and Clean Architecture patterns.</p>
 
@@ -1687,7 +1700,7 @@ project_purpose: Academic Management System
 
 <p>The standards include comprehensive XML documentation requirements for public APIs, a detailed anti-patterns table highlighting common mistakes like primitive obsession and mutable static state, and a validation checklist ensuring compiler warnings are resolved, nullable reference types properly handled, and all code follows consistent patterns-serving as the foundational C# guidance that specialized instruction files like CQRS and MediatR implementations build upon.</p>
 
-<h3 id="fluentvalidation-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/fluentvalidation-implementation.instructions.md">fluentvalidation-implementation.instructions.md</a></h3>
+<h3 id="fluentvalidation-implementationinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/instructions/fluentvalidation-implementation.instructions.md">fluentvalidation-implementation.instructions.md</a></h3>
 
 <p>The FluentValidation Implementation standards instruction file establishes comprehensive validation patterns for the Zeus Academia backend, mandating one validator per MediatR command or query with FluentValidation 11.0+ to enforce declarative, fail-fast request validation in the CQRS pipeline.</p>
 
@@ -1695,7 +1708,7 @@ project_purpose: Academic Management System
 
 <p>The file demonstrates custom error message formatting with property names and values, error code assignment for API responses, reusable validation rule extensions for common patterns like GUID validation and alphanumeric checks, and performance optimization techniques including compiled regex caching and strategic ordering of cheap-before-expensive validations. It explicitly prohibits anti-patterns like validation logic in handlers, synchronous database checks blocking the pipeline, mixing business rules with input validation, throwing custom exceptions from validators, and generic unhelpful error messages-instead requiring stateless validators injected via DI, async operations with proper cancellation token support, separation of validation (input correctness) from business rules (domain logic), and specific actionable error messages that guide users toward correct input, all integrated automatically through the MediatR ValidationBehavior pipeline that collects all validation failures before executing handlers.</p>
 
-<h3 id="mediatr-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/mediatr-implementation.instructions.md">mediatr-implementation.instructions.md</a></h3>
+<h3 id="mediatr-implementationinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/instructions/mediatr-implementation.instructions.md">mediatr-implementation.instructions.md</a></h3>
 
 <p>The MediatR CQRS Implementation standards instruction file establishes comprehensive patterns for implementing the Command Query Responsibility Segregation (CQRS) pattern in the Zeus Academia backend using MediatR 12.0+. It enforces strict separation between commands (write operations) and queries (read operations) through immutable record types, with one handler per request following single responsibility principles.</p>
 
@@ -1705,13 +1718,13 @@ project_purpose: Academic Management System
 
 <p>The standards explicitly prohibit anti-patterns like mutable commands/queries, business logic in pipeline behaviors, queries that modify state, returning domain entities directly to APIs, and validation logic embedded in handlers-instead mandating the use of FluentValidation validators in the pipeline, repository abstractions for data access, DTO projections for API responses, and proper cancellation token propagation throughout async operations to ensure scalable, maintainable, and testable CQRS implementations.</p>
 
-<h3 id="pinia-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/pinia-implementation.instructions.md">pinia-implementation.instructions.md</a></h3>
+<h3 id="pinia-implementationinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/instructions/pinia-implementation.instructions.md">pinia-implementation.instructions.md</a></h3>
 
 <p>The Pinia State Management standards instruction file establishes comprehensive guidelines for implementing global state management in the Zeus Academia Vue 3 frontend using Pinia 2.1+ with TypeScript, mandating setup stores (composition API style) exclusively while avoiding the options API altogether. It provides extensive code examples for standard CRUD store structure with reactive state using <code class="language-plaintext highlighter-rouge">ref()</code>, computed getters for derived values, async actions with loading/error states, and the <code class="language-plaintext highlighter-rouge">$reset()</code> function for cleanup, along with patterns for store composition to combine multiple stores for related functionality, manual state persistence for sensitive data like auth tokens, and optimistic updates with rollback for improved perceived performance.</p>
 
 <p>The file documents integration patterns including component usage with <code class="language-plaintext highlighter-rouge">useXxxStore()</code>, router guard integration for auth checks, and test patterns using <code class="language-plaintext highlighter-rouge">setActivePinia()</code> with Vitest for isolated store testing with mocked API calls. It establishes strict naming conventions (<code class="language-plaintext highlighter-rouge">use&lt;Feature&gt;Store.ts</code>), file organization under <code class="language-plaintext highlighter-rouge">src/frontend/stores/</code>, and type safety requirements ensuring all state, getters, and actions have explicit TypeScript types, while explicitly prohibiting anti-patterns like options API stores, direct state mutations from components, storing derived values instead of using computed getters, mixing unrelated concerns in one store, async logic in getters, persisting loading states, and creating store instances outside component setup-instead requiring focused domain-specific stores, action-based state modifications, selective data persistence, and proper reactive composition to ensure maintainable, performant, and type-safe global state management that leverages Vue 3’s reactivity system and Pinia’s modern composition-based architecture.</p>
 
-<h3 id="typescript-frontend-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/typescript-frontend-implementation.instructions.md">typescript-frontend-implementation.instructions.md</a></h3>
+<h3 id="typescript-frontend-implementationinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/instructions/typescript-frontend-implementation.instructions.md">typescript-frontend-implementation.instructions.md</a></h3>
 
 <p>The TypeScript Frontend Implementation standards instruction file establishes comprehensive type-safety guidelines for the Zeus Academia Vue 3 SPA frontend, mandating TypeScript 5.3+ with strict mode enabled and zero tolerance for implicit any types.</p>
 
@@ -1719,7 +1732,7 @@ project_purpose: Academic Management System
 
 <p>It explicitly calls out anti-patterns like using any, unchecked type assertions with as, excessive optional chaining, numeric enums, and <code class="language-plaintext highlighter-rouge">@ts-ignore</code> comments, instead promoting type guards, readonly modifiers, string enums or union types, and proper null handling through type narrowing to ensure the frontend codebase maintains complete type safety and leverages TypeScript’s full compile-time guarantees.</p>
 
-<h3 id="vitest-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/vitest-implementation.instructions.md">vitest-implementation.instructions.md</a></h3>
+<h3 id="vitest-implementationinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/instructions/vitest-implementation.instructions.md">vitest-implementation.instructions.md</a></h3>
 
 <p>The Vitest Testing standards instruction file establishes comprehensive testing guidelines for the Zeus Academia Vue 3 frontend, mandating Vitest 1.2+ with 80%+ code coverage through clear Arrange-Act-Assert patterns, descriptive test naming that explains behavior rather than implementation, and fast execution times measured in milliseconds for unit tests.</p>
 
@@ -1727,13 +1740,13 @@ project_purpose: Academic Management System
 
 <p>The file documents all standard assertion patterns from basic equality checks through Testing Library’s accessibility-focused matchers like <code class="language-plaintext highlighter-rouge">toBeInTheDocument()</code> and <code class="language-plaintext highlighter-rouge">toHaveTextContent()</code>, while establishing strict validation requirements including mock cleanup with <code class="language-plaintext highlighter-rouge">beforeEach(() =&gt; vi.clearAllMocks())</code>, async/await over <code class="language-plaintext highlighter-rouge">setTimeout</code> delays, and proper test isolation. It explicitly prohibits anti-patterns including testing implementation details instead of user behavior, shallow rendering without justification, hardcoded test data duplication, generic uninformative test names, and multiple unrelated assertions per test-instead requiring focused behavioral tests, full component renders with Testing Library, test data factories for reusable fixtures, descriptive test names that serve as documentation, and single-concern tests that validate one logical behavior to ensure maintainable, reliable test suites that validate frontend functionality through user-centric testing patterns aligned with Testing Library philosophy.</p>
 
-<h3 id="vue3-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/vue3-implementation.instructions.md">vue3-implementation.instructions.md</a></h3>
+<h3 id="vue3-implementationinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/instructions/vue3-implementation.instructions.md">vue3-implementation.instructions.md</a></h3>
 
 <p>The Vue 3 Implementation standards instruction file establishes comprehensive guidelines for building the Zeus Academia frontend SPA using Vue 3.4+ with TypeScript, mandating exclusive use of the Composition API with <code class="language-plaintext highlighter-rouge">&lt;script setup&gt;</code> syntax while completely avoiding the Options API. It provides extensive code examples for Single File Component (SFC) structure with typed props using <code class="language-plaintext highlighter-rouge">defineProps&lt;T&gt;()</code>, emits declaration with <code class="language-plaintext highlighter-rouge">defineEmits&lt;{}&gt;()</code>, composable patterns prefixed with use that encapsulate reusable logic with proper TypeScript return types, and template refs with explicit type annotations for DOM element and component instance access.</p>
 
 <p>The file documents integration patterns with Pinia stores via <code class="language-plaintext highlighter-rouge">useXxxStore()</code> composables, Vue Router navigation hooks, and performance optimization techniques including lazy-loaded routes with <code class="language-plaintext highlighter-rouge">() =&gt; import()</code>, <code class="language-plaintext highlighter-rouge">v-once</code> for static content, <code class="language-plaintext highlighter-rouge">v-memo</code> for expensive list rendering, and computed properties over methods for derived reactive state. It establishes strict lifecycle hook usage patterns with cleanup requirements in <code class="language-plaintext highlighter-rouge">onUnmounted</code> for subscriptions and event listeners, validation checklists ensuring all components use scoped styles and handle async operations with loading/error states, and explicitly prohibits anti-patterns like untyped props, prop mutations, global state in composables, missing :key attributes in <code class="language-plaintext highlighter-rouge">v-for</code> loops, and inline event handler creation that causes unnecessary <code class="language-plaintext highlighter-rouge">re-renders-all</code> while maintaining strict TypeScript typing throughout to ensure type-safe, performant, and maintainable Vue 3 components that leverage reactivity primitives (<code class="language-plaintext highlighter-rouge">ref</code>, <code class="language-plaintext highlighter-rouge">reactive</code>, <code class="language-plaintext highlighter-rouge">computed</code>) and lifecycle hooks correctly for optimal rendering performance and developer experience.</p>
 
-<h3 id="xunit-implementationinstructionsmd"><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/main/.github/instructions/xunit-implementation.instructions.md">xunit-implementation.instructions.md</a></h3>
+<h3 id="xunit-implementationinstructionsmd"><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/instructions/xunit-implementation.instructions.md">xunit-implementation.instructions.md</a></h3>
 
 <p>The xUnit Testing standards instruction file establishes comprehensive testing guidelines for the Zeus Academia backend, mandating xUnit 2.6+ with a target of 80%+ code coverage through clear Arrange-Act-Assert test structure, descriptive naming conventions that explain the scenario and expected result, and one logical assertion per test for focused validation. It provides extensive code examples for unit tests using <code class="language-plaintext highlighter-rouge">NSubstitute</code> for mocking dependencies, theory tests with <code class="language-plaintext highlighter-rouge">InlineData</code> and <code class="language-plaintext highlighter-rouge">MemberData</code> for parameterized testing, test fixtures with <code class="language-plaintext highlighter-rouge">IClassFixture</code> for shared setup across test classes, integration tests using <code class="language-plaintext highlighter-rouge">WebApplicationFactory</code> to test actual HTTP endpoints, and repository tests with in-memory Entity Framework databases for data access validation.</p>
 
@@ -1766,7 +1779,7 @@ project_purpose: Academic Management System
 
 <p>In Part 6, I’ll introduce the vertical slice implementation pattern which breaks down the project into small, end-to-end slices that can be developed and tested independently. I’ll also introduce an implementation plan prompt and show how to use AI to generate a detailed implementation plan that breaks down the project into manageable tasks while respecting the architectural constraints we’ve established. We’ll finish this phase by creating implementation prompts that guide AI agents through the actual coding work, ensuring that all generated code adheres to our technology-specific instruction files and architectural vision.</p>
 
-<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
+<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/j0hnnymiller/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
 
 <hr />
 
@@ -1781,6 +1794,7 @@ project_purpose: Academic Management System
 <p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
 
 <p>Prompts:</p>
+
 <ul>
   <li>Rewrite this blog post focusing on technology instruction files</li>
   <li>After the section “## Why Architecture Instruction Files Matter” add a section describing running the following prompt to update the project overview:
@@ -1867,19 +1881,19 @@ project_purpose: Academic Management System</li>
 
 <p>Prior to creating CQRS instructions, I created a prompt file to guide the creation of the instructions. By asking Copilot to create a prompt file, you give Copilot a chance to add relevant context which improves the prompt, which in turn will improve the instructions generated by the prompt.</p>
 
-<p>When generating GitHub AI guidance I used the custom <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/chatmodes/prompt-engineer.chatmode.md">prompt-engineer.chatmode.md</a> chat mode, introduced in <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD2/">Part 2</a>, which focuses Copilot on the skills needed to generate effective prompts.</p>
+<p>When generating GitHub AI guidance I used the custom <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/chatmodes/prompt-engineer.chatmode.md">prompt-engineer.chatmode.md</a> chat mode, introduced in <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD2/">Part 2</a>, which focuses Copilot on the skills needed to generate effective prompts.</p>
 
 <p>When working with GitHub AI guidance there is always a chicken-and-egg problem. For Copilot to generate an artifact, you need a prompt. In this case we want Copilot to generate a prompt file. We could create a prompt file that would generate the prompt file we need to generate the instruction file. This is a recursive process with diminishing returns. At some point we’d need to manually prompt Copilot to bootstrap the artifact generation.</p>
 
 <p>Here is the manual prompt I used to generate the prompt file: <em>Create a prompt file that generates instruction files for a CQRS architecture. The prompt file should target AI agents and be optimized to reduce token consumption.</em></p>
 
-<p>By asking Copilot to generate a prompt file, Copilot will use the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/instructions/ai-assisted-output.instructions.md">ai-assisted-output.instructions.md</a> and the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/instructions/prompt-file-generation.instructions.md">prompt-file-generation.instructions.md</a> to guide the generation of the prompt file. This ensures the prompt file conforms to the AI output instructions and the instructions for generating prompts.</p>
+<p>By asking Copilot to generate a prompt file, Copilot will use the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/instructions/ai-assisted-output.instructions.md">ai-assisted-output.instructions.md</a> and the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/a0ce78c1e527432044f574dafe4cca7cdacdd099/.github/instructions/prompt-file-generation.instructions.md">prompt-file-generation.instructions.md</a> to guide the generation of the prompt file. This ensures the prompt file conforms to the AI output instructions and the instructions for generating prompts.</p>
 
 <p>All of this meta guidance (prompts that generate prompts which create instructions that govern the generation of code) can get confusing. Take a close look at the files I’ve referenced in this post and have Copilot explain anything you don’t quite understand.</p>
 
 <h3 id="understanding-the-generate-cqrs-eventsourcing-instructionspromptmd-prompt-file">Understanding the <code class="language-plaintext highlighter-rouge">generate-cqrs-eventsourcing-instructions.prompt.md</code> Prompt File</h3>
 
-<p>The <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/13fc7e8eb6fa47a5f933cd0e427dc7c65642f5c0/.github/prompts/generate-cqrs-eventsourcing-instructions.prompt.md">generate-cqrs-eventsourcing-instructions.prompt.md</a> prompt file instructs an AI agent to generate a complete instruction file for implementing CQRS with event sourcing patterns in a specific programming language and technology stack. The agent takes four parameters, the programming language, mediator framework, event store implementation, and projection strategy, and produces a comprehensive <code class="language-plaintext highlighter-rouge">.instructions.md</code> file that will guide future AI-assisted code generation.</p>
+<p>The <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/13fc7e8eb6fa47a5f933cd0e427dc7c65642f5c0/.github/prompts/generate-cqrs-eventsourcing-instructions.prompt.md">generate-cqrs-eventsourcing-instructions.prompt.md</a> prompt file instructs an AI agent to generate a complete instruction file for implementing CQRS with event sourcing patterns in a specific programming language and technology stack. The agent takes four parameters, the programming language, mediator framework, event store implementation, and projection strategy, and produces a comprehensive <code class="language-plaintext highlighter-rouge">.instructions.md</code> file that will guide future AI-assisted code generation.</p>
 
 <p>The instruction file content follows a rigid 15-section structure. The agent begins with a brief overview, then creates a reference table defining core concepts like events, aggregates, event stores, projections, and snapshots. It documents three main implementation patterns, command handling with event-sourced aggregates, event store operations for writing and reading event streams, and query handling using projections rather than direct event store access.</p>
 
@@ -1929,7 +1943,7 @@ project_purpose: Academic Management System</li>
 
 <p>In Part 5, I’ll add instruction files for the technologies we’re implementing. These instructions will guide Copilot in the details for implementing specific technologies. That post will cover naming conventions, patterns, namespaces, standards, and templates for implementing the classes that will be implemented.</p>
 
-<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
+<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/j0hnnymiller/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
 
 <hr />
 
@@ -2009,7 +2023,7 @@ project_purpose: Academic Management System</li>
 <p>Models have biases, if only to their own work. By utilizing multiple models you mitigate for these biases and the different perspectives can add to the robustness of the implementations.</p>
 
 <p>Here is a link to the
-<a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/instructions/ai-dev-process.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">ai-dev-process.instructions.md</code></a> file.</p>
+<a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/instructions/ai-dev-process.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">ai-dev-process.instructions.md</code></a> file.</p>
 
 <p>The AI-assisted software development process further constrains what the AI can do when working with code in the project. It’s important to note that these constraints only apply when AI is actively working. If you want these constrains to apply to human developers on your team, you’ll want to add gates to the repository to enforce the constraints across the board.</p>
 
@@ -2029,7 +2043,7 @@ project_purpose: Academic Management System</li>
   <li><strong>Orphan cleanup:</strong> AI branches are ephemeral. If they aren’t merged in 7 days, they are deleted.</li>
 </ul>
 
-<p>Here is a link to the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/instructions/git-workflow.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">git-workflow.instructions.md</code></a> file.</p>
+<p>Here is a link to the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/instructions/git-workflow.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">git-workflow.instructions.md</code></a> file.</p>
 
 <p>Like the AI development instructions, some of the requirement enforcement should be implemented through repo or pipeline configuration. This is called out in the <strong>Enforcement</strong> section of the instruction file.</p>
 
@@ -2037,13 +2051,13 @@ project_purpose: Academic Management System</li>
 
 <p>Finally, we created the project overview instructions to tie everything together. It acts as the entry point for any new agent (or human) joining the project, pointing them to the standards and critical files they need to respect.</p>
 
-<p>Here is a link to the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/instructions/project-overview.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">project-overview.instructions.md</code></a> file.</p>
+<p>Here is a link to the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/instructions/project-overview.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">project-overview.instructions.md</code></a> file.</p>
 
 <p>The project overview instructions are a snapshot of the project in time. As the project evolves we’ll update the project overview so that it always contains the current state of the project.</p>
 
 <h2 id="checking-the-context">Checking the Context</h2>
 
-<p>When adding or changing instruction files it’s important to verify that all of the instructions are complimentary. The <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/prompts/check-context.prompt.md" target="_blank">check-context.prompt.md</a> prompt file examines the current context for conflicting instructions, factual inconsistencies, logical contradictions, priority conflicts, technical incompatibilities, terminology gaps, and redundancies.</p>
+<p>When adding or changing instruction files it’s important to verify that all of the instructions are complimentary. The <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/prompts/check-context.prompt.md" target="_blank">check-context.prompt.md</a> prompt file examines the current context for conflicting instructions, factual inconsistencies, logical contradictions, priority conflicts, technical incompatibilities, terminology gaps, and redundancies.</p>
 
 <p>It’s a good idea to submit this prompt to a different model than was used to generate the instruction files to avoid the model favoring it’s own output.</p>
 
@@ -2069,13 +2083,13 @@ project_purpose: Academic Management System</li>
 
 <p>When submitted, AI will create a prompt file that conforms to the <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code> instructions and meets the intent of creating the project overview instructions.</p>
 
-<p>Here are links to the prompt files that created the instruction files: <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/prompts/create-ai-dev-process.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-ai-dev-process.prompt.md</code></a>, <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/prompts/create-git-workflow-instructions.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-git-workflow-instructions.prompt.md</code></a>, and <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/prompts/create-project-overview.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-project-overview.prompt.md</code></a></p>
+<p>Here are links to the prompt files that created the instruction files: <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/prompts/create-ai-dev-process.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-ai-dev-process.prompt.md</code></a>, <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/prompts/create-git-workflow-instructions.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-git-workflow-instructions.prompt.md</code></a>, and <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/prompts/create-project-overview.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-project-overview.prompt.md</code></a></p>
 
 <h2 id="whats-next">What’s Next?</h2>
 
 <p>This concludes the work of establishing the core instructions we need and moves us closer to starting an implementation. In Part 4 we’ll add instructions that define the architecture and the architecture implementation. Establishing a path that the AI can follow when implementing the solution.</p>
 
-<p>If you’re interested in seeing the files, you can find them in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b" target="_blank">Academia GitHub repository</a>. If you like to follow along with your own implementation, fork this repo and use the fork to build you own implementation.</p>
+<p>If you’re interested in seeing the files, you can find them in the <a href="https://github.com/j0hnnymiller/zeus.academia.3b" target="_blank">Academia GitHub repository</a>. If you like to follow along with your own implementation, fork this repo and use the fork to build you own implementation.</p>
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 

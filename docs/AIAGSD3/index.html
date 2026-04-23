@@ -95,7 +95,7 @@
 <p>Models have biases, if only to their own work. By utilizing multiple models you mitigate for these biases and the different perspectives can add to the robustness of the implementations.</p>
 
 <p>Here is a link to the
-<a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/instructions/ai-dev-process.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">ai-dev-process.instructions.md</code></a> file.</p>
+<a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/instructions/ai-dev-process.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">ai-dev-process.instructions.md</code></a> file.</p>
 
 <p>The AI-assisted software development process further constrains what the AI can do when working with code in the project. It’s important to note that these constraints only apply when AI is actively working. If you want these constrains to apply to human developers on your team, you’ll want to add gates to the repository to enforce the constraints across the board.</p>
 
@@ -115,7 +115,7 @@
   <li><strong>Orphan cleanup:</strong> AI branches are ephemeral. If they aren’t merged in 7 days, they are deleted.</li>
 </ul>
 
-<p>Here is a link to the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/instructions/git-workflow.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">git-workflow.instructions.md</code></a> file.</p>
+<p>Here is a link to the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/instructions/git-workflow.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">git-workflow.instructions.md</code></a> file.</p>
 
 <p>Like the AI development instructions, some of the requirement enforcement should be implemented through repo or pipeline configuration. This is called out in the <strong>Enforcement</strong> section of the instruction file.</p>
 
@@ -123,13 +123,13 @@
 
 <p>Finally, we created the project overview instructions to tie everything together. It acts as the entry point for any new agent (or human) joining the project, pointing them to the standards and critical files they need to respect.</p>
 
-<p>Here is a link to the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/instructions/project-overview.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">project-overview.instructions.md</code></a> file.</p>
+<p>Here is a link to the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/instructions/project-overview.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">project-overview.instructions.md</code></a> file.</p>
 
 <p>The project overview instructions are a snapshot of the project in time. As the project evolves we’ll update the project overview so that it always contains the current state of the project.</p>
 
 <h2 id="checking-the-context">Checking the Context</h2>
 
-<p>When adding or changing instruction files it’s important to verify that all of the instructions are complimentary. The <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/prompts/check-context.prompt.md" target="_blank">check-context.prompt.md</a> prompt file examines the current context for conflicting instructions, factual inconsistencies, logical contradictions, priority conflicts, technical incompatibilities, terminology gaps, and redundancies.</p>
+<p>When adding or changing instruction files it’s important to verify that all of the instructions are complimentary. The <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/prompts/check-context.prompt.md" target="_blank">check-context.prompt.md</a> prompt file examines the current context for conflicting instructions, factual inconsistencies, logical contradictions, priority conflicts, technical incompatibilities, terminology gaps, and redundancies.</p>
 
 <p>It’s a good idea to submit this prompt to a different model than was used to generate the instruction files to avoid the model favoring it’s own output.</p>
 
@@ -155,13 +155,13 @@
 
 <p>When submitted, AI will create a prompt file that conforms to the <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code> instructions and meets the intent of creating the project overview instructions.</p>
 
-<p>Here are links to the prompt files that created the instruction files: <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/prompts/create-ai-dev-process.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-ai-dev-process.prompt.md</code></a>, <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/prompts/create-git-workflow-instructions.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-git-workflow-instructions.prompt.md</code></a>, and <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Three/.github/prompts/create-project-overview.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-project-overview.prompt.md</code></a></p>
+<p>Here are links to the prompt files that created the instruction files: <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/prompts/create-ai-dev-process.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-ai-dev-process.prompt.md</code></a>, <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/prompts/create-git-workflow-instructions.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-git-workflow-instructions.prompt.md</code></a>, and <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Three/.github/prompts/create-project-overview.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-project-overview.prompt.md</code></a></p>
 
 <h2 id="whats-next">What’s Next?</h2>
 
 <p>This concludes the work of establishing the core instructions we need and moves us closer to starting an implementation. In Part 4 we’ll add instructions that define the architecture and the architecture implementation. Establishing a path that the AI can follow when implementing the solution.</p>
 
-<p>If you’re interested in seeing the files, you can find them in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b" target="_blank">Academia GitHub repository</a>. If you like to follow along with your own implementation, fork this repo and use the fork to build you own implementation.</p>
+<p>If you’re interested in seeing the files, you can find them in the <a href="https://github.com/j0hnnymiller/zeus.academia.3b" target="_blank">Academia GitHub repository</a>. If you like to follow along with your own implementation, fork this repo and use the fork to build you own implementation.</p>
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 

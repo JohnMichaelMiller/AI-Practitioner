@@ -205,7 +205,7 @@ which improves consistency across slices and reduces prompt drift.
 When a prompt generates a file, link to the generated artifact:
 
 ```markdown
-[custom-agents.instructions.md](https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md)
+[custom-agents.instructions.md](https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md)
 
 This is the execution step where the reusable prompt is run with concrete project settings...
 ```

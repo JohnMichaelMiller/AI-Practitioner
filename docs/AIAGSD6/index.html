@@ -6,8 +6,9 @@ categories: AIAGSD
 tags: [vertical-slice, agents, planning, meta-prompts, workflow-modeling, implementation-planning]
 excerpt: “Learn how to generate planning artifacts—vertical-slice definitions, workflow models, and dependency diagrams—that guide coordinated slice-by-slice delivery using AI and meta-prompts.”
 description: “Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.”
-image:
-—</p>
+image:</p>
+
+<hr />
 
 <p><strong>TL;DR:</strong> This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution.</p>
 
@@ -76,6 +77,7 @@ image:
 <h2 id="what-are-vertical-slices">What are vertical slices?</h2>
 
 <p>A vertical slice is a narrow, end-to-end feature that delivers user value and can be built, tested, and deployed independently. Instead of building horizontally (e.g., database → API → UI for the entire system), you build vertically through all layers but only for a small piece of functionality. For example, a “Course Discovery” slice in an academia management system might include:</p>
+
 <ul>
   <li>A database query to list active courses</li>
   <li>An API endpoint to serve that data</li>
@@ -94,6 +96,7 @@ image:
 <p><strong>Problem</strong>: Registrars need to search for and view active courses before enrollment opens; stakeholders need visibility into what’s offered.</p>
 
 <p><strong>Acceptance Criteria</strong>:</p>
+
 <ul>
   <li>List all active courses (paginated, 10 per page)</li>
   <li>Filter by department and term</li>
@@ -102,6 +105,7 @@ image:
 </ul>
 
 <p><strong>Minimal Tasks</strong>:</p>
+
 <ol>
   <li>Add course search endpoint (filter by department, term, status)</li>
   <li>Create course list UI component</li>
@@ -151,7 +155,7 @@ image:
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>using https://docs.github.com/en/copilot/reference/custom-agents-configuration, https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents, https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents create a prompt that will create an instruction file for creating agents.
 </code></pre></div></div>
 
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md">create-custom-agents-instructions.prompt.md</a></p>
+<p><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md">create-custom-agents-instructions.prompt.md</a></p>
 
 <p>This is a meta-prompt: instead of directly generating an agent profile, it generates a reusable prompt that can produce a full instruction file for agent authors. In practice, we’re creating a repeatable tool, not a one-off output.</p>
 
@@ -208,7 +212,7 @@ agent_scope: repository
 include_ide_notes: true
 </code></pre></div></div>
 
-<p>Submitting the prompt with these arguments generates the actual instruction file that defines repository standards for authoring <code class="language-plaintext highlighter-rouge">.agent.md</code> profiles. The prior step created the generator; this step produces the generated artifact <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md">custom-agents.instructions.md</a></p>
+<p>Submitting the prompt with these arguments generates the actual instruction file that defines repository standards for authoring <code class="language-plaintext highlighter-rouge">.agent.md</code> profiles. The prior step created the generator; this step produces the generated artifact <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md">custom-agents.instructions.md</a></p>
 
 <p>This is the execution step where the reusable prompt is run with concrete project settings. The first step produced the tool; this step applies it to generate repository-ready standards.</p>
 
@@ -254,7 +258,7 @@ include_ide_notes: true
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create a prompt file that creates an agent for the product manager persona
 </code></pre></div></div>
 
-<p>This generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md">create-product-manager-agent.prompt.md</a> prompt file. This is a prompt-generation step, not an agent-generation step. The purpose is to produce a reusable authoring prompt that can consistently generate or refine a PM persona agent as requirements evolve.</p>
+<p>This generates the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md">create-product-manager-agent.prompt.md</a> prompt file. This is a prompt-generation step, not an agent-generation step. The purpose is to produce a reusable authoring prompt that can consistently generate or refine a PM persona agent as requirements evolve.</p>
 
 <p>What this prompt produces:</p>
 
@@ -281,7 +285,7 @@ include_execute_tool: false
 scope_note: The universe of discourse is Academia Management
 </code></pre></div></div>
 
-<p>The generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md">product-manager.agent.md</a> custom agent.</p>
+<p>The generates the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md">product-manager.agent.md</a> custom agent.</p>
 
 <p>This is the execution step that converts the reusable PM-agent prompt into a concrete, repository-ready persona agent file. In other words, the prior step created the generator, and this step produced the generated artifact.</p>
 
@@ -309,7 +313,7 @@ scope_note: The universe of discourse is Academia Management
 
 <p>The is is another prompt-generation step that strengthens planning quality before implementation begins. Instead of drafting PRDs ad hoc, we now have a reusable prompt artifact that drives a consistent PRD structure across slices.</p>
 
-<p>This prompt generates the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md">create-prd.prompt.md</a> file :</p>
+<p>This prompt generates the <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md">create-prd.prompt.md</a> file :</p>
 
 <ul>
   <li>A reusable PRD prompt file with explicit section requirements</li>
@@ -330,7 +334,7 @@ scope_note: The universe of discourse is Academia Management
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create a new prompt file, that creates an instruction file, that provides guidance for implementing applications in vertical slices
 </code></pre></div></div>
 
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md">create-vertical-slice-implementation-instructions.prompt.md</a></p>
+<p><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md">create-vertical-slice-implementation-instructions.prompt.md</a></p>
 
 <p>This request is one level more specific than a general implementation prompt: it creates a prompt artifact whose job is to generate instruction files for vertical-slice execution. That distinction helps keep planning guidance and implementation governance synchronized as the project grows.</p>
 
@@ -355,7 +359,7 @@ scope_note: The universe of discourse is Academia Management
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit #file:create-vertical-slice-implementation-instructions.prompt.md
 </code></pre></div></div>
 
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md">vertical-slice-implementation.instructions.md</a></p>
+<p><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md">vertical-slice-implementation.instructions.md</a></p>
 
 <p>This is the execution step that produces the instruction file used to guide slice-by-slice implementation work. The previous step created the generator prompt; this step produced the concrete implementation-governance artifact.</p>
 
@@ -380,7 +384,7 @@ scope_note: The universe of discourse is Academia Management
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>given these #file:academia.txt facts create a comprehensive list, in markdown, of the workflows needed for the zeus.academia management system. put the file in the models/workflows folder
 </code></pre></div></div>
 
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md">academia-workflows.md</a></p>
+<p><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md">academia-workflows.md</a></p>
 
 <p>This step converts domain facts into an implementation-facing workflow catalog. Instead of inferring workflows ad hoc during coding, the team gets an explicit markdown inventory that can be mapped to vertical slices and prioritized systematically.</p>
 
@@ -405,7 +409,7 @@ scope_note: The universe of discourse is Academia Management
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create an implementation plan that implements the workflows #file:academia-workflows.md and the business rules #file:academia.txt. include a portrait mermaid diagram that shows the slices and their dependencies
 </code></pre></div></div>
 
-<p><a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md">academia-implementation-plan.md</a></p>
+<p><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md">academia-implementation-plan.md</a></p>
 
 <p>This step converts workflow modeling into an executable delivery plan. Instead of planning slices from memory, it uses explicit workflow and rule inputs and adds a visual dependency model to make sequencing decisions easier to review.</p>
 
@@ -437,6 +441,7 @@ scope_note: The universe of discourse is Academia Management
 </ul>
 
 <p>In the example:</p>
+
 <ol>
   <li>“Course Discovery” has no dependencies → build first</li>
   <li>“Enrollment”, “Waitlist”, and “Cancellation” all depend on “Course Discovery” → build after</li>
@@ -455,7 +460,7 @@ scope_note: The universe of discourse is Academia Management
 
 <p>We’ll finish this phase by creating implementation prompts that guide AI agents through coding work while keeping generated output aligned with our technology-specific instruction files and architectural vision. In the next step, I’ll use the planning and persona-agent outputs to define implementation slices with clear dependencies and acceptance criteria. The goal is to move from governance-compliant planning into execution prompts that drive coding tasks with minimal ambiguity.</p>
 
-<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/johnmillerATcodemag-com/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
+<p>If you’d like to explore the files or follow along with your own implementation, everything is available in the <a href="https://github.com/j0hnnymiller/zeus.academia.3b">Academia GitHub</a> repository. Fork it, experiment, and adapt it to your own workflow.</p>
 
 <hr />
 
@@ -472,24 +477,24 @@ scope_note: The universe of discourse is Academia Management
 <p>Prompts:</p>
 
 <ul>
-  <li>Expand on this post with descriptions of this prompt: “using (https://docs.github.com/en/copilot/reference/custom-agents-configuration), https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents, https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents create a prompt that will create an instruction file for creating agents” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md” created by the prompt</li>
+  <li>Expand on this post with descriptions of this prompt: “using (https://docs.github.com/en/copilot/reference/custom-agents-configuration), https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents, https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents create a prompt that will create an instruction file for creating agents” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-custom-agents-instructions.prompt.md” created by the prompt</li>
   <li>Expand this post with a description of this prompt: “Prompt: submit this prompt #file:create-custom-agents-instructions.prompt.md with these arguments:
 instruction*filename: custom-agents.instructions.md
 apply_to: .github/agents/**/_.agent.md
 agent_scope: repository
-include_ide_notes: true” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a prompt file that creates an agent for the product manager persona” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md” created by the prompt</li>
+include_ide_notes: true” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/instructions/custom-agents.instructions.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a prompt file that creates an agent for the product manager persona” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-product-manager-agent.prompt.md” created by the prompt</li>
   <li>Add a section to this post with a description of this prompt: “submit the #file:create-product-manager-agent.prompt.md prompt file with these arguments:
 agent_filename: product-manager.agent.md
 target: omit
 include_execute_tool: false
-scope_note: The universe of discourse is Academia Management” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing the steps to create a structured PRD with problem, goals, non-goals, and success metrics” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing guidance for implementing applications in vertical slices” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create a new prompt file, that creates an instruction file, that provides guidance for implementing applications in vertical slices” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “submit #file:create-vertical-slice-implementation-instructions.prompt.md” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “given these #file:academia.txt facts create a comprehensive list, in markdown, of the workflows needed for the zeus.academia management system. put the file in the models/workflows folder” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md” created by the prompt</li>
-  <li>Add a section to this post with a description of this prompt: “create an implementation plan that implements the workflows #file:academia-workflows.md and the business rules #file:academia.txt. include a portrait mermaid diagram that shows the slices and their dependencies” and the file “https://github.com/johnmillerATcodemag-com/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md” created by the prompt</li>
+scope_note: The universe of discourse is Academia Management” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/agents/product-manager.agent.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing the steps to create a structured PRD with problem, goals, non-goals, and success metrics” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-prd.prompt.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a new prompt file containing guidance for implementing applications in vertical slices” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create a new prompt file, that creates an instruction file, that provides guidance for implementing applications in vertical slices” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/prompts/create-vertical-slice-implementation-instructions.prompt.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “submit #file:create-vertical-slice-implementation-instructions.prompt.md” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/instructions/vertical-slice-implementation.instructions.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “given these #file:academia.txt facts create a comprehensive list, in markdown, of the workflows needed for the zeus.academia management system. put the file in the models/workflows folder” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-workflows.md” created by the prompt</li>
+  <li>Add a section to this post with a description of this prompt: “create an implementation plan that implements the workflows #file:academia-workflows.md and the business rules #file:academia.txt. include a portrait mermaid diagram that shows the slices and their dependencies” and the file “https://github.com/j0hnnymiller/zeus.academia.3b/blob/Part-Six/.github/models/workflows/academia-implementation-plan.md” created by the prompt</li>
   <li>Insert a governance checkpoint: After the vertical-slice introduction, add a section validating that the planning artifacts (agent standards, agent profiles, PRD template, and implementation instructions) form a coherent system</li>
   <li>Refactor artifact summaries: Convert feature lists to thesis-first paragraphs where appropriate</li>
   <li>Add a definition of prompt drift</li>
