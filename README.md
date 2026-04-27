@@ -131,3 +131,4 @@ This repository includes tools for managing multiple GitHub accounts:
 ## CODE Publication Copies
 
 - **[CODE/2026-04-17-AIAGSD7.md](CODE/2026-04-17-AIAGSD7.md)**: CODE Magazine publication copy of AIAGSD Part 7 with CODE links/contact details preserved for publication workflow.
+- **[CODE/2026-04-23-AIAGSD8.md](CODE/2026-04-23-AIAGSD8.md)**: CODE Magazine publication copy of AIAGSD Part 8 covering the first implementation wave, starting with the shared kernel and foundational reference-data slices. [AI log](ai-logs/2026/04/23/08140724-bc73-4680-9f5f-2f3b307fc6b5/conversation.md)

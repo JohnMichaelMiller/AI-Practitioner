@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants | AI Practitioner</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants" />
+<meta name="author" content="John Michael Miller" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="This post shows how the first implementation wave in Zeus Academia forced a shift from code-only verification to durable schema enforcement, migration-centric evidence, and more explicit multi-agent handoffs." />
+<meta property="og:description" content="This post shows how the first implementation wave in Zeus Academia forced a shift from code-only verification to durable schema enforcement, migration-centric evidence, and more explicit multi-agent handoffs." />
+<link rel="canonical" href="https://blog.pdata.com/AIAGSD8/" />
+<meta property="og:url" content="https://blog.pdata.com/AIAGSD8/" />
+<meta property="og:site_name" content="AI Practitioner" />
+<meta property="og:image" content="https://blog.pdata.com/assets/images/2026-04-23/AIAGSD8_Header_Large.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-23T00:00:00-07:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://blog.pdata.com/assets/images/2026-04-23/AIAGSD8_Header_Large.png" />
+<meta property="twitter:title" content="AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2026-04-23T00:00:00-07:00","datePublished":"2026-04-23T00:00:00-07:00","description":"This post shows how the first implementation wave in Zeus Academia forced a shift from code-only verification to durable schema enforcement, migration-centric evidence, and more explicit multi-agent handoffs.","headline":"AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants","image":"https://blog.pdata.com/assets/images/2026-04-23/AIAGSD8_Header_Large.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIAGSD8/"},"url":"https://blog.pdata.com/AIAGSD8/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">AI Practitioner</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/">Home</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2026-04-23T00:00:00-07:00" itemprop="datePublished">Apr 23, 2026
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This is the point where the AIAGSD workflow has to prove it can survive contact with real implementation. Up to now, the series has focused on requirements, scaffolding, governance, architecture, workflow models, and implementation prompts. In Part 8, I move from planning artifacts into the first bounded delivery wave and show what the first real implementation work taught us: passing unit tests is not enough if the database can still accept invalid state.</p>
+
+<!--more-->
+
+<figure>
+  <img src="/assets/images/2026-04-23/AIAGSD8_Header_Large.png" alt="Foundational vertical slices establishing shared kernel and reference data before broader implementation" />
+  <figcaption>The first implementation wave should not just validate domain logic. It should prove that critical invariants survive direct writes, migrations, and downstream slice reuse.</figcaption>
+</figure>
+
+<p>This is the eighth post in the series on AI-assisted greenfield software development. It builds on <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1" target="_blank">Part 1: Business Requirements</a> and the subsequent posts in the series. If you have not read the earlier posts, start there first, because Part 8 assumes the repository already has prompts, instruction files, agent roles, provenance rules, and a dependency-aware implementation plan.</p>
+
+<p>Part 7 ended with a full set of implementation prompts and agent handoffs, but a prompt library is only useful if it produces disciplined code when implementation begins. The first test is not a flashy feature. It is the foundation that the rest of the application will trust. That means locking down the shared domain rules and the canonical reference data before registration, lifecycle actions, reporting, or richer user workflows are allowed to build on top of them.</p>
+
+<p>What changed during this first implementation wave was my standard for evidence. The early slices exposed a gap between code-level correctness and durable system integrity. An aggregate can guard state perfectly, a unit test can pass, and an AI verifier can still be wrong if the underlying schema does not enforce the same invariant. Once I hit that realization, Part 8 stopped being just about implementing foundational slices and became about enforcing them in a way that survives real-world paths through the system.</p>
+
+<h2 id="why-the-first-slices-matter">Why the First Slices Matter</h2>
+
+<p>The earliest slices in a vertical-slice plan carry more architectural weight than their scope suggests. They do not usually produce the most visible business outcomes, but they define the invariants, data contracts, and canonical sources of truth that every later slice will consume. If those first slices drift, the rest of the backlog inherits that instability and the AI starts compensating with local convenience logic instead of following a shared model.</p>
+
+<p>That is why I started with the Shared Kernel and the first reference-data slices instead of jumping straight to registration or profile management. The point of this wave is to reduce the number of assumptions available to the model. Once rank codes, degree catalogs, university catalogs, extension rules, and shared domain contracts are explicit and testable, the downstream slices have a much tighter path to follow.</p>
+
+<p>The opening implementation wave focuses on this dependency chain:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Slice</th>
+      <th>Purpose</th>
+      <th>Why it comes first</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>EP-0-1 Shared Kernel</td>
+      <td>Establish shared domain primitives, invariants, result/error contracts, and domain-event boundaries</td>
+      <td>Every later slice depends on these core rules</td>
+    </tr>
+    <tr>
+      <td>EP-1-1 ManageRanks</td>
+      <td>Define the canonical rank set and its access-level mapping</td>
+      <td>Registration and reporting must not invent rank semantics</td>
+    </tr>
+    <tr>
+      <td>EP-1-2 ManageDegrees</td>
+      <td>Create the degree catalog used by qualification workflows</td>
+      <td>Registration and qualification slices depend on stable degree references</td>
+    </tr>
+    <tr>
+      <td>EP-1-3 ManageUniversities</td>
+      <td>Create the university catalog used by qualification workflows</td>
+      <td>Qualification rules need one approved source of university data</td>
+    </tr>
+    <tr>
+      <td>EP-1-4 ProvisionExtension</td>
+      <td>Manage extension inventory and availability rules</td>
+      <td>Registration and reassignment flows depend on unique, provisioned extensions</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>None of these slices is exciting on its own. Together, they turn the rest of the implementation plan from a loose sequence into a governed dependency chain.</p>
+
+<p>The crucial lesson is that foundational slices do not just need correct behavior. They need durable enforcement. If a core rule can be bypassed by an administrative script, a bulk import, a direct SQL operation, or a race that avoids the intended domain path, then the system is not actually protected. It is just well-behaved under ideal conditions.</p>
+
+<h2 id="beyond-unit-tests-durable-invariants-or-illusions">Beyond Unit Tests: Durable Invariants or Illusions</h2>
+
+<p>We have all seen this failure mode. The unit tests pass, the aggregate guards its state, and the AI assistant confidently marks the slice as verified. But that confidence becomes fragile when persistence verification relies on convenience shortcuts instead of deployment-grade artifacts.</p>
+
+<p>In Zeus Academia, that weakness showed up most clearly around rules such as employment XOR. An academic can be tenured or contracted, but never both. A domain model can enforce that invariant in memory, and a unit test can prove that the aggregate rejects invalid transitions. That is useful, but it is not enough.</p>
+
+<p>If the database schema does not enforce the same rule, the system is still vulnerable. A bypassed code path can insert contradictory rows. A migration can fail to carry the intended constraint into an existing environment. A verifier can mark the slice complete based on code that was never backed by durable schema evidence. That is not integrity. It is optimism.</p>
+
+<h2 id="why-before-how-the-illusion-of-ensurecreated">Why Before How: The Illusion of <code class="language-plaintext highlighter-rouge">EnsureCreated()</code></h2>
+
+<p>Previously, the verification flow for persistence-heavy slices was too trusting. If a slice introduced an invariant, the AI would often prove the aggregate logic, run a narrow persistence test, and treat the result as enough evidence to sign off. In many cases that meant leaning on EF Core’s <code class="language-plaintext highlighter-rouge">EnsureCreated()</code> to stand up a disposable database, validate mappings, and move on.</p>
+
+<p>The problem is that <code class="language-plaintext highlighter-rouge">EnsureCreated()</code> does not prove migration readiness. It does not show that a <code class="language-plaintext highlighter-rouge">CHECK</code> constraint will be generated, reviewed, committed, and applied safely to a living schema. It does not demonstrate that indexes or uniqueness constraints exist as durable deployment artifacts. It can tell you that the model maps. It cannot tell you that the rule survives reality.</p>
+
+<p>That distinction forced a workflow change. For slices that introduce schema-level guarantees, the standard of evidence can no longer stop at unit tests or mapping tests. The implementation has to produce actual migration artifacts and the verification flow has to prove they exist.</p>
+
+<h2 id="the-migration-artifact-mandate">The Migration Artifact Mandate</h2>
+
+<p>That change now shows up directly in the agent guidance for <code class="language-plaintext highlighter-rouge">data-persistence</code>, <code class="language-plaintext highlighter-rouge">testing-verification</code>, and <code class="language-plaintext highlighter-rouge">slice-verifier</code>. These agents are no longer allowed to treat schema-changing work as complete based solely on code-level checks.</p>
+
+<p>The new expectation is straightforward:</p>
+
+<ul>
+  <li>No <code class="language-plaintext highlighter-rouge">EnsureCreated()</code> shortcuts for schema-changing slices.</li>
+  <li>Committed migration artifacts are required when a slice adds uniqueness rules, check constraints, or meaningful index changes.</li>
+  <li>Business rules that must survive direct writes or concurrent paths need explicit persistence backing, such as <code class="language-plaintext highlighter-rouge">.HasCheckConstraint()</code> mappings in EF Core.</li>
+</ul>
+
+<p>This does two things. First, it forces the persistence work into the same definition of done as the domain logic. Second, it gives the verification agents something objective to inspect in the diff instead of relying on optimistic interpretation.</p>
+
+<h2 id="the-enforcement-matrix">The Enforcement Matrix</h2>
+
+<p>Once the persistence burden became explicit, the next problem was ambiguity. If a rule belongs in more than one layer, an AI agent can easily under-enforce it or assume another role will pick it up later. To remove that ambiguity, I updated the implementation-prompt guidance to require an Enforcement Matrix for non-trivial rules.</p>
+
+<p>Instead of asking the model to infer where an invariant belongs, the prompt names the canonical layer, whether persistence backing is required, and what evidence counts as verification.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Rule</th>
+      <th>Canonical layer</th>
+      <th>Persistence backing required</th>
+      <th>Verification evidence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Employment XOR</td>
+      <td>Aggregate + database</td>
+      <td>Yes, CHECK constraint</td>
+      <td>Unit test + schema or migration proof</td>
+    </tr>
+    <tr>
+      <td>Extension uniqueness</td>
+      <td>Aggregate + database</td>
+      <td>Yes, unique index/constraint</td>
+      <td>Handler test + migration proof</td>
+    </tr>
+    <tr>
+      <td>Rank code validity</td>
+      <td>Domain + reference-data boundary</td>
+      <td>Usually no separate CHECK if canonical set is enforced elsewhere</td>
+      <td>Validator or integration proof</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This matrix sharpens agent responsibilities. The <code class="language-plaintext highlighter-rouge">backend-domain</code> agent owns the aggregate and handler behavior. The <code class="language-plaintext highlighter-rouge">data-persistence</code> agent owns the EF Core configuration and migration implications. The verification roles know what evidence they have to demand before a slice can be closed.</p>
+
+<h2 id="starting-with-the-shared-kernel">Starting With the Shared Kernel</h2>
+
+<p>The Shared Kernel is where the implementation plan stops being abstract. This slice is the operational contract for the domain. It defines the primitives that later commands and queries will rely on, the invariants that handlers are not allowed to bypass, and the shared error/result patterns that make behavior consistent across the solution.</p>
+
+<p>For this series, the Shared Kernel matters because it gives the AI fewer places to improvise. Instead of rediscovering domain rules slice by slice, the model can rely on an explicit representation of concepts such as rank, access level, academic qualifications, employment-state constraints, and extension uniqueness. That makes the later slices smaller because they can consume stable behavior instead of recreating it.</p>
+
+<p>Three principles guided this first implementation step:</p>
+
+<ul>
+  <li>Shared rules belong in the model, not in scattered handlers or UI branches.</li>
+  <li>Aggregate and value-object invariants must be observable in tests before dependent slices are allowed to proceed.</li>
+  <li>Result and error contracts should be stable enough that downstream slices can compose them without redefining failure semantics.</li>
+</ul>
+
+<p>The Shared Kernel also acts as a pressure test for the instruction files created in earlier posts. If architecture guidance, process rules, and implementation prompts are clear, the AI should be able to produce a small but rigorous first slice without leaking unrelated feature behavior into the solution. If the slice sprawls, duplicates logic, or weakens invariants, that is a sign the guidance still has holes.</p>
+
+<h2 id="building-the-reference-data-foundation">Building the Reference-Data Foundation</h2>
+
+<p>Once the shared model is in place, the next priority is the set of reference-data slices that make later business workflows deterministic. Registration should not be able to invent a rank. Qualification management should not accept degrees or universities from ad hoc sources. Extension assignment should not guess whether an extension exists or is available. Those concerns belong in dedicated slices with their own acceptance criteria.</p>
+
+<p>This is where the vertical-slice model pays off. Each reference-data slice stays narrow, but it still covers the full delivery contract: domain rules, persistence behavior, API surface, verification, and demonstration. Instead of treating lookup tables as incidental setup, the implementation prompts make them first-class capabilities with explicit boundaries.</p>
+
+<p>In practice, each of these slices protects a different part of the system from drift:</p>
+
+<ul>
+  <li>ManageRanks protects the access-level model from becoming duplicated business logic.</li>
+  <li>ManageDegrees and ManageUniversities establish the canonical lookup sources for qualification workflows.</li>
+  <li>ProvisionExtension protects the one-to-one assignment model before registration and lifecycle operations begin.</li>
+</ul>
+
+<p>This matters for AI-assisted delivery because foundational reference data is where convenience-based shortcuts often appear. A model under-specified on these points will happily hardcode values, embed translation logic in handlers, or treat seed data as an ungoverned implementation detail. By isolating these rules into bounded slices, I can make the correct behavior explicit and testable before any downstream feature has a chance to depend on the wrong assumptions.</p>
+
+<h2 id="smarter-agent-handoffs">Smarter Agent Handoffs</h2>
+
+<p>The persistence changes also exposed a second weakness: vague handoffs between agents. A flat list of handoff targets tells the AI where work might go next, but not why the handoff is happening or what kind of contribution the receiving agent is supposed to make.</p>
+
+<p>That is why the handoff schema was upgraded from simple lists to structured objects. Instead of saying only that a prompt may hand off to <code class="language-plaintext highlighter-rouge">backend-domain</code> or <code class="language-plaintext highlighter-rouge">slice-coordinator</code>, the handoff now carries a label, a specific agent name, and a short prompt explaining the purpose of the escalation.</p>
+
+<p>This change sounds small, but it improves the execution model in two ways. It reduces hallucinated delegation by making the intent of the handoff explicit, and it gives each receiving agent better context before it starts work. In a multi-agent workflow, that is the difference between coordination and just passing responsibility around.</p>
+
+<h2 id="turning-implementation-prompts-into-execution-work">Turning Implementation Prompts Into Execution Work</h2>
+
+<p>The implementation prompts from Part 7 were designed to do more than describe scope. They define agent roles, validation steps, handoff points, and demonstration expectations. Part 8 is where that structure becomes useful, because the first implementation wave needs coordination as much as it needs code.</p>
+
+<p>The working pattern is straightforward:</p>
+
+<ol>
+  <li>Start with the slice prompt and confirm dependencies.</li>
+  <li>Identify which agent roles own the work, usually slice coordination, domain implementation, persistence support, and verification.</li>
+  <li>Implement only the bounded slice behavior required by the prompt.</li>
+  <li>Run the narrowest meaningful verification before moving to adjacent work.</li>
+  <li>Capture evidence and residual risks before handing the slice off.</li>
+</ol>
+
+<p>That sequence sounds procedural, but its real purpose is architectural discipline. It prevents the AI from using a foundational slice as an excuse to reach ahead into future features. The more dependency-heavy the backlog becomes, the more important it is to prove that each slice is complete on its own terms before the next one starts to consume it.</p>
+
+<p>In practical terms, the verification flow for a persistence-sensitive slice now looks more like this:</p>
+
+<ol>
+  <li>The slice coordinator confirms whether the prompt contains non-trivial rules that need an Enforcement Matrix.</li>
+  <li>The backend-domain agent implements the aggregate guards, validators, contracts, and bounded behavior.</li>
+  <li>The data-persistence agent decides whether the rule requires database backing and, if it does, adds the EF Core configuration and migration artifact.</li>
+  <li>The testing-verification role runs narrow behavioral checks and also looks for durable evidence in the diff, especially the migration artifact.</li>
+  <li>The slice-verifier blocks completion if the slice claims schema enforcement but only proves in-memory behavior.</li>
+</ol>
+
+<p>That is the shift Part 8 needed to capture. The first implementation wave is where the AI workflow stopped treating persistence as a secondary detail and started treating it as part of the contract.</p>
+
+<h2 id="what-the-first-implementation-wave-proves">What the First Implementation Wave Proves</h2>
+
+<p>The first implementation wave is not about maximizing visible functionality. It is about demonstrating that the delivery system created in the earlier posts can produce dependable results when the work becomes concrete. If the workflow is sound, these early slices should show several things clearly.</p>
+
+<p>First, the instruction files and prompts should reduce ambiguity instead of just documenting it. The AI should have a clear place to look for architecture rules, scope boundaries, and quality expectations. Second, the agent boundaries should improve delivery rather than add ceremony. Coordinating domain work, persistence behavior, and verification as distinct concerns should make slices easier to reason about. Third, the validation loop should stay narrow and evidence-based. Foundational slices do not need broad end-to-end theatrics; they need targeted proof that their invariants hold at both the code and schema layers.</p>
+
+<p>That is the real threshold for Part 8. If the Shared Kernel and reference-data slices can be implemented cleanly, verified narrowly, backed by durable persistence evidence, and consumed without reinterpretation, then the series is ready to move into the first richer business workflows. If they cannot, the right move is not to push ahead. It is to tighten the guidance until the foundation is trustworthy.</p>
+
+<p>For developers, this changes the workflow in three concrete ways:</p>
+
+<ol>
+  <li>You should expect the AI to push for database-backed constraints on critical invariants instead of stopping at aggregate logic.</li>
+  <li>You should expect migration artifacts to become part of slice completion, not an optional follow-up.</li>
+  <li>You should expect newer implementation prompts to make enforcement ownership more explicit, especially where domain rules and persistence rules must line up.</li>
+</ol>
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>With the foundational slices in place, the next logical step is the first feature slice that consumes them end to end: academic registration. That is where the series can test whether the shared kernel, reference catalogs, extension inventory rules, migration requirements, and verification workflow actually combine into a coherent implementation path. In the next post, I’ll use that dependency chain to move from foundations into the first true business-facing workflow.</p>
+
+<p>If you’re following along in your own repository, resist the urge to skip these early slices. They are where your AI delivery system either earns trust or accumulates debt.</p>
+
+<h2 id="feedback-loop">Feedback Loop</h2>
+
+<p>Feedback is always welcome. Send your thoughts to <a href="mailto:john.miller@codemag.com">john.miller@codemag.com</a>.</p>
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<p>Prompts:</p>
+
+<ul>
+  <li>Create a blog post for AIAGSD Part 8 that explains why foundational slices need durable database invariants, migration-centric verification, and explicit multi-agent handoffs.</li>
+  <li>Summarize this file in one paragraph.</li>
+  <li>Turn the foundational slice set into a dependency-aware implementation checklist for a human reviewer.</li>
+</ul>
+
+  </div><a class="u-url" href="/AIAGSD8/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">AI Practitioner</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">John Michael Miller</li><li><a class="u-email" href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>jMM&#39;s AI Practitioner Blog</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
