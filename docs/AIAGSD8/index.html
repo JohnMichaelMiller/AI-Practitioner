@@ -55,15 +55,42 @@
 <!--more-->
 
 <figure>
-  <img src="/assets/images/2026-04-23/AIAGSD8_Header_Large.png" alt="Foundational vertical slices establishing shared kernel and reference data before broader implementation" />
+  <img src="https://epsenterprise.blob.core.windows.net/permanent-files/FileAttachments/c8bb814e_635f_4b3b_a5c7_691b480818f1/AIAGSD8_Header_Large.png" alt="Foundational vertical slices establishing shared kernel and reference data before broader implementation" />
   <figcaption>The first implementation wave should not just validate domain logic. It should prove that critical invariants survive direct writes, migrations, and downstream slice reuse.</figcaption>
 </figure>
 
-<p>This is the eighth post in the series on AI-assisted greenfield software development. It builds on <a href="https://www.codemag.com/blog/AIPractitioner/AIAGSD1" target="_blank">Part 1: Business Requirements</a> and the subsequent posts in the series. If you have not read the earlier posts, start there first, because Part 8 assumes the repository already has prompts, instruction files, agent roles, provenance rules, and a dependency-aware implementation plan.</p>
+<p>This is the eighth post in the series on AI-assisted greenfield software development. It builds on <a href="https://blog.pdata.com/AIAGSD1" target="_blank">Part 1: Business Requirements</a> and the subsequent posts in the series. If you have not read the earlier posts, start there first, because Part 8 assumes the repository already has prompts, instruction files, agent roles, provenance rules, and a dependency-aware implementation plan.</p>
 
 <p>Part 7 ended with a full set of implementation prompts and agent handoffs, but a prompt library is only useful if it produces disciplined code when implementation begins. The first test is not a flashy feature. It is the foundation that the rest of the application will trust. That means locking down the shared domain rules and the canonical reference data before registration, lifecycle actions, reporting, or richer user workflows are allowed to build on top of them.</p>
 
 <p>What changed during this first implementation wave was my standard for evidence. The early slices exposed a gap between code-level correctness and durable system integrity. An aggregate can guard state perfectly, a unit test can pass, and an AI verifier can still be wrong if the underlying schema does not enforce the same invariant. Once I hit that realization, Part 8 stopped being just about implementing foundational slices and became about enforcing them in a way that survives real-world paths through the system.</p>
+
+<figure>
+  <img src="https://epsenterprise.blob.core.windows.net/permanent-files/FileAttachments/261b2d0c_2566_4ced_b505_5072082778f5/AIAGSD8_Slice_Sequence.png" alt="AIAGSD8_Slice_Sequence.png" />
+  <figcaption>The detailed slice implementation sequence, showing the interactions between the slice coordinator, backend domain, data persistence, and testing verification components.</figcaption>
+</figure>
+
+<pre><code class="language-mermaid">sequenceDiagram
+    participant SC as slice-coordinator
+    participant BD as backend-domain
+    participant DP as data-persistence
+    participant TV as testing-verification
+
+    SC-&gt;&gt;BD: Define Enforcement Matrix rules
+    BD-&gt;&gt;BD: Implement Aggregate Guards
+    BD-&gt;&gt;DP: Escalate schema requirements
+    DP-&gt;&gt;DP: Configure EF Core Check Constraints
+    DP-&gt;&gt;DP: Generate EF Core Migration
+    DP-&gt;&gt;TV: Handoff for verification
+
+    rect rgb(240, 240, 240)
+    Note over TV: Rigorous Verification Gate
+    TV-&gt;&gt;TV: Run Domain Unit Tests
+    TV-&gt;&gt;TV: Assert Migration Artifact Exists in Diff
+    end
+
+    TV--&gt;&gt;SC: Slice Verified &amp; Demo Ready
+</code></pre>
 
 <h2 id="why-the-first-slices-matter">Why the First Slices Matter</h2>
 
@@ -132,7 +159,7 @@
 
 <h2 id="the-migration-artifact-mandate">The Migration Artifact Mandate</h2>
 
-<p>That change now shows up directly in the agent guidance for <code class="language-plaintext highlighter-rouge">data-persistence</code>, <code class="language-plaintext highlighter-rouge">testing-verification</code>, and <code class="language-plaintext highlighter-rouge">slice-verifier</code>. These agents are no longer allowed to treat schema-changing work as complete based solely on code-level checks.</p>
+<p>That change now shows up directly in the agent guidance for <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/data-persistence.agent.md"><code class="language-plaintext highlighter-rouge">data-persistence</code></a>, <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/testing-verification.agent.md"><code class="language-plaintext highlighter-rouge">testing-verification</code></a>, and <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/slice-verifier.agent.md"><code class="language-plaintext highlighter-rouge">slice-verifier</code></a>. These agents are no longer allowed to treat schema-changing work as complete based solely on code-level checks.</p>
 
 <p>The new expectation is straightforward:</p>
 
@@ -181,7 +208,7 @@
   </tbody>
 </table>
 
-<p>This matrix sharpens agent responsibilities. The <code class="language-plaintext highlighter-rouge">backend-domain</code> agent owns the aggregate and handler behavior. The <code class="language-plaintext highlighter-rouge">data-persistence</code> agent owns the EF Core configuration and migration implications. The verification roles know what evidence they have to demand before a slice can be closed.</p>
+<p>This matrix sharpens agent responsibilities. The <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/backend-domain.agent.md"><code class="language-plaintext highlighter-rouge">backend-domain</code></a> agent owns the aggregate and handler behavior. The <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/data-persistence.agent.md"><code class="language-plaintext highlighter-rouge">data-persistence</code></a> agent owns the EF Core configuration and migration implications. The verification roles know what evidence they have to demand before a slice can be closed.</p>
 
 <h2 id="starting-with-the-shared-kernel">Starting With the Shared Kernel</h2>
 
@@ -219,7 +246,7 @@
 
 <p>The persistence changes also exposed a second weakness: vague handoffs between agents. A flat list of handoff targets tells the AI where work might go next, but not why the handoff is happening or what kind of contribution the receiving agent is supposed to make.</p>
 
-<p>That is why the handoff schema was upgraded from simple lists to structured objects. Instead of saying only that a prompt may hand off to <code class="language-plaintext highlighter-rouge">backend-domain</code> or <code class="language-plaintext highlighter-rouge">slice-coordinator</code>, the handoff now carries a label, a specific agent name, and a short prompt explaining the purpose of the escalation.</p>
+<p>That is why the handoff schema was upgraded from simple lists to structured objects. Instead of saying only that a prompt may hand off to <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/backend-domain.agent.md"><code class="language-plaintext highlighter-rouge">backend-domain</code></a> or <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/slice-coordinator.agent.md"><code class="language-plaintext highlighter-rouge">slice-coordinator</code></a>, the handoff now carries a label, a specific agent name, and a short prompt explaining the purpose of the escalation.</p>
 
 <p>This change sounds small, but it improves the execution model in two ways. It reduces hallucinated delegation by making the intent of the handoff explicit, and it gives each receiving agent better context before it starts work. In a multi-agent workflow, that is the difference between coordination and just passing responsibility around.</p>
 
@@ -243,10 +270,10 @@
 
 <ol>
   <li>The slice coordinator confirms whether the prompt contains non-trivial rules that need an Enforcement Matrix.</li>
-  <li>The backend-domain agent implements the aggregate guards, validators, contracts, and bounded behavior.</li>
-  <li>The data-persistence agent decides whether the rule requires database backing and, if it does, adds the EF Core configuration and migration artifact.</li>
-  <li>The testing-verification role runs narrow behavioral checks and also looks for durable evidence in the diff, especially the migration artifact.</li>
-  <li>The slice-verifier blocks completion if the slice claims schema enforcement but only proves in-memory behavior.</li>
+  <li>The <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/backend-domain.agent.md"><code class="language-plaintext highlighter-rouge">backend-domain</code></a> agent implements the aggregate guards, validators, contracts, and bounded behavior.</li>
+  <li>The <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/data-persistence.agent.md"><code class="language-plaintext highlighter-rouge">data-persistence</code></a> agent decides whether the rule requires database backing and, if it does, adds the EF Core configuration and migration artifact.</li>
+  <li>The <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/testing-verification.agent.md"><code class="language-plaintext highlighter-rouge">testing-verification</code></a> role runs narrow behavioral checks and also looks for durable evidence in the diff, especially the migration artifact.</li>
+  <li>The <a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/slice-verifier.agent.md"><code class="language-plaintext highlighter-rouge">slice-verifier</code></a> blocks completion if the slice claims schema enforcement but only proves in-memory behavior.</li>
 </ol>
 
 <p>That is the shift Part 8 needed to capture. The first implementation wave is where the AI workflow stopped treating persistence as a secondary detail and started treating it as part of the contract.</p>
@@ -267,6 +294,49 @@
   <li>You should expect newer implementation prompts to make enforcement ownership more explicit, especially where domain rules and persistence rules must line up.</li>
 </ol>
 
+<h2 id="reviewing-the-slice-implementation">Reviewing the Slice Implementation</h2>
+
+<p>On the completion of the first slice, I ran a review against the implementation checklist created in Part 7 by running the prompt: verify the implementation of slice #file:ep-0-1-shared-kernel-implementation.prompt.md. The checklist is designed to capture the key expectations for the foundational slice, especially around durable invariants and migration evidence. Here are the results:</p>
+
+<p>Completion Checklist Gaps
+❌ Missing migration artifact — src/backend/Persistence/Migrations/ does not exist. The prompt lists this as a required deliverable.</p>
+
+<p>❌ Shared constants not referenced in EF Core configurations — EmpNr.RequiredLength, Degree.MaxCodeLength, and University.MaxCodeLength exist as constants but are not referenced in AcademicConfiguration.cs or AcademicQualificationConfiguration.cs. Both files use raw literals (6, 10, 15), which can drift from the domain constants.</p>
+
+<p>❌ AcademicQualification.Create does not validate max lengths — Only null/empty is checked. If DegreeCode.Length &gt; 10 or UniversityCode.Length &gt; 10, the domain factory accepts it and the database constraint does the rejection. The prompt requires the factory to reject before hitting the database.</p>
+
+<p>⚠️ No test for DB-level XOR CHECK constraint — SQLite (used in persistence tests) does not enforce CHECK constraints via EF Core. There is no SQL Server migration test to prove the constraint will work against the target provider.</p>
+
+<p>⚠️ Academic.Create uses raw literal 6 and 15 — EmpNr.RequiredLength exists but is not referenced. There is no EmpName.MaxLength constant, so Academic.Create and AcademicConfiguration both embed 15 independently.</p>
+
+<p>Copilot wanted to patch the implementation to fix the issues, but I stopped it and instead chose to run the prompt: suggest changes to the .github guardrails to prevent these gaps from occurring when I rerun the prompt. This produced the following changes to the instruction files, which should help prevent these issues from recurring in future slices and also guide the AI toward better implementation practices around durable invariants and migration evidence.</p>
+
+<p>Three instruction files updated:</p>
+
+<p><strong>cqrs-mediatr-efcore.instructions.md</strong> — Added two new subsections after <code class="language-plaintext highlighter-rouge">### Change Tracking</code>:</p>
+<ul>
+  <li><strong>Migrations</strong>: Requires migration artifact in every schema-changing slice diff; mandates <code class="language-plaintext highlighter-rouge">Database.Migrate()</code> in tests</li>
+  <li><strong>Length and Precision Constants</strong>: Prohibits raw literals in <code class="language-plaintext highlighter-rouge">HasMaxLength</code>/<code class="language-plaintext highlighter-rouge">HasPrecision</code>; requires referencing value object constants; notes explicit annotation requirement for provider-sensitive shadow FK types</li>
+</ul>
+
+<p><strong>csharp-implementation.instructions.md</strong> — Added two checklist items to the Validation Checklist:</p>
+<ul>
+  <li>Factory methods validate all persisted constraints against value object constants</li>
+  <li>Value object constants are the single source of truth — used in both factory validation and EF Core config</li>
+</ul>
+
+<p><strong>xunit-implementation.instructions.md</strong> — Replaced the <code class="language-plaintext highlighter-rouge">UseInMemoryDatabase</code> fixture example with:</p>
+<ul>
+  <li>An explicit prohibition on <code class="language-plaintext highlighter-rouge">UseInMemoryDatabase</code> and <code class="language-plaintext highlighter-rouge">UseSqlite</code> in-memory for persistence tests</li>
+  <li>SQL Server LocalDB fixture using <code class="language-plaintext highlighter-rouge">Database.Migrate()</code> instead of <code class="language-plaintext highlighter-rouge">EnsureCreated()</code></li>
+</ul>
+
+<p>When I reran the implementation prompt, the AI produced code that includes a migration artifact, references value object constants in both domain validation and EF Core configuration, and used a SQL Server LocalDB fixture for persistence tests. The verification agents should also be able to check for these requirements in the diff and block completion if they are not met.</p>
+
+<p>This technique of using the implementation review to tighten the guardrails is a powerful way to turn specific feedback into systemic improvement. Instead of just fixing the code, it updates the instructions that guide future implementations, which should help prevent similar issues from recurring and improve the overall quality of the delivery system.</p>
+
+<p>You can see the updated instruction files in the repository, and the implementation of the Shared Kernel slice now includes durable database constraints, a migration artifact, and sharper agent handoffs as required by the new guidance on the Part-Eight branch of the <a href="https://github.com/j0hnnymiller/zeus.academia.3b">Zeus.Academia</a> repository.</p>
+
 <h2 id="whats-next">What’s Next?</h2>
 
 <p>With the foundational slices in place, the next logical step is the first feature slice that consumes them end to end: academic registration. That is where the series can test whether the shared kernel, reference catalogs, extension inventory rules, migration requirements, and verification workflow actually combine into a coherent implementation path. In the next post, I’ll use that dependency chain to move from foundations into the first true business-facing workflow.</p>
@@ -275,7 +345,7 @@
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 
-<p>Feedback is always welcome. Send your thoughts to <a href="mailto:john.miller@codemag.com">john.miller@codemag.com</a>.</p>
+<p>Feedback is always welcome. Send your thoughts to <a href="mailto:AIP@pdata.com">AIP@pdata.com</a>.</p>
 
 <h2 id="disclaimer">Disclaimer</h2>
 
