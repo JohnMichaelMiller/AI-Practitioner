@@ -40,7 +40,7 @@ The AI Practitioner blog posts are originally published at blog.pdata.com and ne
 
 ### Email Address Updates
 
-- Replace all instances of `AIP@pdata.com` with `john.miller@codemag.com`
+- Replace all instances of `AIP@pdata.com` with `john.miller@codegroup.io`
 - Update contact information throughout the post
 - Maintain professional communication channels
 
