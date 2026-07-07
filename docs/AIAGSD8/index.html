@@ -314,18 +314,21 @@
 <p>Three instruction files updated:</p>
 
 <p><strong>cqrs-mediatr-efcore.instructions.md</strong> — Added two new subsections after <code class="language-plaintext highlighter-rouge">### Change Tracking</code>:</p>
+
 <ul>
   <li><strong>Migrations</strong>: Requires migration artifact in every schema-changing slice diff; mandates <code class="language-plaintext highlighter-rouge">Database.Migrate()</code> in tests</li>
   <li><strong>Length and Precision Constants</strong>: Prohibits raw literals in <code class="language-plaintext highlighter-rouge">HasMaxLength</code>/<code class="language-plaintext highlighter-rouge">HasPrecision</code>; requires referencing value object constants; notes explicit annotation requirement for provider-sensitive shadow FK types</li>
 </ul>
 
 <p><strong>csharp-implementation.instructions.md</strong> — Added two checklist items to the Validation Checklist:</p>
+
 <ul>
   <li>Factory methods validate all persisted constraints against value object constants</li>
   <li>Value object constants are the single source of truth — used in both factory validation and EF Core config</li>
 </ul>
 
 <p><strong>xunit-implementation.instructions.md</strong> — Replaced the <code class="language-plaintext highlighter-rouge">UseInMemoryDatabase</code> fixture example with:</p>
+
 <ul>
   <li>An explicit prohibition on <code class="language-plaintext highlighter-rouge">UseInMemoryDatabase</code> and <code class="language-plaintext highlighter-rouge">UseSqlite</code> in-memory for persistence tests</li>
   <li>SQL Server LocalDB fixture using <code class="language-plaintext highlighter-rouge">Database.Migrate()</code> instead of <code class="language-plaintext highlighter-rouge">EnsureCreated()</code></li>
@@ -345,7 +348,7 @@
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 
-<p>Feedback is always welcome. Send your thoughts to <a href="mailto:AIP@pdata.com">AIP@pdata.com</a>.</p>
+<p>Feedback is always welcome. Send your thoughts to <a href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a>.</p>
 
 <h2 id="disclaimer">Disclaimer</h2>
 

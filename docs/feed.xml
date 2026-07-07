@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-07-07T09:38:37-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice</title><link href="https://blog.pdata.com/AIAGSD9/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice" /><published>2026-06-28T00:00:00-07:00</published><updated>2026-06-28T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD9</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD9/"><![CDATA[<p>Part 8 established that foundational slices cannot be verified by code alone. Database constraints, migration artifacts, and durable enforcement are required. Part 9 takes that lesson into the first reference-data slice: ManageRanks. This slice is where the implementation chain proves itself under realistic constraints. Without a single source of truth for rank codes, registration, access control, and reporting each risk hardcoding or duplicating the rank definitions. The ManageRanks reference-data slice solves this by establishing a canonical repository of rank codes (P, SL, L) and their access-level mappings, enforced through database constraints and validation rules that all downstream slices depend upon.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-07-07T09:43:14-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice</title><link href="https://blog.pdata.com/AIAGSD9/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice" /><published>2026-06-28T00:00:00-07:00</published><updated>2026-06-28T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD9</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD9/"><![CDATA[<p>Part 8 established that foundational slices cannot be verified by code alone. Database constraints, migration artifacts, and durable enforcement are required. Part 9 takes that lesson into the first reference-data slice: ManageRanks. This slice is where the implementation chain proves itself under realistic constraints. Without a single source of truth for rank codes, registration, access control, and reporting each risk hardcoding or duplicating the rank definitions. The ManageRanks reference-data slice solves this by establishing a canonical repository of rank codes (P, SL, L) and their access-level mappings, enforced through database constraints and validation rules that all downstream slices depend upon.</p>
 
 <!--more-->
 
@@ -393,7 +393,7 @@
   <li><a href="https://blog.pdata.com/AIAGSD8" target="_blank">Part 8: Durable Database Invariants</a> — The motivation for two-layer enforcement</li>
 </ul>
 
-<p>Feedback is always welcome. Send your thoughts to <strong>AIP@pdata.com</strong>.</p>
+<p>Feedback is always welcome. Send your thoughts to <strong>AIPractitioner@pdata.com</strong>.</p>
 
 <h2 id="disclaimer">Disclaimer</h2>
 
@@ -675,18 +675,21 @@
 <p>Three instruction files updated:</p>
 
 <p><strong>cqrs-mediatr-efcore.instructions.md</strong> — Added two new subsections after <code class="language-plaintext highlighter-rouge">### Change Tracking</code>:</p>
+
 <ul>
   <li><strong>Migrations</strong>: Requires migration artifact in every schema-changing slice diff; mandates <code class="language-plaintext highlighter-rouge">Database.Migrate()</code> in tests</li>
   <li><strong>Length and Precision Constants</strong>: Prohibits raw literals in <code class="language-plaintext highlighter-rouge">HasMaxLength</code>/<code class="language-plaintext highlighter-rouge">HasPrecision</code>; requires referencing value object constants; notes explicit annotation requirement for provider-sensitive shadow FK types</li>
 </ul>
 
 <p><strong>csharp-implementation.instructions.md</strong> — Added two checklist items to the Validation Checklist:</p>
+
 <ul>
   <li>Factory methods validate all persisted constraints against value object constants</li>
   <li>Value object constants are the single source of truth — used in both factory validation and EF Core config</li>
 </ul>
 
 <p><strong>xunit-implementation.instructions.md</strong> — Replaced the <code class="language-plaintext highlighter-rouge">UseInMemoryDatabase</code> fixture example with:</p>
+
 <ul>
   <li>An explicit prohibition on <code class="language-plaintext highlighter-rouge">UseInMemoryDatabase</code> and <code class="language-plaintext highlighter-rouge">UseSqlite</code> in-memory for persistence tests</li>
   <li>SQL Server LocalDB fixture using <code class="language-plaintext highlighter-rouge">Database.Migrate()</code> instead of <code class="language-plaintext highlighter-rouge">EnsureCreated()</code></li>
@@ -706,7 +709,7 @@
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 
-<p>Feedback is always welcome. Send your thoughts to <a href="mailto:AIP@pdata.com">AIP@pdata.com</a>.</p>
+<p>Feedback is always welcome. Send your thoughts to <a href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a>.</p>
 
 <h2 id="disclaimer">Disclaimer</h2>
 
@@ -1143,7 +1146,7 @@
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 
-<p>Feedback is always welcome. Send your thoughts to <a href="mailto:AIP@pdata.com">AIP@pdata.com</a>.</p>
+<p>Feedback is always welcome. Send your thoughts to <a href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a>.</p>
 
 <h2 id="disclaimer">Disclaimer</h2>
 
@@ -2128,7 +2131,7 @@ scope_note: The universe of discourse is Academia Management
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 
-<p>Feedback is always welcome. Send your thoughts to <strong>AIP@pdata.com</strong>.</p>
+<p>Feedback is always welcome. Send your thoughts to <strong>AIPractitioner@pdata.com</strong>.</p>
 
 <hr />
 
@@ -2487,7 +2490,7 @@ project_purpose: Academic Management System
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 
-<p>Feedback is always welcome. Send your thoughts to <strong>AIP@pdata.com</strong>.</p>
+<p>Feedback is always welcome. Send your thoughts to <strong>AIPractitioner@pdata.com</strong>.</p>
 
 <hr />
 
@@ -2651,7 +2654,7 @@ project_purpose: Academic Management System</li>
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 
-<p>Feedback is always welcome. Send your thoughts to <strong>AIP@pdata.com</strong>.</p>
+<p>Feedback is always welcome. Send your thoughts to <strong>AIPractitioner@pdata.com</strong>.</p>
 
 <hr />
 
@@ -2795,7 +2798,7 @@ project_purpose: Academic Management System</li>
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 
-<p>Feedback is always welcome. Please direct it to <a href="mailto:AIP@pdata.com" target="_blank">AIP@pdata.com</a></p>
+<p>Feedback is always welcome. Please direct it to <a href="mailto:AIPractitioner@pdata.com" target="_blank">AIPractitioner@pdata.com</a></p>
 
 <h3 id="disclaimer">Disclaimer</h3>
 
@@ -2890,7 +2893,7 @@ project_purpose: Academic Management System</li>
 
 <h2 id="feedback-loop">Feedback Loop</h2>
 
-<p>Feedback is always welcome. Please direct it to <a href="mailto:AIP@pdata.com" target="_blank">AIP@pdata.com</a></p>
+<p>Feedback is always welcome. Please direct it to <a href="mailto:AIPractitioner@pdata.com" target="_blank">AIPractitioner@pdata.com</a></p>
 
 <h3 id="disclaimer">Disclaimer</h3>
 
