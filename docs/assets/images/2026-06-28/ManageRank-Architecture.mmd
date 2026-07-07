@@ -1,0 +1,41 @@
+graph LR
+    A["🔷 ManageRanks Vertical Slice"]
+
+    A --> B["AddRank Use Case"]
+    A --> C["ListRanks Use Case"]
+    A --> D["Migration"]
+    A --> E["Domain Model"]
+
+    B --> B1["Validator<br/>P|SL|L code<br/>≤50 char description"]
+    B --> B2["Handler<br/>Check uniqueness<br/>Derive access level<br/>Persist"]
+    B --> B3["Endpoint<br/>POST /api/reference-data/ranks"]
+    B --> B4["Tests<br/>7 validator + 6 handler"]
+
+    C --> C1["Query<br/>No parameters"]
+    C --> C2["Handler<br/>EF Core query<br/>OrderBy Code"]
+    C --> C3["Endpoint<br/>GET /api/reference-data/ranks"]
+    C --> C4["Tests<br/>5 query tests"]
+
+    D --> D1["RankReferences Table<br/>Code varchar2 PK<br/>Description varchar50"]
+    D --> D2["UNIQUE Index on Code"]
+    D --> D3["Seed Data<br/>P, SL, L<br/>+ descriptions"]
+
+    E --> E1["RankReference<br/>Code<br/>Description<br/>AccessLevel derived"]
+
+    style A fill:#ff6b6b,color:#fff,stroke:#c92a2a,stroke-width:3px
+    style B fill:#4ecdc4,color:#fff,stroke:#0b7285,stroke-width:2px
+    style C fill:#4ecdc4,color:#fff,stroke:#0b7285,stroke-width:2px
+    style D fill:#ffe66d,color:#000,stroke:#f59f00,stroke-width:2px
+    style E fill:#95e1d3,color:#000,stroke:#12b886,stroke-width:2px
+    style B1 fill:#a8e6cf,color:#000
+    style B2 fill:#a8e6cf,color:#000
+    style B3 fill:#a8e6cf,color:#000
+    style B4 fill:#a8e6cf,color:#000
+    style C1 fill:#a8e6cf,color:#000
+    style C2 fill:#a8e6cf,color:#000
+    style C3 fill:#a8e6cf,color:#000
+    style C4 fill:#a8e6cf,color:#000
+    style D1 fill:#fff4bf,color:#000
+    style D2 fill:#fff4bf,color:#000
+    style D3 fill:#fff4bf,color:#000
+    style E1 fill:#c3fae8,color:#000

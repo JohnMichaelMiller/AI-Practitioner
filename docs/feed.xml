@@ -1,4 +1,417 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-05-28T10:38:40-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants</title><link href="https://blog.pdata.com/AIAGSD8/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants" /><published>2026-04-23T00:00:00-07:00</published><updated>2026-04-23T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD8</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD8/"><![CDATA[<p>This is the point where the AIAGSD workflow has to prove it can survive contact with real implementation. Up to now, the series has focused on requirements, scaffolding, governance, architecture, workflow models, and implementation prompts. In Part 8, I move from planning artifacts into the first bounded delivery wave and show what the first real implementation work taught us: passing unit tests is not enough if the database can still accept invalid state.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-07-07T08:15:10-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice</title><link href="https://blog.pdata.com/AIAGSD9/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice" /><published>2026-06-28T00:00:00-07:00</published><updated>2026-06-28T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD9</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD9/"><![CDATA[<p>Part 8 established that foundational slices cannot be verified by code alone. Database constraints, migration artifacts, and durable enforcement are required. Part 9 takes that lesson into the first reference-data slice: ManageRanks. This slice is where the implementation chain proves itself under realistic constraints. Without a single source of truth for rank codes, registration, access control, and reporting each risk hardcoding or duplicating the rank definitions. The ManageRanks reference-data slice solves this by establishing a canonical repository of rank codes (P, SL, L) and their access-level mappings, enforced through database constraints and validation rules that all downstream slices depend upon.</p>
+
+<!--more-->
+
+<p><img src="https://epsenterprise.blob.core.windows.net/permanent-files/FileAttachments/d8bba5dd_8764_4c13_8e76_c3d42ff3e568/Copilot_20260629_090713.png" alt="Copilot_20260629_090713.png" /></p>
+
+<p>This is the ninth post in the series on AI-assisted greenfield software development. It builds on posts <a href="https://blog.pdata.com/AIAGSD1" target="_blank">Part 1: Business Requirements</a>, through <a href="https://blog.pdata.com/AIAGSD8" target="_blank">Part 8: Durable Database Invariants</a>, in the series. If you have not read the earlier posts, start there first, because Part 9 assumes the repository already has shared kernel definitions, foundational agent roles, and a dependency-aware implementation plan.</p>
+
+<h2 id="the-first-reference-data-slice">The First Reference-Data Slice</h2>
+
+<p>After Part 8’s focus on durable invariants, the implementation plan moves into the reference-data foundation. Rank management is the first of five reference-data slices that form the backbone of the Zeus Academia system. The sequence is:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Slice</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ManageRanks (EP-1-1)</td>
+      <td>Define the canonical rank set (P, SL, L) and their access-level mappings</td>
+    </tr>
+    <tr>
+      <td>ManageDegrees (EP-1-2)</td>
+      <td>Create the degree catalog used by qualification workflows</td>
+    </tr>
+    <tr>
+      <td>ManageUniversities (EP-1-3)</td>
+      <td>Create the university catalog used by qualification workflows</td>
+    </tr>
+    <tr>
+      <td>ProvisionExtension (EP-1-4)</td>
+      <td>Manage extension inventory and availability rules</td>
+    </tr>
+    <tr>
+      <td>ManageAcademicCalendars (EP-1-5)</td>
+      <td>Define term calendars and academic-period boundaries</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>ManageRanks appears first because registration, lifecycle changes, and access control all depend on it. Without a canonical rank source, downstream slices have no choice but to duplicate or invent rank semantics. That fragmentation compounds through the system.</p>
+
+<h2 id="why-reference-data-slices-matter">Why Reference-Data Slices Matter</h2>
+
+<p>Reference data is the foundation that other domain slices depend on. When rank codes are scattered across multiple features or hardcoded in business logic, you lose the ability to enforce consistency, track changes, or adapt to new requirements. The ManageRanks slice inverts this by treating rank management as a first-class, independently deployable feature.</p>
+
+<p>A reference-data slice provides:</p>
+
+<ul>
+  <li><strong>Canonical source of truth</strong>: One database table, one API, one validation rule</li>
+  <li><strong>Deterministic behavior</strong>: Duplicate codes are blocked by both application logic and persistence constraints</li>
+  <li><strong>Downstream confidence</strong>: Registration, access control, and reporting consume stable rank data instead of reinventing it</li>
+  <li><strong>Auditability</strong>: Changes to rank definitions are traced and versioned through the application layer</li>
+</ul>
+
+<h2 id="agent-roles-and-slice-coordination">Agent Roles and Slice Coordination</h2>
+
+<p>Like Part 8’s foundational work, ManageRanks requires coordination across multiple agent roles. The implementation prompt defines a structured handoff sequence:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Responsibilities</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>slice-coordinator</td>
+      <td>Confirm slice boundaries, persistence strategy, and migration path</td>
+    </tr>
+    <tr>
+      <td>backend-domain</td>
+      <td>Implement add and list behavior with validation rules</td>
+    </tr>
+    <tr>
+      <td>testing-verification</td>
+      <td>Verify uniqueness, allowed codes, and response contracts</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This clear separation prevents scope drift and ensures each agent knows exactly what evidence to produce before handing off to the next.</p>
+
+<h2 id="clarifying-the-slice-boundaries">Clarifying the Slice Boundaries</h2>
+
+<p>The ManageRanks implementation is driven by the implementation prompt <a href="https://github.com/JohnMichaelMiller/Zeus/blob/main/zeus.academia.3b/.github/prompts/academia-implementation/ep-1-1-manage-ranks-implementation.prompt.md"><code class="language-plaintext highlighter-rouge">ep-1-1-manage-ranks-implementation.prompt.md</code></a>, which defines the slice’s responsibilities, dependencies, and acceptance criteria within the Zeus Academia vertical-slice architecture.</p>
+
+<p>The first step described in the implementation prompt is confirming what the ManageRanks slice owns and what it does not. This boundary-clarification work belongs to the slice-coordinator agent:</p>
+
+<p><strong>Boundary Clarification Checklist</strong>:</p>
+
+<ol>
+  <li>Confirm whether rank records are seeded at deployment, managed through the API, or both.</li>
+  <li>Document the canonical rank codes (P, SL, L) and their access-level mappings.</li>
+  <li>Identify any existing rank data in the Shared Kernel that must not be duplicated.</li>
+  <li>Specify the folder structure: src/features/ReferenceData/ManageRanks/ or alternative.</li>
+  <li>If later slices still persist raw rank codes before foreign-key wiring is complete, decide whether this slice adds a temporary CHECK constraint or accepts the gap explicitly.</li>
+</ol>
+
+<p>What this boundary work produces:</p>
+
+<ul>
+  <li>Confirmed ownership: AddRank command + ListRanks query form the slice boundary</li>
+  <li>Persistence strategy: database-backed seed at deployment, admin API for runtime changes</li>
+  <li>Integration points: access-level mapping exposed so registration and reporting resolve it once</li>
+  <li>Clear acceptance criteria: only P, SL, L accepted; duplicates rejected deterministically; migration artifact when constraints change</li>
+</ul>
+
+<p>Clarifying boundaries before implementation prevents scope drift and ensures downstream slices have a stable contract to depend on. This boundary work becomes the contract that backend-domain and testing-verification will verify against.</p>
+
+<h2 id="implementing-the-add-rank-command">Implementing the Add-Rank Command</h2>
+
+<p>With boundaries confirmed, the backend-domain agent builds the core add behavior. The AddRank command accepts a rank code, validates that it is one of the canonical codes, and stores it with its access-level mapping. The implementation follows the <code class="language-plaintext highlighter-rouge">mediatr</code> and <code class="language-plaintext highlighter-rouge">fluentvalidation</code> patterns established in earlier posts:</p>
+
+<p><strong>AddRank Implementation Checklist</strong>:</p>
+
+<ol>
+  <li>Create an AddRankCommand that accepts rankCode and accessLevel.</li>
+  <li>Build an AddRankCommandValidator that enforces:
+    <ul>
+      <li>rankCode must be one of “P”, “SL”, “L”</li>
+      <li>rankCode must be unique (no duplicate codes in persistence)</li>
+    </ul>
+  </li>
+  <li>Create an AddRankCommandHandler that:
+    <ul>
+      <li>Validates the command</li>
+      <li>Stores the rank in the database with the access-level relationship</li>
+      <li>Returns a response with the created rank</li>
+    </ul>
+  </li>
+  <li>Wire the endpoint to accept rank creation requests.</li>
+</ol>
+
+<p>What this implementation produces:</p>
+
+<ul>
+  <li>AddRankCommand with typed rankCode and accessLevel properties</li>
+  <li>AddRankCommandValidator enforcing code enumeration and uniqueness</li>
+  <li>AddRankCommandHandler with database persistence and error handling</li>
+  <li>HTTP endpoint (POST /api/ranks) bound to the handler</li>
+  <li>Database migration ensuring rankCode uniqueness constraint</li>
+</ul>
+
+<p>This structure separates concerns: validation happens before persistence, the handler orchestrates the add flow, and the endpoint exposes a clean contract.</p>
+
+<h3 id="enforcing-uniqueness-at-two-levels">Enforcing Uniqueness at Two Levels</h3>
+
+<p>Without explicit uniqueness checks, a concurrent request might insert duplicate rank codes. The implementation guards uniqueness both at the application and persistence levels:</p>
+
+<p><strong>Application layer</strong>: The validator queries the database before persisting, raising an error if the code already exists. This provides immediate feedback and prevents unnecessary database round-trips.</p>
+
+<p><strong>Persistence layer</strong>: A unique constraint on the <code class="language-plaintext highlighter-rouge">rankCode</code> column in the database ensures that even if validation is bypassed or corrupted data is restored, duplicates cannot be stored. The validator tests confirm that both layers reject duplicates deterministically.</p>
+
+<h2 id="implementing-the-list-ranks-query">Implementing the List-Ranks Query</h2>
+
+<p>With add-rank behavior in place, the slice must expose the canonical rank data to downstream features. The ListRanks query retrieves all stored rank codes and their access-level mappings in a stable form. The implementation follows mediatr patterns:</p>
+
+<p><strong>ListRanks Implementation Checklist</strong>:</p>
+
+<ol>
+  <li>Create a ListRanksQuery (no parameters).</li>
+  <li>Create a ListRanksQueryHandler that:
+    <ul>
+      <li>Queries the rank repository for all records, ordered by rankCode</li>
+      <li>Maps each rank to a response DTO with rankCode, accessLevel, and createdAt</li>
+      <li>Returns a list of rank records with stable, predictable field names</li>
+    </ul>
+  </li>
+  <li>Create a ListRanksResponse contract that registration, access control, and reporting can depend on.</li>
+  <li>Wire a GET /api/ranks endpoint to this handler.</li>
+</ol>
+
+<p>What this implementation produces:</p>
+
+<ul>
+  <li>ListRanksQuery as a read-only operation</li>
+  <li>ListRanksQueryHandler with ordering and DTO mapping</li>
+  <li>Stable response contract so downstream slices can deserialize and use the data reliably</li>
+  <li>
+    <p>HTTP endpoint (GET /api/ranks) returning JSON-serialized rank records</p>
+
+    <p>The list behavior is intentionally simple: it queries the database in a deterministic order and returns the raw rank data. Downstream slices (registration, reporting) consume this and apply their own business logic.</p>
+  </li>
+</ul>
+
+<h2 id="manageranks-architecture-overview">ManageRanks Architecture Overview</h2>
+
+<p>The ManageRanks slice is implemented as a vertical slice with clear boundaries, validation, and persistence. The architecture diagram below illustrates the flow from HTTP request to database persistence, highlighting the two-layer enforcement of rank code uniqueness.</p>
+
+<p><img src="https://epsenterprise.blob.core.windows.net/permanent-files/FileAttachments/10153293_48c0_4507_9f2f_7f1e1d8156a1/ManageRank_Architecture.png" alt="ManageRank-Architecture.png" /></p>
+
+<h2 id="building-validation-and-verification-tests">Building Validation and Verification Tests</h2>
+
+<p>Reference-data correctness is foundational; errors cascade to dependent features. The verification step covers add and list flows with both success and failure scenarios. The testing-verification agent follows the assertion patterns established in earlier posts:</p>
+
+<p><strong>Verification Test Checklist</strong>:</p>
+
+<ol>
+  <li>Validator tests:
+    <ul>
+      <li>AddRankCommandValidator accepts P, SL, L and rejects other codes</li>
+      <li>Validator detects duplicate rank codes by querying the test database</li>
+      <li>Invalid inputs (null, empty, unknown codes) fail with clear error messages</li>
+    </ul>
+  </li>
+  <li>Handler tests:
+    <ul>
+      <li>AddRankCommandHandler successfully stores valid ranks</li>
+      <li>Handler returns the stored rank with access-level mapping</li>
+      <li>Duplicate attempts fail without side effects (no partial writes)</li>
+    </ul>
+  </li>
+  <li>Integration tests:
+    <ul>
+      <li>POST /api/ranks with valid code succeeds and is idempotent</li>
+      <li>GET /api/ranks returns all ranks in stable order</li>
+      <li>Constraint violations (direct database inserts) are caught as corruption signals</li>
+    </ul>
+  </li>
+  <li>Persistence tests:
+    <ul>
+      <li>Database unique constraint rejects duplicate rankCode values</li>
+      <li>Migration ensures rankCode column exists with correct type and constraints</li>
+    </ul>
+  </li>
+</ol>
+
+<p>What this verification produces:</p>
+
+<ul>
+  <li>Validator unit tests covering valid codes, invalid codes, and duplicates</li>
+  <li>Handler tests confirming storage and response mapping</li>
+  <li>Integration tests validating the full request/response cycle</li>
+  <li>Constraint tests confirming database-level uniqueness</li>
+  <li>Test evidence demonstrating the slice meets all acceptance criteria</li>
+</ul>
+
+<p>Tests are particularly important for reference data because they serve as executable documentation: future developers can see exactly which codes are valid, how duplicates are handled, and what the stable query response looks like. This evidence also ensures that the next slice in the plan (ManageDegrees) can safely depend on ManageRanks without reinventing its verification.</p>
+
+<h2 id="documenting-the-rank-to-access-level-mapping">Documenting the Rank-to-Access-Level Mapping</h2>
+
+<p>Reference-data slices are most valuable when downstream slices can consume the mapping without redefining it. This is ensured by explicitly documenting the rank-to-access-level relationship in both code comments and API documentation.</p>
+
+<p>The ListRanksResponse includes:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"ranks"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"rankCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"P"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"accessLevel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Principal"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"createdAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-28T10:00:00Z"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"rankCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SL"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"accessLevel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"StaffLeadership"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"createdAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-28T10:00:00Z"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"rankCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"L"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"accessLevel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Lecturer"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"createdAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-28T10:00:00Z"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This mapping is consumed directly by:</p>
+
+<ul>
+  <li><strong>Registration slice</strong>: Maps user input to a valid rank + access-level pair</li>
+  <li><strong>Access-control slice</strong>: Resolves permissions based on stored access-level values</li>
+  <li><strong>Reporting slice</strong>: Groups or filters by access level without hardcoding codes</li>
+</ul>
+
+<p>By making the mapping explicit and queryable, the ManageRanks slice becomes a force multiplier for downstream features.</p>
+
+<h2 id="the-enforcement-contract">The Enforcement Contract</h2>
+
+<p>Like Part 8’s critical lesson, ManageRanks cannot be verified by code alone. The persistence layer must enforce the same invariants as the application logic.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Rule</th>
+      <th>Canonical layer</th>
+      <th>Persistence backing required</th>
+      <th>Verification evidence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Rank code validity</td>
+      <td>Validator + reference-data boundary</td>
+      <td>Not required (canonical set enforced by handler)</td>
+      <td>Validator tests + integration tests</td>
+    </tr>
+    <tr>
+      <td>Rank code uniqueness</td>
+      <td>Validator + handler</td>
+      <td>Yes, unique constraint</td>
+      <td>Handler tests + migration proof</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This clarity ensures that neither the application layer nor persistence layer can drift. If a developer later considers adding a uniqueness constraint without updating the validator, the verification flow will catch it. If the validator is removed but the constraint remains, tests will fail.</p>
+
+<h2 id="acceptance-and-handoff">Acceptance and Handoff</h2>
+
+<p>The slice is complete when:</p>
+
+<ul>
+  <li>✅ Only P, SL, and L are accepted</li>
+  <li>✅ Duplicates are blocked at application and persistence levels</li>
+  <li>✅ Rank data is queryable with stable response contract</li>
+  <li>✅ Tests cover add, duplicate, list, and constraint-violation scenarios</li>
+  <li>✅ Migration artifact documents uniqueness schema</li>
+  <li>✅ Downstream slices have documented access to the rank-to-access-level mapping</li>
+  <li>✅ Enforcement matrix evidence confirms both application and persistence layers protect the same rules</li>
+</ul>
+
+<p>At this point, the slice is ready for integration testing with dependent features. The next phase will wire registration, access-control, and reporting slices to depend on the ManageRanks API, validating that the reference-data contract is stable and sufficient. Each of those slices will be able to assume that ManageRanks has already proven it can survive direct writes, migrations, and load without bypassing its own rules.</p>
+
+<h2 id="the-implementation-wave">The Implementation Wave</h2>
+
+<p>ManageRanks is the first test of whether the reference-data strategy actually works. If this slice is implemented incorrectly, the mistake gets inherited by registration, access control, and reporting. That weight is exactly why it appears early in the plan: the cost of getting it right is paid once, up front, instead of being distributed across five downstream slices.</p>
+
+<p>The next reference-data slice, ManageDegrees, will follow the exact same structure: boundary clarification, command/query implementation, two-layer enforcement, and verification with migration evidence. Each succeeding reference-data slice builds confidence that the pattern itself is sound.</p>
+
+<p>Once all five reference-data slices are complete, registration becomes possible without duplicating any rank, degree, university, or extension logic. That is the payoff of treating reference data as a first-class concern instead of a setup detail.</p>
+
+<h2 id="demonstration">Demonstration</h2>
+
+<p>You can showcase the value of ManageRanks by demonstrating that the two-layer enforcement works as intended. The following steps illustrate the expected behavior:</p>
+
+<ol>
+  <li><strong>Add a rank</strong>: Call the AddRank endpoint with code “P” and access level “Principal”. Verify it is stored once.</li>
+  <li><strong>Add a duplicate</strong>: Attempt to add “P” again. Observe the deterministic rejection.</li>
+  <li><strong>List ranks</strong>: Call the ListRanks endpoint. Confirm the three canonical codes are returned with their access-level mappings.</li>
+  <li><strong>Bypass validation</strong>: Connect directly to the database and attempt to insert “X” as a rank code. Observe the constraint violation. The database does not allow the invalid state even when validation is bypassed.</li>
+</ol>
+
+<p>This shows that ManageRanks enforces its contract at both the code level and the persistence level.</p>
+
+<h2 id="post-implementation-guidance-updates">Post implementation guidance updates</h2>
+
+<p>Like in the previous post, the implementation of the ManageRanks slice has prompted updates to the AI guidance. I encountered problems persisting Ranks when call the endpoint. The cause was that SQLite in-memory connections created isolated databases per DbContext scope, causing “no such table” errors across HTTP requests despite successful migrations. Switching to LocalDB resolved the issue, and the guidance documentation has been updated to reflect this requirement. Additionally, the migration pattern for reference-data slices has been clarified to ensure that future slices follow the same approach.</p>
+
+<p>The following files have been updated to reflect the new reference-data slice and its enforcement patterns:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Change</th>
+      <th>File</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>New Instruction</strong></td>
+      <td><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Nine/.github/instructions/database-setup-migrations.instructions.md">database-setup-migrations.instructions.md</a></td>
+      <td>Comprehensive guide on LocalDB setup, SQL Server migration patterns, and troubleshooting</td>
+    </tr>
+    <tr>
+      <td><strong>Vertical Slice Update</strong></td>
+      <td><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Nine/.github/instructions/vertical-slice-implementation.instructions.md">vertical-slice-implementation.instructions.md</a></td>
+      <td>Added migration validation requirements and persistence slice checklist items</td>
+    </tr>
+    <tr>
+      <td><strong>Project Overview Update</strong></td>
+      <td><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Nine/.github/instructions/project-overview.instructions.md">project-overview.instructions.md</a></td>
+      <td>Added database setup reference and clarified LocalDB for development</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>See <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Nine/rank-management-guidance-updates.md">rank-management-guidance-updates.md</a> for details on the guidance updates and rationale.</p>
+
+<h2 id="feedback-and-references">Feedback and References</h2>
+
+<p>This post references:</p>
+
+<ul>
+  <li><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/slice-coordinator.agent.md" target="_blank">slice-coordinator agent</a> — Responsible for boundary clarification and integration points</li>
+  <li><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/backend-domain.agent.md" target="_blank">backend-domain agent</a> — Implements commands, queries, and handlers</li>
+  <li><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/testing-verification.agent.md" target="_blank">testing-verification agent</a> — Verifies behavior and produces evidence</li>
+  <li><a href="https://blog.pdata.com/AIAGSD8" target="_blank">Part 8: Durable Database Invariants</a> — The motivation for two-layer enforcement</li>
+</ul>
+
+<p>Feedback is always welcome. Send your thoughts to <strong>john.miller@codegroup.io</strong>.</p>
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<h2 id="implementation-prompt">Implementation Prompt</h2>
+
+<p>This post is derived entirely from a single executable specification:</p>
+
+<ul>
+  <li><a href="https://github.com/JohnMichaelMiller/Zeus/blob/main/zeus.academia.3b/.github/prompts/academia-implementation/ep-1-1-manage-ranks-implementation.prompt.md"><code class="language-plaintext highlighter-rouge">ep-1-1-manage-ranks-implementation.prompt.md</code></a> — The complete ManageRanks slice specification, including boundaries, agent responsibilities, implementation steps, acceptance criteria, and demonstration expectations.</li>
+</ul>
+
+<h2 id="prompts">Prompts</h2>
+
+<ul>
+  <li>Create a new blog post, 2026-06-28-AIAGSD9, that explains the implementation of slice <code class="language-plaintext highlighter-rouge">ep-1-1-manage-ranks-implementation.prompt.md</code></li>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="vertical-slices" /><category term="reference-data" /><category term="vertical-slices" /><category term="reference-data" /><category term="domain-driven-design" /><category term="implementation" /><category term="mediatr" /><category term="fluent-validation" /><summary type="html"><![CDATA[Part 9 of the AIAGSD series implements the ManageRanks reference-data slice, demonstrating how vertical-slice patterns enforce data integrity, prevent duplication, and simplify downstream dependencies.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-06-28/AIAGSD9_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-06-28/AIAGSD9_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants</title><link href="https://blog.pdata.com/AIAGSD8/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants" /><published>2026-04-23T00:00:00-07:00</published><updated>2026-04-23T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD8</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD8/"><![CDATA[<p>This is the point where the AIAGSD workflow has to prove it can survive contact with real implementation. Up to now, the series has focused on requirements, scaffolding, governance, architecture, workflow models, and implementation prompts. In Part 8, I move from planning artifacts into the first bounded delivery wave and show what the first real implementation work taught us: passing unit tests is not enough if the database can still accept invalid state.</p>
 
 <!--more-->
 
@@ -2520,971 +2933,4 @@ project_purpose: Academic Management System</li>
   <li>In two paragraphs, describe how the modern mainstream coding experience interprets intent?</li>
 </ul>
 
-<p><small><small><small>2025-12-01-wtbd.md</small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="programming-history" /><category term="software-engineering" /><category term="natural-language-coding" /><summary type="html"><![CDATA[A look at the revolutionary impact of AI on software development, comparing it to previous paradigm shifts in programming. This post explores how natural language coding is changing the way we build software and why this transformation is different from past technological advances.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-12-01/header-WTBD.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-12-01/header-WTBD.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 2: Core Instructions</title><link href="https://blog.pdata.com/AIAGSD2/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 2: Core Instructions" /><published>2025-09-24T00:00:00-07:00</published><updated>2025-09-24T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD2</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD2/"><![CDATA[<p>This is the second post in the series on AI assisted greenfield software development. This post builds on the first post <a href="https://blog.pdata.com/AIAGSD1" target="_blank">AI-Assisted Greenfield Software Development - Part 1 Business Requirements</a>. If you haven’t read that post, you might want to start there.</p>
-
-<p>In this post I’ll cover the instructions, prompts, and chat modes I used to start to lay down the guidance for turning requirements into code. These files are critical for controlling the AI output and having a comprehensive set of instructions, prompts, and chat modes greatly increase the chances of getting AI to produce something usable.</p>
-
-<!--more-->
-
-<p><img src="/assets/images/2025-09-24/header-AIAGSD2.png" alt="Header Image" /></p>
-
-<h3 id="github-copilot-instruction-files">GitHub Copilot Instruction Files</h3>
-
-<p>Instruction files provide detailed guidance for Copilot to follow when generating code. They define the rules, best practices, and constraints for specific tasks or domains. These files ensure consistency and quality in AI-generated outputs.</p>
-
-<h3 id="github-copilot-prompt-files">GitHub Copilot Prompt Files</h3>
-
-<p>Prompt files are used to define the context and objectives for Copilot in a specific session. They include the task description, expected output format, and any additional parameters to guide the AI in generating relevant and actionable content.</p>
-
-<h3 id="github-copilot-chat-mode-files">GitHub Copilot Chat Mode Files</h3>
-
-<p>Chat mode files configure Copilot’s behavior in a specific chat mode. They define the tools available, the model to use, and the overall purpose of the session. These files enable Copilot to act as a specialized assistant tailored to the needs of the project.</p>
-
-<p>For more on instruction files, see <a href="https://blog.pdata.com/SIWT" target="_blank">Sharing Instructions with the Team</a></p>
-
-<h3 id="relationships-between-chat-modes-prompts-and-instruction-files">Relationships Between Chat Modes, Prompts, and Instruction Files</h3>
-
-<p><img src="../assets/images/2025-09-24/Chatmodes-Prompts-Instructions.png" alt="Chatmodes-Prompts-Instructions.png" /></p>
-
-<p>Chat mode files configure the behavior of the AI by defining tools, models, and session-specific parameters. These chat modes use prompt files to guide the AI in generating specific outputs, such as instruction files, prompts, and generated code. Instruction files, in turn, provide detailed guidance for implementing the solution, ensuring consistency and adherence to best practices. Together, these components form a cohesive workflow that bridges high-level configuration with actionable implementation.</p>
-
-<h2 id="overview-of-core-files">Overview of Core Files</h2>
-
-<p>In this post I’ll cover one chat mode file, one prompt file, and four instruction files that are core to the framework I created to help implement the Academia solution. These files are not domain specific and can be easily used in other projects.</p>
-
-<h2 id="the-ai-assisted-outputinstructionsmd-instruction-file">The <code class="language-plaintext highlighter-rouge">ai-assisted-output.instructions.md</code> Instruction File</h2>
-
-<p>The <code class="language-plaintext highlighter-rouge">ai-assisted-output.instructions.md</code> file is a comprehensive guide for ensuring the provenance, quality, and audit-ability of AI-generated artifacts. It defines the metadata requirements, workflows, and enforcement mechanisms necessary to maintain consistency and accountability in AI-assisted outputs. This file is critical for projects that rely on AI to generate code, documentation, or other artifacts, as it provides a structured approach to managing and tracking AI contributions.</p>
-
-<p>Below is the metadata for the <code class="language-plaintext highlighter-rouge">ai-assisted-output.instructions.md</code> file followed by the full content of the file itself. The metadata is explained in detail in the instruction file.</p>
-
-<hr />
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">anthropic/claude-3.5-sonnet@2024-10-22"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-assisted-output-policy-2025-10-15"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">Create comprehensive AI provenance and logging policy for</span>
-  <span class="s">all AI-assisted outputs in the repository, defining required</span>
-  <span class="s">metadata, workflow, and enforcement.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-15T13:00:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-15T13:45:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">policy</span><span class="nv"> </span><span class="s">design"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:20:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">workflow</span><span class="nv"> </span><span class="s">specification"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:15:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">template</span><span class="nv"> </span><span class="s">creation"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:10:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:45:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/10/15/ai-assisted-output-policy-2025-10-15/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">.github/prompts/create-ai-assisted-output-instructions.prompt.md"</span>
-<span class="na">applyTo</span><span class="pi">:</span> <span class="s2">"</span><span class="s">**/*"</span>
-</code></pre></div></div>
-
-<hr />
-
-<h1 id="ai-assisted-output-instructions">AI-Assisted Output Instructions</h1>
-
-<p>This policy keeps AI-generated artifacts audit-able with minimal overhead. Follow it for all code, docs, diagrams, tests, or data touched by an AI assistant.</p>
-
-<h2 id="quick-obligations">Quick Obligations</h2>
-
-<ul>
-  <li>Always work inside an active chat with a unique <code class="language-plaintext highlighter-rouge">chat_id</code>; block output otherwise.</li>
-  <li>Capture the exact <code class="language-plaintext highlighter-rouge">provider/model@version</code> shown by the tool before generating content.</li>
-  <li>Embed provenance metadata (front matter or sidecar) including the raw prompt and timestamps.</li>
-  <li>Store full chat logs under <code class="language-plaintext highlighter-rouge">ai-logs/&lt;yyyy&gt;/&lt;mm&gt;/&lt;dd&gt;/&lt;chat-id&gt;/</code> with <code class="language-plaintext highlighter-rouge">conversation.md</code> and <code class="language-plaintext highlighter-rouge">summary.md</code>.</li>
-  <li>Record task duration, keep README entries for notable new artifacts, and run the checklists below before committing.</li>
-</ul>
-
-<h2 id="metadata-placement">Metadata Placement</h2>
-
-<ul>
-  <li>Markdown or formats with front matter: embed YAML at the top of the file.</li>
-  <li>Non-front-matter formats: create <code class="language-plaintext highlighter-rouge">&lt;artifact&gt;.meta.md</code> with the same fields.</li>
-  <li>Use lowercase file paths; never create sidecars when front matter is possible.</li>
-</ul>
-
-<h2 id="canonical-metadata-fields">Canonical Metadata Fields</h2>
-
-<p>Every AI-assisted artifact <strong>must</strong> include:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">ai_generated: true</code></li>
-  <li><code class="language-plaintext highlighter-rouge">model: "&lt;provider&gt;/&lt;model&gt;@&lt;version&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">operator: "&lt;github-username&gt;"</code> (must be the GitHub username, e.g., “johnmillerATcodemag-com”)</li>
-  <li><code class="language-plaintext highlighter-rouge">chat_id: "&lt;chat-id&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">prompt: |</code> + exact user prompt</li>
-  <li><code class="language-plaintext highlighter-rouge">started</code>, <code class="language-plaintext highlighter-rouge">ended</code> (ISO8601)</li>
-  <li><code class="language-plaintext highlighter-rouge">task_durations:</code> list of <code class="language-plaintext highlighter-rouge">{task, duration}</code> entries</li>
-  <li><code class="language-plaintext highlighter-rouge">total_duration</code></li>
-  <li><code class="language-plaintext highlighter-rouge">ai_log: "ai-logs/&lt;yyyy&gt;/&lt;mm&gt;/&lt;dd&gt;/&lt;chat-id&gt;/conversation.md"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">source:</code> creator or prompt file</li>
-</ul>
-
-<p><strong>For instruction files (<code class="language-plaintext highlighter-rouge">.instructions.md</code>)</strong>: Also include:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">description: "&lt;one-line purpose&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">applyTo: "&lt;glob pattern&gt;"</code> (e.g., ‘<strong>’, ‘src/</strong>/<em>.py’, ‘**/</em>.bicep’)</li>
-</ul>
-
-<p><strong>For prompt files (<code class="language-plaintext highlighter-rouge">.prompt.md</code>)</strong>: Also include:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">description: "&lt;one-line purpose&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">context: "&lt;relevant context or constraints&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">expected_output: "&lt;type of output expected&gt;"</code></li>
-</ul>
-
-<p><strong>For chat mode files (<code class="language-plaintext highlighter-rouge">.chatmode.md</code>)</strong>: Also include:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">description: "&lt;one-line purpose&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">chatmode_type: "&lt;type of chat mode&gt;"</code> (e.g., ‘coding’, ‘research’, ‘testing’)</li>
-  <li><code class="language-plaintext highlighter-rouge">capabilities: []</code> list of chat mode capabilities</li>
-</ul>
-
-<h3 id="sample-front-matter">Sample Front Matter</h3>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">openai/gpt-4o@2024-11-20"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18-refactor"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">Exact request that triggered the artifact.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18T17:03:11Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18T17:06:54Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">draft"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:02:20"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">review"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:01:23"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:03:43"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/04/18/2025-04-18-refactor/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<h3 id="sample-front-matter-instruction-file">Sample Front Matter (Instruction File)</h3>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">anthropic/claude-sonnet-4.5@unknown"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28-meta-instructions"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">create an instruction file to guide an ai assistant in the generation</span>
-  <span class="s">of instruction files. optimize the instruction file to minimize the</span>
-  <span class="s">number of tokens required.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28T14:30:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28T14:35:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">draft"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:03:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">optimize"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:02:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:05:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/10/28/2025-10-28-meta-instructions/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Guide</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">generating</span><span class="nv"> </span><span class="s">instruction</span><span class="nv"> </span><span class="s">files"</span>
-<span class="na">applyTo</span><span class="pi">:</span> <span class="s2">"</span><span class="s">**/*.instructions.md"</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<h3 id="sample-front-matter-prompt-file">Sample Front Matter (Prompt File)</h3>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">anthropic/claude-sonnet-4.5@unknown"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28-data-analysis"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">create a prompt template for data analysis tasks</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28T15:00:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28T15:05:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">draft"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:05:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:05:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/10/28/2025-10-28-data-analysis/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Prompt</span><span class="nv"> </span><span class="s">template</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">analysis"</span>
-<span class="na">context</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Python</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">science</span><span class="nv"> </span><span class="s">workflows"</span>
-<span class="na">expected_output</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Analysis</span><span class="nv"> </span><span class="s">code</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">visualizations"</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<h3 id="sample-front-matter-chat-mode-file">Sample Front Matter (Chat Mode File)</h3>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">anthropic/claude-sonnet-4.5@unknown"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28-test-chatmode"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">create a chat mode configuration for automated testing</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28T16:00:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28T16:10:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">draft"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:07:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">validate"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:03:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:10:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/10/28/2025-10-28-test-chatmode/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Automated</span><span class="nv"> </span><span class="s">testing</span><span class="nv"> </span><span class="s">chat</span><span class="nv"> </span><span class="s">mode</span><span class="nv"> </span><span class="s">configuration"</span>
-<span class="na">chatmode_type</span><span class="pi">:</span> <span class="s2">"</span><span class="s">testing"</span>
-<span class="na">capabilities</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">unit</span><span class="nv"> </span><span class="s">testing"</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">integration</span><span class="nv"> </span><span class="s">testing"</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">coverage</span><span class="nv"> </span><span class="s">reporting"</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<p><strong>Model Identification Guide</strong>:</p>
-
-<ul>
-  <li><strong>GitHub Copilot Chat</strong> (as of Oct 2025): Uses <code class="language-plaintext highlighter-rouge">anthropic/claude-sonnet-4.5@unknown</code> unless you can identify the exact version</li>
-  <li><strong>OpenAI GPT-4o</strong>: <code class="language-plaintext highlighter-rouge">openai/gpt-4o@2024-11-20</code> (or specific version)</li>
-  <li><strong>Claude 3.5 Sonnet</strong>: <code class="language-plaintext highlighter-rouge">anthropic/claude-3.5-sonnet@2024-10-22</code></li>
-  <li><strong>Claude Sonnet 4.5</strong>: <code class="language-plaintext highlighter-rouge">anthropic/claude-sonnet-4.5@&lt;version&gt;</code> (use <code class="language-plaintext highlighter-rouge">@unknown</code> if version not shown)</li>
-  <li>If UI shows marketing names like “GPT-5-Codex”, map to the actual underlying model</li>
-  <li>When version is not surfaced, use <code class="language-plaintext highlighter-rouge">@unknown</code></li>
-  <li>Track additional models used in the same chat inside <code class="language-plaintext highlighter-rouge">summary.md</code></li>
-</ul>
-
-<h2 id="chat-workflow-canonical">Chat Workflow (Canonical)</h2>
-
-<ol>
-  <li><strong>Start</strong> a fresh chat → capture <code class="language-plaintext highlighter-rouge">chat_id</code>, operator, and model label immediately.</li>
-  <li><strong>Scaffold logs on first artifact</strong> at <code class="language-plaintext highlighter-rouge">ai-logs/&lt;yyyy&gt;/&lt;mm&gt;/&lt;dd&gt;/&lt;chat-id&gt;/</code> with:
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">conversation.md</code>: full timestamped transcript.</li>
-      <li><code class="language-plaintext highlighter-rouge">summary.md</code>: objectives, outcomes, models used, remaining work.</li>
-      <li>Optional <code class="language-plaintext highlighter-rouge">artifacts/</code> for files not checked into the repo.</li>
-    </ul>
-  </li>
-  <li><strong>Generate artifact</strong> only if chat context is active; inject metadata using the captured model string.</li>
-  <li><strong>Update logs</strong> after each artifact; export current transcript, append deliverables list, and record pending actions.</li>
-  <li><strong>Close</strong> by finalizing <code class="language-plaintext highlighter-rouge">summary.md</code>, ensuring task durations and README updates are complete.</li>
-</ol>
-
-<h3 id="minimal-conversationmd">Minimal conversation.md</h3>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh"># AI Conversation Log</span>
-<span class="p">
--</span> Chat ID: <span class="nt">&lt;chat-id&gt;</span>
-<span class="p">-</span> Operator: <span class="nt">&lt;github-username&gt;</span>
-<span class="p">-</span> Model: <span class="nt">&lt;provider&gt;</span>/<span class="nt">&lt;model&gt;</span>@<span class="nt">&lt;version&gt;</span>
-<span class="p">-</span> Started: <span class="nt">&lt;ISO8601&gt;</span>
-<span class="p">-</span> Ended: <span class="nt">&lt;ISO8601&gt;</span>
-<span class="p">-</span> Total Duration: <span class="nt">&lt;hh:mm:ss&gt;</span>
-
-<span class="gu">## Context</span>
-<span class="p">
--</span> Inputs: <span class="nt">&lt;files</span><span class="err">/</span><span class="na">constraints</span><span class="nt">&gt;</span>
-<span class="p">-</span> Targets: <span class="nt">&lt;intended</span> <span class="na">artifacts</span><span class="nt">&gt;</span>
-
-<span class="gu">## Exchanges</span>
-
-[<span class="nt">&lt;timestamp&gt;</span>] <span class="nt">&lt;user&gt;</span>
-
-<span class="p">```</span><span class="nl">text
-</span>&lt;prompt&gt;
-<span class="p">```</span>
-
-[<span class="nt">&lt;timestamp&gt;</span>] <span class="nt">&lt;provider&gt;</span>/<span class="nt">&lt;model&gt;</span>@<span class="nt">&lt;version&gt;</span>
-
-<span class="p">```</span><span class="nl">text
-</span>&lt;assistant reply&gt;
-<span class="p">```</span>
-
-<span class="gu">## Artifacts</span>
-<span class="p">
--</span> <span class="nt">&lt;path&gt;</span> – <span class="nt">&lt;one-line</span> <span class="na">purpose</span><span class="nt">&gt;</span>
-
-<span class="gu">## Next Steps</span>
-<span class="p">
--</span> [ ] <span class="nt">&lt;action&gt;</span>
-</code></pre></div></div>
-
-<h3 id="minimal-summarymd">Minimal summary.md</h3>
-
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh"># Session Summary – &lt;chat-id&gt;</span>
-
-<span class="gs">**Date**</span>: <span class="nt">&lt;YYYY-MM-DD&gt;</span>
-<span class="gs">**Operator**</span>: <span class="nt">&lt;github-username&gt;</span>
-<span class="gs">**Model**</span>: <span class="nt">&lt;provider&gt;</span>/<span class="nt">&lt;model&gt;</span>@<span class="nt">&lt;version&gt;</span>
-<span class="gs">**Duration**</span>: <span class="nt">&lt;hh:mm:ss&gt;</span>
-
-<span class="gu">## Objective</span>
-<span class="p">
--</span> <span class="nt">&lt;goal&gt;</span>
-
-<span class="gu">## Deliverables</span>
-<span class="p">
-1.</span> <span class="sb">`&lt;path&gt;`</span> – <span class="nt">&lt;purpose&gt;</span>
-
-<span class="gu">## Decisions</span>
-<span class="p">
--</span> <span class="nt">&lt;decision&gt;</span>: <span class="nt">&lt;rationale&gt;</span>
-
-<span class="gu">## Follow-up</span>
-<span class="p">
--</span> [ ] <span class="nt">&lt;action&gt;</span>
-
-<span class="gu">## Metadata</span>
-
-<span class="p">```</span><span class="nl">yaml
-</span><span class="na">chat_id</span><span class="pi">:</span> <span class="s">&lt;chat-id&gt;</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s">&lt;ISO8601&gt;</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s">&lt;ISO8601&gt;</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s">&lt;hh:mm:ss&gt;</span>
-<span class="na">models_used</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="s">&lt;provider&gt;/&lt;model&gt;@&lt;version&gt;</span>
-<span class="na">artifacts_count</span><span class="pi">:</span> <span class="s">&lt;int&gt;</span>
-<span class="na">files_modified</span><span class="pi">:</span> <span class="s">&lt;int&gt;</span>
-<span class="p">```</span>
-</code></pre></div></div>
-
-<h2 id="placement--readme">Placement &amp; README</h2>
-
-<ul>
-  <li>Keep this file at <code class="language-plaintext highlighter-rouge">.github/instructions/ai-assisted-output.instructions.md</code>.</li>
-  <li>For every notable new artifact, add a bullet in <code class="language-plaintext highlighter-rouge">README.md</code> linking to the artifact (and optional <code class="language-plaintext highlighter-rouge">ai_log</code>) under an “AI-Assisted Artifacts” section.</li>
-  <li>Temporary scratch work still requires logs and metadata but may skip README updates.</li>
-</ul>
-
-<h2 id="quality-checklist">Quality Checklist</h2>
-
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Metadata complete and embedded (or sidecar when required).</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Model label copied verbatim from the chat UI.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Prompt, timestamps, task durations, and totals recorded.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">ai-logs/.../conversation.md</code> and <code class="language-plaintext highlighter-rouge">summary.md</code> exist and reference the artifact.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />README updated for new durable artifacts.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />No sensitive data captured.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Tests/docs run or noted as pending.</li>
-</ul>
-
-<h2 id="pr-checklist">PR Checklist</h2>
-
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Every changed AI-generated file references a real <code class="language-plaintext highlighter-rouge">chat_id</code> and <code class="language-plaintext highlighter-rouge">ai_log</code>.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />All logs committed alongside artifacts.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />README entries present where required.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Provenance fields pass CI (formatter, YAML syntax, existing paths).</li>
-</ul>
-
-<h2 id="copilot--tooling-requirements">Copilot / Tooling Requirements</h2>
-
-<ul>
-  <li>Auto-create chat IDs, log folders, and metadata scaffolds on first artifact.</li>
-  <li>Prevent artifact generation without live chat context.</li>
-  <li>Export transcripts and summaries automatically.</li>
-  <li>Surface the active model name/version so it can be copied as <code class="language-plaintext highlighter-rouge">provider/model@version</code>.</li>
-  <li>Track files generated per chat to support audits.</li>
-</ul>
-
-<h2 id="enforcement">Enforcement</h2>
-
-<ul>
-  <li>CI script <code class="language-plaintext highlighter-rouge">Verify AI Provenance</code> checks Markdown front matter for <code class="language-plaintext highlighter-rouge">ai_generated</code>, <code class="language-plaintext highlighter-rouge">chat_id</code>, <code class="language-plaintext highlighter-rouge">ai_log</code>, and valid log paths. Extend similarly for other formats as needed.</li>
-</ul>
-
-<h2 id="remediation">Remediation</h2>
-
-<ul>
-  <li>Missing metadata → add required fields and regenerate logs.</li>
-  <li>Orphaned artifacts → create <code class="language-plaintext highlighter-rouge">ai-logs/...</code> records retroactively and update README.</li>
-  <li>Sidecar misuse → move metadata into front matter when supported.</li>
-</ul>
-
-<hr />
-
-<h3 id="summary-of-the-ai-assisted-outputinstructionsmd-file">Summary of the <code class="language-plaintext highlighter-rouge">ai-assisted-output.instructions.md</code> File</h3>
-
-<p>This instruction file outlines the obligations for working with AI-generated artifacts, including the need to capture metadata such as the model used, operator, and timestamps. It emphasizes the importance of embedding provenance metadata directly into the artifacts or using sidecar files when necessary. The file also provides detailed workflows for managing AI-assisted sessions, including logging conversations, summarizing outcomes, and ensuring proper placement of artifacts.</p>
-
-<p>Additionally, the file includes examples of metadata for various types of AI-generated files, such as instruction files, prompt files, and chat mode files. These examples serve as templates for ensuring that all artifacts adhere to the defined standards. The enforcement section highlights the use of CI scripts to verify compliance with the metadata requirements, ensuring that all AI-generated outputs are properly documented and traceable.</p>
-
-<p>The metadata portion captures essential information about the creation of the instruction file itself, including the model used, operator, chat ID, prompt, and timestamps. This metadata ensures that the creation of the instruction file is also auditable and traceable.</p>
-
-<p>The <code class="language-plaintext highlighter-rouge">conversation.md</code> and <code class="language-plaintext highlighter-rouge">summary.md</code> files associated with this instruction file would provide a detailed record of the interactions that led to its creation, including the specific prompts used and the decisions made during the process. The summary file is also structured to capture the objectives, deliverables, decisions, and follow-up actions related to the development of the instruction file. The summary file also allows a conversation to be interrupted and continued later.</p>
-
-<p>While the <code class="language-plaintext highlighter-rouge">ai-assisted-output.instructions.md</code> file focuses on the overarching policies and workflows for managing AI-generated artifacts, the <code class="language-plaintext highlighter-rouge">instruction-file-generation.instructions.md</code> file dives deeper into the specific guidelines for creating instruction files. This next file provides a token-optimized approach to generating instruction files, ensuring clarity and efficiency in their creation. Let’s explore its contents and how it complements the broader framework established in the <code class="language-plaintext highlighter-rouge">ai-assisted-output.instructions.md</code> file.</p>
-
-<h2 id="the-instruction-file-generationinstructionsmd-instruction-file">The <code class="language-plaintext highlighter-rouge">instruction-file-generation.instructions.md</code> Instruction File</h2>
-
-<p>The <code class="language-plaintext highlighter-rouge">instruction-file-generation.instructions.md</code> file is a specialized guide for creating instruction files. It emphasizes token efficiency while ensuring clarity and usability. This file provides a structured approach to generating instruction files that are both concise and comprehensive, making it an essential tool for projects that rely on AI-assisted workflows.</p>
-
-<p>Below is the metadata for the <code class="language-plaintext highlighter-rouge">instruction-file-generation.instructions.md</code> file followed by the full content of the file itself. The metadata is explained in detail in the instruction file.</p>
-
-<hr />
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">anthropic/claude-3.5-sonnet@2024-10-22"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">instruction-file-generation-policy-2025-10-20"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">Create a token-optimized instruction file for generating instruction files,</span>
-  <span class="s">ensuring clarity and usability while minimizing token usage.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-20T10:00:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-20T10:30:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">draft"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:15:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">review"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:10:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">optimize"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:05:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:30:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/10/20/instruction-file-generation-policy-2025-10-20/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">.github/prompts/create-instruction-file-generation-instructions.prompt.md"</span>
-<span class="na">applyTo</span><span class="pi">:</span> <span class="s2">"</span><span class="s">**/*.instructions.md"</span>
-</code></pre></div></div>
-
-<hr />
-
-<h1 id="generating-an-instruction-file">Generating an Instruction File</h1>
-
-<p>This guide provides a streamlined approach to writing instruction files for AI-assisted development. It focuses on minimizing token usage while maintaining clarity and effectiveness. Follow these guidelines to ensure that generated instruction files are concise, actionable, and aligned with project goals.</p>
-
-<h2 id="key-principles">Key Principles</h2>
-
-<ol>
-  <li><strong>Clarity</strong>: Ensure that the instructions are easy to understand and follow.</li>
-  <li><strong>Token Efficiency</strong>: Use concise language to minimize token usage without sacrificing clarity.</li>
-  <li><strong>Actionability</strong>: Provide clear steps and examples to guide users in implementing the instructions.</li>
-  <li><strong>Consistency</strong>: Adhere to a standard format and structure for all instruction files.</li>
-</ol>
-
-<h2 id="metadata-requirements">Metadata Requirements</h2>
-
-<p>Every instruction file must include the following metadata:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">ai_generated: true</code></li>
-  <li><code class="language-plaintext highlighter-rouge">model: "&lt;provider&gt;/&lt;model&gt;@&lt;version&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">operator: "&lt;github-username&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">chat_id: "&lt;chat-id&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">prompt: |</code> + exact user prompt</li>
-  <li><code class="language-plaintext highlighter-rouge">started</code>, <code class="language-plaintext highlighter-rouge">ended</code> (ISO8601)</li>
-  <li><code class="language-plaintext highlighter-rouge">task_durations:</code> list of <code class="language-plaintext highlighter-rouge">{task, duration}</code> entries</li>
-  <li><code class="language-plaintext highlighter-rouge">total_duration</code></li>
-  <li><code class="language-plaintext highlighter-rouge">ai_log: "ai-logs/&lt;yyyy&gt;/&lt;mm&gt;/&lt;dd&gt;/&lt;chat-id&gt;/conversation.md"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">source:</code> creator or prompt file</li>
-  <li><code class="language-plaintext highlighter-rouge">description: "&lt;one-line purpose&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">applyTo: "&lt;glob pattern&gt;"</code></li>
-</ul>
-
-<h2 id="structure-of-instruction-files">Structure of Instruction Files</h2>
-
-<ol>
-  <li><strong>Introduction</strong>: Briefly describe the purpose of the instruction file.</li>
-  <li><strong>Key Principles</strong>: Highlight the main principles or guidelines.</li>
-  <li><strong>Metadata Requirements</strong>: Define the metadata fields required for the file.</li>
-  <li><strong>Examples</strong>: Provide sample metadata and instructions for reference.</li>
-  <li><strong>Checklist</strong>: Include a checklist to ensure compliance with the guidelines.</li>
-</ol>
-
-<h2 id="examples">Examples</h2>
-
-<h3 id="sample-metadata">Sample Metadata</h3>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">openai/gpt-4o@2024-11-20"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18-instruction-file"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">Create an instruction file for generating instruction files.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18T12:00:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18T12:15:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">draft"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:10:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">review"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:05:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:15:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/04/18/2025-04-18-instruction-file/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Guide</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">generating</span><span class="nv"> </span><span class="s">instruction</span><span class="nv"> </span><span class="s">files"</span>
-<span class="na">applyTo</span><span class="pi">:</span> <span class="s2">"</span><span class="s">**/*.instructions.md"</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<h3 id="sample-checklist">Sample Checklist</h3>
-
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Metadata is complete and accurate.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Instructions are clear and concise.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Examples are relevant and easy to follow.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Checklist is included to ensure compliance.</li>
-</ul>
-
-<hr />
-
-<h3 id="summary-of-the-instruction-file-generationinstructionsmd-file">Summary of the <code class="language-plaintext highlighter-rouge">instruction-file-generation.instructions.md</code> File</h3>
-
-<p>This instruction file provides a clear and efficient framework for creating instruction files. By focusing on token optimization and clarity, it ensures that generated files are both concise and effective. The metadata requirements and structured format help maintain consistency across projects, while the examples and checklist provide practical guidance for implementation.</p>
-
-<p>Of note is the <strong>applyTo</strong> field in the metadata which specifies that this instruction file applies to all files with the <code class="language-plaintext highlighter-rouge">.instructions.md</code> extension. This ensures that any instruction file generated in the repository adheres to the guidelines set forth in this document and that is excluded from the context when generating other types of files.</p>
-
-<p>The <code class="language-plaintext highlighter-rouge">instruction-file-generation.instructions.md</code> file complements the broader framework established in the <code class="language-plaintext highlighter-rouge">ai-assisted-output.instructions.md</code> file by diving deeper into the specific requirements for instruction files. Together, these files form a comprehensive approach to managing AI-assisted workflows.</p>
-
-<p>Next, we will explore the <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code> file, which provides guidelines for creating prompt files that effectively guide AI in generating desired outputs.</p>
-
-<h2 id="the-prompt-file-generationinstructionsmd-instruction-file">The <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code> Instruction File</h2>
-
-<p>The <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code> file is a specialized guide for creating prompt files. It focuses on defining clear, actionable, and context-rich prompts that guide the AI in producing high-quality outputs. This file is essential for ensuring that AI-generated content aligns with project objectives and maintains a high standard of quality.</p>
-
-<p>Below is the metadata for the <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code> file followed by the full content of the file itself. The metadata is explained in detail in the instruction file.</p>
-
-<hr />
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">anthropic/claude-3.5-sonnet@2024-10-22"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">prompt-file-generation-policy-2025-10-25"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">Create a comprehensive guide for generating prompt files,</span>
-  <span class="s">emphasizing clarity, context, and actionability.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-25T09:00:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-25T09:45:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">guide</span><span class="nv"> </span><span class="s">creation"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:30:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">review"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:15:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:45:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/10/25/prompt-file-generation-policy-2025-10-25/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">.github/prompts/create-prompt-file-generation-instructions.prompt.md"</span>
-<span class="na">applyTo</span><span class="pi">:</span> <span class="s2">"</span><span class="s">**/*.prompt.md"</span>
-</code></pre></div></div>
-
-<hr />
-
-<h1 id="prompt-file-generation-instructions">Prompt File Generation Instructions</h1>
-
-<p>This instruction file provides a detailed guide for creating prompt files that effectively communicate tasks and expectations to the AI. Well-structured prompt files are crucial for obtaining high-quality, relevant, and actionable AI outputs. Follow these instructions to create prompt files that enhance the effectiveness of AI assistance in your projects.</p>
-
-<h2 id="key-components-of-a-prompt-file">Key Components of a Prompt File</h2>
-
-<ol>
-  <li><strong>Description</strong>: A brief overview of the prompt file’s purpose.</li>
-  <li><strong>Context</strong>: Relevant background information or constraints that the AI should consider.</li>
-  <li><strong>Expected Output</strong>: The type of output expected from the AI, including format and content requirements.</li>
-  <li><strong>Examples</strong>: Sample prompts and expected AI responses for reference.</li>
-  <li><strong>Checklist</strong>: A list of items to verify before finalizing the prompt file.</li>
-</ol>
-
-<h2 id="metadata-requirements-1">Metadata Requirements</h2>
-
-<p>Every prompt file must include the following metadata:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">ai_generated: true</code></li>
-  <li><code class="language-plaintext highlighter-rouge">model: "&lt;provider&gt;/&lt;model&gt;@&lt;version&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">operator: "&lt;github-username&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">chat_id: "&lt;chat-id&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">prompt: |</code> + exact user prompt</li>
-  <li><code class="language-plaintext highlighter-rouge">started</code>, <code class="language-plaintext highlighter-rouge">ended</code> (ISO8601)</li>
-  <li><code class="language-plaintext highlighter-rouge">task_durations:</code> list of <code class="language-plaintext highlighter-rouge">{task, duration}</code> entries</li>
-  <li><code class="language-plaintext highlighter-rouge">total_duration</code></li>
-  <li><code class="language-plaintext highlighter-rouge">ai_log: "ai-logs/&lt;yyyy&gt;/&lt;mm&gt;/&lt;dd&gt;/&lt;chat-id&gt;/conversation.md"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">source:</code> creator or prompt file</li>
-  <li><code class="language-plaintext highlighter-rouge">description: "&lt;one-line purpose&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">context: "&lt;relevant context or constraints&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">expected_output: "&lt;type of output expected&gt;"</code></li>
-</ul>
-
-<h2 id="examples-1">Examples</h2>
-
-<h3 id="sample-metadata-1">Sample Metadata</h3>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">openai/gpt-4o@2024-11-20"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18-prompt-file"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">Create a prompt file for generating prompt files.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18T12:00:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18T12:15:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">draft"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:10:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">review"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:05:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:15:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/04/18/2025-04-18-prompt-file/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Guide</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">generating</span><span class="nv"> </span><span class="s">prompt</span><span class="nv"> </span><span class="s">files"</span>
-<span class="na">context</span><span class="pi">:</span> <span class="s2">"</span><span class="s">AI-assisted</span><span class="nv"> </span><span class="s">development</span><span class="nv"> </span><span class="s">workflows"</span>
-<span class="na">expected_output</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Clear</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">actionable</span><span class="nv"> </span><span class="s">prompts"</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<h3 id="sample-checklist-1">Sample Checklist</h3>
-
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Metadata is complete and accurate.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Description clearly conveys the purpose of the prompt file.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Context provides relevant background information.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Expected output is well-defined and achievable.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Examples are included and correctly formatted.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Checklist is included to ensure compliance.</li>
-</ul>
-
-<hr />
-
-<h3 id="summary-of-the-prompt-file-generationinstructionsmd-file">Summary of the <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code> File</h3>
-
-<p>This instruction file provides comprehensive guidelines for creating prompt files that effectively guide AI in generating desired outputs. By emphasizing clarity, context, and action-ability, it ensures that AI-generated content is relevant, high-quality, and aligned with project objectives. The metadata requirements and structured format promote consistency and best practices across projects.</p>
-
-<p>The <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code> file ensures that prompt files are clear, actionable, and context-rich, enabling AI to produce high-quality outputs. Building on this, the <code class="language-plaintext highlighter-rouge">chatmode-file-generation.instructions.md</code> file provides a comprehensive guide for creating chat mode files. These files define the behavior, capabilities, and configuration of AI chat modes, ensuring they are tailored to specific tasks and workflows. Let’s explore its contents and how it complements the framework established by the other instruction files.</p>
-
-<h2 id="the-chatmode-file-generationinstructionsmd-instruction-file">The <code class="language-plaintext highlighter-rouge">chatmode-file-generation.instructions.md</code> Instruction File</h2>
-
-<p>The <code class="language-plaintext highlighter-rouge">chatmode-file-generation.instructions.md</code> file is a specialized guide for creating chat mode files. It defines the configuration, behavior, and capabilities of AI chat modes, ensuring they are tailored to specific tasks and workflows. This file is essential for projects that require precise control over AI chat mode behavior and integration with other tools and processes.</p>
-
-<p>Below is the metadata for the <code class="language-plaintext highlighter-rouge">chatmode-file-generation.instructions.md</code> file followed by the full content of the file itself. The metadata is explained in detail in the instruction file.</p>
-
-<hr />
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">anthropic/claude-3.5-sonnet@2024-10-22"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">chatmode-file-generation-policy-2025-10-30"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">Create a comprehensive guide for generating chat mode files,</span>
-  <span class="s">detailing configuration, behavior, and capabilities.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-30T11:00:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-30T11:50:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">guide</span><span class="nv"> </span><span class="s">creation"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:40:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">review"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:10:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:50:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/10/30/chatmode-file-generation-policy-2025-10-30/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">.github/prompts/create-chatmode-file-generation-instructions.prompt.md"</span>
-<span class="na">applyTo</span><span class="pi">:</span> <span class="s2">"</span><span class="s">**/*.chatmode.md"</span>
-</code></pre></div></div>
-
-<hr />
-
-<h1 id="chat-mode-file-generation-instructions">Chat Mode File Generation Instructions</h1>
-
-<p>This instruction file provides a detailed guide for creating chat mode files that define the behavior, capabilities, and configuration of AI chat modes. Properly configured chat mode files are crucial for ensuring that AI chat modes perform optimally and are well-integrated with other tools and processes in the development workflow. Follow these instructions to create chat mode files that enhance the effectiveness and reliability of AI assistance in your projects.</p>
-
-<h2 id="key-components-of-a-chat-mode-file">Key Components of a Chat Mode File</h2>
-
-<ol>
-  <li><strong>Description</strong>: A brief overview of the chat mode file’s purpose.</li>
-  <li><strong>Chat Mode Type</strong>: The type of chat mode being configured (e.g., coding, research, testing).</li>
-  <li><strong>Capabilities</strong>: The specific abilities or functions the chat mode can perform.</li>
-  <li><strong>Configuration</strong>: Settings and parameters that define the chat mode’s behavior.</li>
-  <li><strong>Examples</strong>: Sample chat mode configurations for reference.</li>
-  <li><strong>Checklist</strong>: A list of items to verify before finalizing the chat mode file.</li>
-</ol>
-
-<h2 id="metadata-requirements-2">Metadata Requirements</h2>
-
-<p>Every chat mode file must include the following metadata:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">ai_generated: true</code></li>
-  <li><code class="language-plaintext highlighter-rouge">model: "&lt;provider&gt;/&lt;model&gt;@&lt;version&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">operator: "&lt;github-username&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">chat_id: "&lt;chat-id&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">prompt: |</code> + exact user prompt</li>
-  <li><code class="language-plaintext highlighter-rouge">started</code>, <code class="language-plaintext highlighter-rouge">ended</code> (ISO8601)</li>
-  <li><code class="language-plaintext highlighter-rouge">task_durations:</code> list of <code class="language-plaintext highlighter-rouge">{task, duration}</code> entries</li>
-  <li><code class="language-plaintext highlighter-rouge">total_duration</code></li>
-  <li><code class="language-plaintext highlighter-rouge">ai_log: "ai-logs/&lt;yyyy&gt;/&lt;mm&gt;/&lt;dd&gt;/&lt;chat-id&gt;/conversation.md"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">source:</code> creator or prompt file</li>
-  <li><code class="language-plaintext highlighter-rouge">description: "&lt;one-line purpose&gt;"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">chatmode_type: "&lt;type of chat mode&gt;"</code> (e.g., ‘coding’, ‘research’, ‘testing’)</li>
-  <li><code class="language-plaintext highlighter-rouge">capabilities: []</code> list of chat mode capabilities</li>
-</ul>
-
-<h2 id="examples-2">Examples</h2>
-
-<h3 id="sample-metadata-2">Sample Metadata</h3>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">openai/gpt-4o@2024-11-20"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18-chatmode-file"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">Create a chat mode file for generating chat mode files.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18T12:00:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18T12:15:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">draft"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:10:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">review"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:05:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:15:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/04/18/2025-04-18-chatmode-file/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Guide</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">generating</span><span class="nv"> </span><span class="s">chat</span><span class="nv"> </span><span class="s">mode</span><span class="nv"> </span><span class="s">files"</span>
-<span class="na">chatmode_type</span><span class="pi">:</span> <span class="s2">"</span><span class="s">coding"</span>
-<span class="na">capabilities</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">code</span><span class="nv"> </span><span class="s">completion"</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">code</span><span class="nv"> </span><span class="s">suggestions"</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">documentation</span><span class="nv"> </span><span class="s">generation"</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<h3 id="sample-checklist-2">Sample Checklist</h3>
-
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Metadata is complete and accurate.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Description clearly conveys the purpose of the chat mode file.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Chat Mode type is correctly specified.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Capabilities are relevant and comprehensive.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Configuration settings are well-defined.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Examples are included and correctly formatted.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Checklist is included to ensure compliance.</li>
-</ul>
-
-<hr />
-
-<h3 id="summary-of-the-chatmode-file-generationinstructionsmd-file">Summary of the <code class="language-plaintext highlighter-rouge">chatmode-file-generation.instructions.md</code> File</h3>
-
-<p>This instruction file provides comprehensive guidelines for creating chat mode files that define the behavior, capabilities, and configuration of AI chat modes. By emphasizing clear structure, relevant capabilities, and precise configuration, it ensures that AI chat modes are effectively tailored to project requirements. The metadata requirements and structured format promote consistency and best practices across projects.</p>
-
-<p>The <code class="language-plaintext highlighter-rouge">chatmode-file-generation.instructions.md</code> file builds upon the foundations set by the previous instruction files, providing the final piece of the puzzle for managing AI-assisted greenfield software development. With these instruction files, prompts, and chat modes, development teams are well-equipped to leverage AI assistance effectively, enhancing productivity, improving code quality, and accelerating software development timelines.</p>
-
-<h2 id="the-prompt-engineerchatmodemd-chat-mode-file">The <code class="language-plaintext highlighter-rouge">prompt-engineer.chatmode.md</code> Chat Mode File</h2>
-
-<p>The <code class="language-plaintext highlighter-rouge">prompt-engineer.chatmode.md</code> file is a specialized configuration for an AI chat mode designed to assist in crafting and refining prompts. This chat mode is tailored to ensure that prompts are clear, actionable, and aligned with the desired outcomes. By leveraging this chat mode, teams can streamline the process of creating effective prompts, which are critical for guiding AI behavior and achieving high-quality outputs.</p>
-
-<p>Below is the metadata for the <code class="language-plaintext highlighter-rouge">prompt-engineer.chatmode.md</code> file followed by the full content of the file itself. The metadata is explained in detail in the chat mode file.</p>
-
-<hr />
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">anthropic/claude-3.5-sonnet@2024-10-22"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">prompt-engineer-chatmode-policy-2025-11-01"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">Create a chat mode configuration for a prompt engineering assistant,</span>
-  <span class="s">detailing its capabilities and configuration.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-11-01T10:00:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-11-01T10:40:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">chat</span><span class="nv"> </span><span class="s">mode</span><span class="nv"> </span><span class="s">design"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:25:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">review"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:15:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:40:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/11/01/prompt-engineer-chatmode-policy-2025-11-01/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">.github/prompts/create-prompt-engineer-chatmode-instructions.prompt.md"</span>
-<span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Chat</span><span class="nv"> </span><span class="s">Mode</span><span class="nv"> </span><span class="s">configuration</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">prompt</span><span class="nv"> </span><span class="s">engineering"</span>
-<span class="na">chatmode_type</span><span class="pi">:</span> <span class="s2">"</span><span class="s">prompt-engineering"</span>
-<span class="na">capabilities</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">prompt</span><span class="nv"> </span><span class="s">refinement"</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">clarity</span><span class="nv"> </span><span class="s">enhancement"</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">context</span><span class="nv"> </span><span class="s">alignment"</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">output</span><span class="nv"> </span><span class="s">optimization"</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<hr />
-
-<h1 id="prompt-engineer-chat-mode-configuration">Prompt Engineer Chat Mode Configuration</h1>
-
-<p>This chat mode is designed to assist in the creation and refinement of prompts for AI systems. It provides tools and capabilities to ensure that prompts are well-structured, contextually relevant, and optimized for generating high-quality outputs. The chat mode is particularly useful for teams that rely on AI to produce consistent and actionable results.</p>
-
-<h2 id="key-features">Key Features</h2>
-
-<ol>
-  <li><strong>Prompt Refinement</strong>: The chat mode can analyze and improve existing prompts to enhance clarity and effectiveness.</li>
-  <li><strong>Clarity Enhancement</strong>: It ensures that prompts are easy to understand and free of ambiguity.</li>
-  <li><strong>Context Alignment</strong>: The chat mode aligns prompts with the specific context and objectives of the task.</li>
-  <li><strong>Output Optimization</strong>: It optimizes prompts to achieve the desired output format and quality.</li>
-</ol>
-
-<h2 id="metadata-requirements-3">Metadata Requirements</h2>
-
-<p>The <code class="language-plaintext highlighter-rouge">prompt-engineer.chatmode.md</code> file includes detailed metadata to ensure traceability and compliance with project standards. This metadata captures the chat mode’s purpose, capabilities, and configuration details.</p>
-
-<h2 id="examples-3">Examples</h2>
-
-<h3 id="sample-metadata-3">Sample Metadata</h3>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
-<span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">openai/gpt-4o@2024-11-20"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18-prompt-engineer-chatmode"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">Create a chat mode configuration for a prompt engineering assistant.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18T12:00:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-04-18T12:30:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">draft"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:20:00"</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">review"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:10:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:30:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/04/18/2025-04-18-prompt-engineer-chatmode/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Chat</span><span class="nv"> </span><span class="s">Mode</span><span class="nv"> </span><span class="s">configuration</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">prompt</span><span class="nv"> </span><span class="s">engineering"</span>
-<span class="na">chatmode_type</span><span class="pi">:</span> <span class="s2">"</span><span class="s">prompt-engineering"</span>
-<span class="na">capabilities</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">prompt</span><span class="nv"> </span><span class="s">refinement"</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">clarity</span><span class="nv"> </span><span class="s">enhancement"</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">context</span><span class="nv"> </span><span class="s">alignment"</span>
-  <span class="pi">-</span> <span class="s2">"</span><span class="s">output</span><span class="nv"> </span><span class="s">optimization"</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<h3 id="sample-checklist-3">Sample Checklist</h3>
-
-<ul class="task-list">
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Metadata is complete and accurate.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Chat Mode type and capabilities are clearly defined.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Configuration aligns with project objectives.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Examples are included and correctly formatted.</li>
-  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Checklist is included to ensure compliance.</li>
-</ul>
-
-<hr />
-
-<h3 id="summary-of-the-prompt-engineerchatmodemd-file">Summary of the <code class="language-plaintext highlighter-rouge">prompt-engineer.chatmode.md</code> File</h3>
-
-<p>The <code class="language-plaintext highlighter-rouge">prompt-engineer.chatmode.md</code> file provides a comprehensive configuration for an AI chat mode focused on prompt engineering. By defining its capabilities and configuration, this file ensures that the chat mode is well-equipped to assist in creating and refining prompts. The metadata requirements and structured format promote consistency and traceability, making it an essential tool for projects that rely on AI-generated outputs.</p>
-
-<p>This chat mode file complements the instruction and prompt files by providing a specialized tool for optimizing the prompts that guide AI behavior. Together, these components form a robust framework for managing AI-assisted workflows.</p>
-
-<h2 id="the-check-contextpromptmd-prompt-file">The <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> Prompt File</h2>
-
-<p>The <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> file is a specialized guide for verifying and aligning the context of AI-generated outputs. This file ensures that the AI’s outputs are relevant, accurate, and aligned with the project’s objectives. By using this prompt file, teams can maintain high standards of quality and consistency in their AI-assisted workflows.</p>
-
-<p>Below is the metadata for the <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> file followed by the full content of the file itself. The metadata is explained in detail in the prompt file.</p>
-
-<hr />
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">ai_generated</span><span class="pi">:</span> <span class="kc">true</span>
-<span class="na">model</span><span class="pi">:</span> <span class="s2">"</span><span class="s">anthropic/claude-sonnet-4.5@unknown"</span>
-<span class="na">operator</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">chat_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28-context-validation-v2"</span>
-<span class="na">prompt</span><span class="pi">:</span> <span class="pi">|</span>
-  <span class="s">update #file:check-context.prompt.md. create an token optimized prompt file to guide an ai assistant in validating the current context.</span>
-<span class="na">started</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28T16:25:00Z"</span>
-<span class="na">ended</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2025-10-28T16:28:00Z"</span>
-<span class="na">task_durations</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">task</span><span class="pi">:</span> <span class="s2">"</span><span class="s">review</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">validate"</span>
-    <span class="na">duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:03:00"</span>
-<span class="na">total_duration</span><span class="pi">:</span> <span class="s2">"</span><span class="s">00:03:00"</span>
-<span class="na">ai_log</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ai-logs/2025/10/28/2025-10-28-context-validation-v2/conversation.md"</span>
-<span class="na">source</span><span class="pi">:</span> <span class="s2">"</span><span class="s">johnmillerATcodemag-com"</span>
-<span class="na">description</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Validate</span><span class="nv"> </span><span class="s">context</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">conflicts</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">inconsistencies"</span>
-<span class="na">context</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Instruction</span><span class="nv"> </span><span class="s">files,</span><span class="nv"> </span><span class="s">prompts,</span><span class="nv"> </span><span class="s">agents,</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">workspace</span><span class="nv"> </span><span class="s">context"</span>
-<span class="na">expected_output</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Structured</span><span class="nv"> </span><span class="s">conflict</span><span class="nv"> </span><span class="s">analysis</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">recommendations"</span>
-<span class="na">tools</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">search"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">edit"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">fetch"</span><span class="pi">]</span>
-<span class="na">mode</span><span class="pi">:</span> <span class="s">agent</span>
-<span class="nn">---</span>
-</code></pre></div></div>
-
-<h1 id="context-validation">Context Validation</h1>
-
-<p>Analyze current context (instructions, prompts, agents, workspace) for conflicts, contradictions, and inconsistencies.</p>
-
-<h2 id="validation-categories">Validation Categories</h2>
-
-<ol>
-  <li><strong>Conflicting Instructions</strong>: Contradictory directives, incompatible requirements</li>
-  <li><strong>Factual Inconsistencies</strong>: Contradictory data, dates, numbers, or specifications</li>
-  <li><strong>Logical Contradictions</strong>: Mutually exclusive statements, circular dependencies</li>
-  <li><strong>Priority Conflicts</strong>: Competing priorities, incompatible scopes</li>
-  <li><strong>Technical Incompatibilities</strong>: Conflicting tech stacks, version/dependency conflicts</li>
-  <li><strong>Terminology Gaps</strong>: Inconsistent naming, undefined references, missing connections</li>
-  <li><strong>Redundancy</strong>: Duplicate instructions, overlapping processes</li>
-</ol>
-
-<h2 id="output-format">Output Format</h2>
-
-<p>For each issue found:</p>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">category</span><span class="pi">:</span> <span class="s">&lt;conflict type&gt;</span>
-<span class="na">description</span><span class="pi">:</span> <span class="s">&lt;what conflicts&gt;</span>
-<span class="na">location</span><span class="pi">:</span> <span class="s">&lt;where it occurs&gt;</span>
-<span class="na">impact: &lt;severity</span><span class="pi">:</span> <span class="s">critical|high|medium|low&gt;</span>
-<span class="na">recommendation</span><span class="pi">:</span> <span class="s">&lt;resolution approach&gt;</span>
-</code></pre></div></div>
-
-<p>If no conflicts: state “Context validated. No conflicts detected.”</p>
-
-<h2 id="validation-steps">Validation Steps</h2>
-
-<ol>
-  <li>Load all instruction, prompt, and agent files</li>
-  <li>Cross-reference directives for contradictions</li>
-  <li>Check terminology consistency across files</li>
-  <li>Identify duplicate or overlapping content</li>
-  <li>Verify technical compatibility</li>
-  <li>Report findings using output format</li>
-</ol>
-
-<h3 id="summary-of-the-check-contextpromptmd-file">Summary of the <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> File</h3>
-
-<p>The <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> file provides a detailed guide for verifying and aligning the context of AI-generated outputs. By emphasizing relevance, accuracy, and alignment with project objectives, it ensures that AI-generated content meets high standards of quality and consistency. The metadata requirements and structured format promote best practices and trace-ability across projects.</p>
-
-<p>This prompt file serves as a critical tool for maintaining the integrity of AI-assisted workflows, ensuring that all outputs are thoroughly vetted for context and relevance. Conflicting instructions, factual inconsistencies, logical contradictions, priority conflicts, technical incompatibilities, terminology gaps, and redundancy degrade AI performance and can lead to sub-optimal outcomes. Issues identified through this prompt should be addressed proactively and rerun when new instruction files are introduced.</p>
-
-<p>This prompt file complements the instruction and chat mode files by providing a tool for ensuring that AI outputs are contextually appropriate and aligned with project goals. Together, these components form a robust framework for managing AI-assisted workflows.</p>
-
-<h2 id="workflow-for-ai-assisted-development">Workflow for AI-Assisted Development</h2>
-
-<p><img src="../assets/images/2025-09-24/AIAGSD-Workflow.png" alt="AIAGSD_Workflow.png" /></p>
-
-<p>This diagram illustrates how core instructions and business requirements are used to create project-independent instructions and an implementation plan. These components, along with instruction files, guide the solution implementation process.</p>
-
-<p>In this post, we’ve explored the essential components of the framework for AI-assisted software development. We’ve covered the relationships between chat modes, prompts, and instruction files, and delved into the specifics of the <code class="language-plaintext highlighter-rouge">ai-assisted-output.instructions.md</code>, <code class="language-plaintext highlighter-rouge">instruction-file-generation.instructions.md</code>, <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code>, <code class="language-plaintext highlighter-rouge">chatmode-file-generation.instructions.md</code>, and <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> files.</p>
-
-<p>This framework provides a comprehensive and structured approach to managing AI-assisted workflows, ensuring clarity, consistency, and quality in AI-generated outputs. By following these guidelines and utilizing the provided instruction files, prompts, and chat modes, you can effectively leverage AI assistance to produce quality software artifacts that meet your project’s needs.</p>
-
-<p>As you embark on your AI-assisted development journey, remember that this is an iterative process. Continuously refine your instructions, prompts, and chat modes based on feedback and evolving project needs. The key to effective AI assistance lies in clear communication, well-defined objectives, and a commitment to quality and best practices. By fostering a culture of continuous improvement, you can unlock the full potential of AI in your development workflows and achieve sustainable success.</p>
-
-<p>Next time, we’ll look at the Project Independent Instructions that form the basis for reusable AI-assisted development practices across multiple projects.</p>
-
-<h2 id="feedback-and-disclaimer">Feedback and Disclaimer</h2>
-
-<p>Feedback is always welcome. Please direct it to <a href="mailto:AIP@pdata.com" target="_blank">AIP@pdata.com</a></p>
-
-<h3 id="disclaimer">Disclaimer</h3>
-
-<p>AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul.</p>
-
-<p>Prompts:</p>
-
-<ul>
-  <li>Insert a mermaid diagram that documents this workflow:
-    <ul>
-      <li>Business Requirements are used to create the Generate Instructions prompt.</li>
-      <li>The Generate Instructions prompt produces Instruction files</li>
-      <li>Instruction files guide the Solution Implementation</li>
-    </ul>
-  </li>
-  <li>Insert descriptions of GitHub copilot instruction, prompt, and chat mode (chat mode) files</li>
-  <li>Create a mermaid chart showing the relationships between chat modes, prompts, instruction files. Add a paragraph describing the interactions between these files.</li>
-  <li>Insert the contents of the <code class="language-plaintext highlighter-rouge">ai-assisted-output.instructions.md</code> file with an introductory paragraph, summary paragraphs, and a transition to the <code class="language-plaintext highlighter-rouge">instruction-file-generation.instructions.md</code> file.</li>
-  <li>Insert the contents of the <code class="language-plaintext highlighter-rouge">instruction-file-generation.instructions.md</code> file with an introductory paragraph, summary paragraphs, and a transition to the <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code> file.</li>
-  <li>Insert the contents of the <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code> file with an introductory paragraph, summary paragraphs, and a transition to the <code class="language-plaintext highlighter-rouge">chatmode-file-generation.instructions.md</code> file.</li>
-  <li>Insert the contents of the <code class="language-plaintext highlighter-rouge">prompt-engineer.chatmode.md</code> file with an introductory paragraph, summary paragraphs, and a transition to the <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> file.</li>
-  <li>Insert the contents of the <code class="language-plaintext highlighter-rouge">check-context.prompt.md</code> file with an introductory paragraph, summary paragraphs, and a transition to the conclusion.</li>
-</ul>
-
-<p><small><small><small>Original <a href="https://blog.pdata.com/AIAGSD2">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="copilot" /><category term="best-practices" /><category term="instruction-files" /><summary type="html"><![CDATA[This is the second post in the series on AI assisted greenfield software development. This post builds on the first post AI-Assisted Greenfield Software Development - Part 1 Business Requirements. If you haven’t read that post, you might want to start there. In this post I’ll cover the instructions, prompts, and chat modes I used to start to lay down the guidance for turning requirements into code. These files are critical for controlling the AI output and having a comprehensive set of instructions, prompts, and chat modes greatly increase the chances of getting AI to produce something usable.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-09-24/header-AIAGSD2.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-09-24/header-AIAGSD2.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+<p><small><small><small>2025-12-01-wtbd.md</small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="programming-history" /><category term="software-engineering" /><category term="natural-language-coding" /><summary type="html"><![CDATA[A look at the revolutionary impact of AI on software development, comparing it to previous paradigm shifts in programming. This post explores how natural language coding is changing the way we build software and why this transformation is different from past technological advances.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-12-01/header-WTBD.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-12-01/header-WTBD.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>

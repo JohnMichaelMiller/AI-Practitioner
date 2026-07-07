@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice | AI Practitioner</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice" />
+<meta name="author" content="John Michael Miller" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Part 9 of the AIAGSD series implements the ManageRanks reference-data slice, demonstrating how vertical-slice patterns enforce data integrity, prevent duplication, and simplify downstream dependencies." />
+<meta property="og:description" content="Part 9 of the AIAGSD series implements the ManageRanks reference-data slice, demonstrating how vertical-slice patterns enforce data integrity, prevent duplication, and simplify downstream dependencies." />
+<link rel="canonical" href="https://blog.pdata.com/AIAGSD9/" />
+<meta property="og:url" content="https://blog.pdata.com/AIAGSD9/" />
+<meta property="og:site_name" content="AI Practitioner" />
+<meta property="og:image" content="https://blog.pdata.com/assets/images/2026-06-28/AIAGSD9_Header_Large.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-28T00:00:00-07:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://blog.pdata.com/assets/images/2026-06-28/AIAGSD9_Header_Large.png" />
+<meta property="twitter:title" content="AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2026-06-28T00:00:00-07:00","datePublished":"2026-06-28T00:00:00-07:00","description":"Part 9 of the AIAGSD series implements the ManageRanks reference-data slice, demonstrating how vertical-slice patterns enforce data integrity, prevent duplication, and simplify downstream dependencies.","headline":"AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice","image":"https://blog.pdata.com/assets/images/2026-06-28/AIAGSD9_Header_Large.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIAGSD9/"},"url":"https://blog.pdata.com/AIAGSD9/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">AI Practitioner</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/">Home</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2026-06-28T00:00:00-07:00" itemprop="datePublished">Jun 28, 2026
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Part 8 established that foundational slices cannot be verified by code alone. Database constraints, migration artifacts, and durable enforcement are required. Part 9 takes that lesson into the first reference-data slice: ManageRanks. This slice is where the implementation chain proves itself under realistic constraints. Without a single source of truth for rank codes, registration, access control, and reporting each risk hardcoding or duplicating the rank definitions. The ManageRanks reference-data slice solves this by establishing a canonical repository of rank codes (P, SL, L) and their access-level mappings, enforced through database constraints and validation rules that all downstream slices depend upon.</p>
+
+<!--more-->
+
+<p><img src="https://epsenterprise.blob.core.windows.net/permanent-files/FileAttachments/d8bba5dd_8764_4c13_8e76_c3d42ff3e568/Copilot_20260629_090713.png" alt="Copilot_20260629_090713.png" /></p>
+
+<p>This is the ninth post in the series on AI-assisted greenfield software development. It builds on posts <a href="https://blog.pdata.com/AIAGSD1" target="_blank">Part 1: Business Requirements</a>, through <a href="https://blog.pdata.com/AIAGSD8" target="_blank">Part 8: Durable Database Invariants</a>, in the series. If you have not read the earlier posts, start there first, because Part 9 assumes the repository already has shared kernel definitions, foundational agent roles, and a dependency-aware implementation plan.</p>
+
+<h2 id="the-first-reference-data-slice">The First Reference-Data Slice</h2>
+
+<p>After Part 8’s focus on durable invariants, the implementation plan moves into the reference-data foundation. Rank management is the first of five reference-data slices that form the backbone of the Zeus Academia system. The sequence is:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Slice</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ManageRanks (EP-1-1)</td>
+      <td>Define the canonical rank set (P, SL, L) and their access-level mappings</td>
+    </tr>
+    <tr>
+      <td>ManageDegrees (EP-1-2)</td>
+      <td>Create the degree catalog used by qualification workflows</td>
+    </tr>
+    <tr>
+      <td>ManageUniversities (EP-1-3)</td>
+      <td>Create the university catalog used by qualification workflows</td>
+    </tr>
+    <tr>
+      <td>ProvisionExtension (EP-1-4)</td>
+      <td>Manage extension inventory and availability rules</td>
+    </tr>
+    <tr>
+      <td>ManageAcademicCalendars (EP-1-5)</td>
+      <td>Define term calendars and academic-period boundaries</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>ManageRanks appears first because registration, lifecycle changes, and access control all depend on it. Without a canonical rank source, downstream slices have no choice but to duplicate or invent rank semantics. That fragmentation compounds through the system.</p>
+
+<h2 id="why-reference-data-slices-matter">Why Reference-Data Slices Matter</h2>
+
+<p>Reference data is the foundation that other domain slices depend on. When rank codes are scattered across multiple features or hardcoded in business logic, you lose the ability to enforce consistency, track changes, or adapt to new requirements. The ManageRanks slice inverts this by treating rank management as a first-class, independently deployable feature.</p>
+
+<p>A reference-data slice provides:</p>
+
+<ul>
+  <li><strong>Canonical source of truth</strong>: One database table, one API, one validation rule</li>
+  <li><strong>Deterministic behavior</strong>: Duplicate codes are blocked by both application logic and persistence constraints</li>
+  <li><strong>Downstream confidence</strong>: Registration, access control, and reporting consume stable rank data instead of reinventing it</li>
+  <li><strong>Auditability</strong>: Changes to rank definitions are traced and versioned through the application layer</li>
+</ul>
+
+<h2 id="agent-roles-and-slice-coordination">Agent Roles and Slice Coordination</h2>
+
+<p>Like Part 8’s foundational work, ManageRanks requires coordination across multiple agent roles. The implementation prompt defines a structured handoff sequence:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Responsibilities</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>slice-coordinator</td>
+      <td>Confirm slice boundaries, persistence strategy, and migration path</td>
+    </tr>
+    <tr>
+      <td>backend-domain</td>
+      <td>Implement add and list behavior with validation rules</td>
+    </tr>
+    <tr>
+      <td>testing-verification</td>
+      <td>Verify uniqueness, allowed codes, and response contracts</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This clear separation prevents scope drift and ensures each agent knows exactly what evidence to produce before handing off to the next.</p>
+
+<h2 id="clarifying-the-slice-boundaries">Clarifying the Slice Boundaries</h2>
+
+<p>The ManageRanks implementation is driven by the implementation prompt <a href="https://github.com/JohnMichaelMiller/Zeus/blob/main/zeus.academia.3b/.github/prompts/academia-implementation/ep-1-1-manage-ranks-implementation.prompt.md"><code class="language-plaintext highlighter-rouge">ep-1-1-manage-ranks-implementation.prompt.md</code></a>, which defines the slice’s responsibilities, dependencies, and acceptance criteria within the Zeus Academia vertical-slice architecture.</p>
+
+<p>The first step described in the implementation prompt is confirming what the ManageRanks slice owns and what it does not. This boundary-clarification work belongs to the slice-coordinator agent:</p>
+
+<p><strong>Boundary Clarification Checklist</strong>:</p>
+
+<ol>
+  <li>Confirm whether rank records are seeded at deployment, managed through the API, or both.</li>
+  <li>Document the canonical rank codes (P, SL, L) and their access-level mappings.</li>
+  <li>Identify any existing rank data in the Shared Kernel that must not be duplicated.</li>
+  <li>Specify the folder structure: src/features/ReferenceData/ManageRanks/ or alternative.</li>
+  <li>If later slices still persist raw rank codes before foreign-key wiring is complete, decide whether this slice adds a temporary CHECK constraint or accepts the gap explicitly.</li>
+</ol>
+
+<p>What this boundary work produces:</p>
+
+<ul>
+  <li>Confirmed ownership: AddRank command + ListRanks query form the slice boundary</li>
+  <li>Persistence strategy: database-backed seed at deployment, admin API for runtime changes</li>
+  <li>Integration points: access-level mapping exposed so registration and reporting resolve it once</li>
+  <li>Clear acceptance criteria: only P, SL, L accepted; duplicates rejected deterministically; migration artifact when constraints change</li>
+</ul>
+
+<p>Clarifying boundaries before implementation prevents scope drift and ensures downstream slices have a stable contract to depend on. This boundary work becomes the contract that backend-domain and testing-verification will verify against.</p>
+
+<h2 id="implementing-the-add-rank-command">Implementing the Add-Rank Command</h2>
+
+<p>With boundaries confirmed, the backend-domain agent builds the core add behavior. The AddRank command accepts a rank code, validates that it is one of the canonical codes, and stores it with its access-level mapping. The implementation follows the <code class="language-plaintext highlighter-rouge">mediatr</code> and <code class="language-plaintext highlighter-rouge">fluentvalidation</code> patterns established in earlier posts:</p>
+
+<p><strong>AddRank Implementation Checklist</strong>:</p>
+
+<ol>
+  <li>Create an AddRankCommand that accepts rankCode and accessLevel.</li>
+  <li>Build an AddRankCommandValidator that enforces:
+    <ul>
+      <li>rankCode must be one of “P”, “SL”, “L”</li>
+      <li>rankCode must be unique (no duplicate codes in persistence)</li>
+    </ul>
+  </li>
+  <li>Create an AddRankCommandHandler that:
+    <ul>
+      <li>Validates the command</li>
+      <li>Stores the rank in the database with the access-level relationship</li>
+      <li>Returns a response with the created rank</li>
+    </ul>
+  </li>
+  <li>Wire the endpoint to accept rank creation requests.</li>
+</ol>
+
+<p>What this implementation produces:</p>
+
+<ul>
+  <li>AddRankCommand with typed rankCode and accessLevel properties</li>
+  <li>AddRankCommandValidator enforcing code enumeration and uniqueness</li>
+  <li>AddRankCommandHandler with database persistence and error handling</li>
+  <li>HTTP endpoint (POST /api/ranks) bound to the handler</li>
+  <li>Database migration ensuring rankCode uniqueness constraint</li>
+</ul>
+
+<p>This structure separates concerns: validation happens before persistence, the handler orchestrates the add flow, and the endpoint exposes a clean contract.</p>
+
+<h3 id="enforcing-uniqueness-at-two-levels">Enforcing Uniqueness at Two Levels</h3>
+
+<p>Without explicit uniqueness checks, a concurrent request might insert duplicate rank codes. The implementation guards uniqueness both at the application and persistence levels:</p>
+
+<p><strong>Application layer</strong>: The validator queries the database before persisting, raising an error if the code already exists. This provides immediate feedback and prevents unnecessary database round-trips.</p>
+
+<p><strong>Persistence layer</strong>: A unique constraint on the <code class="language-plaintext highlighter-rouge">rankCode</code> column in the database ensures that even if validation is bypassed or corrupted data is restored, duplicates cannot be stored. The validator tests confirm that both layers reject duplicates deterministically.</p>
+
+<h2 id="implementing-the-list-ranks-query">Implementing the List-Ranks Query</h2>
+
+<p>With add-rank behavior in place, the slice must expose the canonical rank data to downstream features. The ListRanks query retrieves all stored rank codes and their access-level mappings in a stable form. The implementation follows mediatr patterns:</p>
+
+<p><strong>ListRanks Implementation Checklist</strong>:</p>
+
+<ol>
+  <li>Create a ListRanksQuery (no parameters).</li>
+  <li>Create a ListRanksQueryHandler that:
+    <ul>
+      <li>Queries the rank repository for all records, ordered by rankCode</li>
+      <li>Maps each rank to a response DTO with rankCode, accessLevel, and createdAt</li>
+      <li>Returns a list of rank records with stable, predictable field names</li>
+    </ul>
+  </li>
+  <li>Create a ListRanksResponse contract that registration, access control, and reporting can depend on.</li>
+  <li>Wire a GET /api/ranks endpoint to this handler.</li>
+</ol>
+
+<p>What this implementation produces:</p>
+
+<ul>
+  <li>ListRanksQuery as a read-only operation</li>
+  <li>ListRanksQueryHandler with ordering and DTO mapping</li>
+  <li>Stable response contract so downstream slices can deserialize and use the data reliably</li>
+  <li>
+    <p>HTTP endpoint (GET /api/ranks) returning JSON-serialized rank records</p>
+
+    <p>The list behavior is intentionally simple: it queries the database in a deterministic order and returns the raw rank data. Downstream slices (registration, reporting) consume this and apply their own business logic.</p>
+  </li>
+</ul>
+
+<h2 id="manageranks-architecture-overview">ManageRanks Architecture Overview</h2>
+
+<p>The ManageRanks slice is implemented as a vertical slice with clear boundaries, validation, and persistence. The architecture diagram below illustrates the flow from HTTP request to database persistence, highlighting the two-layer enforcement of rank code uniqueness.</p>
+
+<p><img src="https://epsenterprise.blob.core.windows.net/permanent-files/FileAttachments/10153293_48c0_4507_9f2f_7f1e1d8156a1/ManageRank_Architecture.png" alt="ManageRank-Architecture.png" /></p>
+
+<h2 id="building-validation-and-verification-tests">Building Validation and Verification Tests</h2>
+
+<p>Reference-data correctness is foundational; errors cascade to dependent features. The verification step covers add and list flows with both success and failure scenarios. The testing-verification agent follows the assertion patterns established in earlier posts:</p>
+
+<p><strong>Verification Test Checklist</strong>:</p>
+
+<ol>
+  <li>Validator tests:
+    <ul>
+      <li>AddRankCommandValidator accepts P, SL, L and rejects other codes</li>
+      <li>Validator detects duplicate rank codes by querying the test database</li>
+      <li>Invalid inputs (null, empty, unknown codes) fail with clear error messages</li>
+    </ul>
+  </li>
+  <li>Handler tests:
+    <ul>
+      <li>AddRankCommandHandler successfully stores valid ranks</li>
+      <li>Handler returns the stored rank with access-level mapping</li>
+      <li>Duplicate attempts fail without side effects (no partial writes)</li>
+    </ul>
+  </li>
+  <li>Integration tests:
+    <ul>
+      <li>POST /api/ranks with valid code succeeds and is idempotent</li>
+      <li>GET /api/ranks returns all ranks in stable order</li>
+      <li>Constraint violations (direct database inserts) are caught as corruption signals</li>
+    </ul>
+  </li>
+  <li>Persistence tests:
+    <ul>
+      <li>Database unique constraint rejects duplicate rankCode values</li>
+      <li>Migration ensures rankCode column exists with correct type and constraints</li>
+    </ul>
+  </li>
+</ol>
+
+<p>What this verification produces:</p>
+
+<ul>
+  <li>Validator unit tests covering valid codes, invalid codes, and duplicates</li>
+  <li>Handler tests confirming storage and response mapping</li>
+  <li>Integration tests validating the full request/response cycle</li>
+  <li>Constraint tests confirming database-level uniqueness</li>
+  <li>Test evidence demonstrating the slice meets all acceptance criteria</li>
+</ul>
+
+<p>Tests are particularly important for reference data because they serve as executable documentation: future developers can see exactly which codes are valid, how duplicates are handled, and what the stable query response looks like. This evidence also ensures that the next slice in the plan (ManageDegrees) can safely depend on ManageRanks without reinventing its verification.</p>
+
+<h2 id="documenting-the-rank-to-access-level-mapping">Documenting the Rank-to-Access-Level Mapping</h2>
+
+<p>Reference-data slices are most valuable when downstream slices can consume the mapping without redefining it. This is ensured by explicitly documenting the rank-to-access-level relationship in both code comments and API documentation.</p>
+
+<p>The ListRanksResponse includes:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"ranks"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"rankCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"P"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"accessLevel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Principal"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"createdAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-28T10:00:00Z"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"rankCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SL"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"accessLevel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"StaffLeadership"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"createdAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-28T10:00:00Z"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"rankCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"L"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"accessLevel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Lecturer"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"createdAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-28T10:00:00Z"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This mapping is consumed directly by:</p>
+
+<ul>
+  <li><strong>Registration slice</strong>: Maps user input to a valid rank + access-level pair</li>
+  <li><strong>Access-control slice</strong>: Resolves permissions based on stored access-level values</li>
+  <li><strong>Reporting slice</strong>: Groups or filters by access level without hardcoding codes</li>
+</ul>
+
+<p>By making the mapping explicit and queryable, the ManageRanks slice becomes a force multiplier for downstream features.</p>
+
+<h2 id="the-enforcement-contract">The Enforcement Contract</h2>
+
+<p>Like Part 8’s critical lesson, ManageRanks cannot be verified by code alone. The persistence layer must enforce the same invariants as the application logic.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Rule</th>
+      <th>Canonical layer</th>
+      <th>Persistence backing required</th>
+      <th>Verification evidence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Rank code validity</td>
+      <td>Validator + reference-data boundary</td>
+      <td>Not required (canonical set enforced by handler)</td>
+      <td>Validator tests + integration tests</td>
+    </tr>
+    <tr>
+      <td>Rank code uniqueness</td>
+      <td>Validator + handler</td>
+      <td>Yes, unique constraint</td>
+      <td>Handler tests + migration proof</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This clarity ensures that neither the application layer nor persistence layer can drift. If a developer later considers adding a uniqueness constraint without updating the validator, the verification flow will catch it. If the validator is removed but the constraint remains, tests will fail.</p>
+
+<h2 id="acceptance-and-handoff">Acceptance and Handoff</h2>
+
+<p>The slice is complete when:</p>
+
+<ul>
+  <li>✅ Only P, SL, and L are accepted</li>
+  <li>✅ Duplicates are blocked at application and persistence levels</li>
+  <li>✅ Rank data is queryable with stable response contract</li>
+  <li>✅ Tests cover add, duplicate, list, and constraint-violation scenarios</li>
+  <li>✅ Migration artifact documents uniqueness schema</li>
+  <li>✅ Downstream slices have documented access to the rank-to-access-level mapping</li>
+  <li>✅ Enforcement matrix evidence confirms both application and persistence layers protect the same rules</li>
+</ul>
+
+<p>At this point, the slice is ready for integration testing with dependent features. The next phase will wire registration, access-control, and reporting slices to depend on the ManageRanks API, validating that the reference-data contract is stable and sufficient. Each of those slices will be able to assume that ManageRanks has already proven it can survive direct writes, migrations, and load without bypassing its own rules.</p>
+
+<h2 id="the-implementation-wave">The Implementation Wave</h2>
+
+<p>ManageRanks is the first test of whether the reference-data strategy actually works. If this slice is implemented incorrectly, the mistake gets inherited by registration, access control, and reporting. That weight is exactly why it appears early in the plan: the cost of getting it right is paid once, up front, instead of being distributed across five downstream slices.</p>
+
+<p>The next reference-data slice, ManageDegrees, will follow the exact same structure: boundary clarification, command/query implementation, two-layer enforcement, and verification with migration evidence. Each succeeding reference-data slice builds confidence that the pattern itself is sound.</p>
+
+<p>Once all five reference-data slices are complete, registration becomes possible without duplicating any rank, degree, university, or extension logic. That is the payoff of treating reference data as a first-class concern instead of a setup detail.</p>
+
+<h2 id="demonstration">Demonstration</h2>
+
+<p>You can showcase the value of ManageRanks by demonstrating that the two-layer enforcement works as intended. The following steps illustrate the expected behavior:</p>
+
+<ol>
+  <li><strong>Add a rank</strong>: Call the AddRank endpoint with code “P” and access level “Principal”. Verify it is stored once.</li>
+  <li><strong>Add a duplicate</strong>: Attempt to add “P” again. Observe the deterministic rejection.</li>
+  <li><strong>List ranks</strong>: Call the ListRanks endpoint. Confirm the three canonical codes are returned with their access-level mappings.</li>
+  <li><strong>Bypass validation</strong>: Connect directly to the database and attempt to insert “X” as a rank code. Observe the constraint violation. The database does not allow the invalid state even when validation is bypassed.</li>
+</ol>
+
+<p>This shows that ManageRanks enforces its contract at both the code level and the persistence level.</p>
+
+<h2 id="post-implementation-guidance-updates">Post implementation guidance updates</h2>
+
+<p>Like in the previous post, the implementation of the ManageRanks slice has prompted updates to the AI guidance. I encountered problems persisting Ranks when call the endpoint. The cause was that SQLite in-memory connections created isolated databases per DbContext scope, causing “no such table” errors across HTTP requests despite successful migrations. Switching to LocalDB resolved the issue, and the guidance documentation has been updated to reflect this requirement. Additionally, the migration pattern for reference-data slices has been clarified to ensure that future slices follow the same approach.</p>
+
+<p>The following files have been updated to reflect the new reference-data slice and its enforcement patterns:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Change</th>
+      <th>File</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>New Instruction</strong></td>
+      <td><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Nine/.github/instructions/database-setup-migrations.instructions.md">database-setup-migrations.instructions.md</a></td>
+      <td>Comprehensive guide on LocalDB setup, SQL Server migration patterns, and troubleshooting</td>
+    </tr>
+    <tr>
+      <td><strong>Vertical Slice Update</strong></td>
+      <td><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Nine/.github/instructions/vertical-slice-implementation.instructions.md">vertical-slice-implementation.instructions.md</a></td>
+      <td>Added migration validation requirements and persistence slice checklist items</td>
+    </tr>
+    <tr>
+      <td><strong>Project Overview Update</strong></td>
+      <td><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Nine/.github/instructions/project-overview.instructions.md">project-overview.instructions.md</a></td>
+      <td>Added database setup reference and clarified LocalDB for development</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>See <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Nine/rank-management-guidance-updates.md">rank-management-guidance-updates.md</a> for details on the guidance updates and rationale.</p>
+
+<h2 id="feedback-and-references">Feedback and References</h2>
+
+<p>This post references:</p>
+
+<ul>
+  <li><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/slice-coordinator.agent.md" target="_blank">slice-coordinator agent</a> — Responsible for boundary clarification and integration points</li>
+  <li><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/backend-domain.agent.md" target="_blank">backend-domain agent</a> — Implements commands, queries, and handlers</li>
+  <li><a href="https://github.com/j0hnnymiller/zeus.academia.3b/blob/main/.github/agents/testing-verification.agent.md" target="_blank">testing-verification agent</a> — Verifies behavior and produces evidence</li>
+  <li><a href="https://blog.pdata.com/AIAGSD8" target="_blank">Part 8: Durable Database Invariants</a> — The motivation for two-layer enforcement</li>
+</ul>
+
+<p>Feedback is always welcome. Send your thoughts to <strong>john.miller@codegroup.io</strong>.</p>
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<h2 id="implementation-prompt">Implementation Prompt</h2>
+
+<p>This post is derived entirely from a single executable specification:</p>
+
+<ul>
+  <li><a href="https://github.com/JohnMichaelMiller/Zeus/blob/main/zeus.academia.3b/.github/prompts/academia-implementation/ep-1-1-manage-ranks-implementation.prompt.md"><code class="language-plaintext highlighter-rouge">ep-1-1-manage-ranks-implementation.prompt.md</code></a> — The complete ManageRanks slice specification, including boundaries, agent responsibilities, implementation steps, acceptance criteria, and demonstration expectations.</li>
+</ul>
+
+<h2 id="prompts">Prompts</h2>
+
+<ul>
+  <li>Create a new blog post, 2026-06-28-AIAGSD9, that explains the implementation of slice <code class="language-plaintext highlighter-rouge">ep-1-1-manage-ranks-implementation.prompt.md</code></li>
+</ul>
+
+  </div><a class="u-url" href="/AIAGSD9/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">AI Practitioner</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">John Michael Miller</li><li><a class="u-email" href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>jMM&#39;s AI Practitioner Blog</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
