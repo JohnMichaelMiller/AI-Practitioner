@@ -15,7 +15,7 @@ Target: jekyll-src_posts\{Date}-{Slug}.md
 
 1. Copy source file into workspace if outside workspace (use PowerShell Copy-Item)
 2. Copy source file to target with date prefix
-3. Replace: `john.miller@codemag.com` → `AIP@pdata.com`
+3. Replace: `john.miller@codemag.com` → `AIPractitioner@pdata.com`
 4. Add YAML front matter:
    ```yaml
    layout: post

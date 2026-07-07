@@ -473,7 +473,7 @@ Before finalizing any blog post, verify:
 ### For CODE Magazine Publication (if applicable)
 
 - [ ] All `blog.pdata.com/` URLs replaced with `www.codemag.com/blog/AIPractitioner/`
-- [ ] All `AIP@pdata.com` email addresses replaced with `john.miller@codemag.com`
+- [ ] All `AIPractitioner@pdata.com` email addresses replaced with `john.miller@codemag.com`
 - [ ] Original post retained in jekyll-src/\_posts/ directory
 - [ ] Publication-ready version saved in CODE/ folder
 - [ ] No content loss or structural changes between versions

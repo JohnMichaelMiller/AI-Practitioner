@@ -40,7 +40,7 @@ Posts prepared for CODE Magazine publication at www.codemag.com/blog/AIPractitio
 
 ### Email Address Updates
 
-- Replace all instances of `john.miller@codemag.com` with `AIP@pdata.com`
+- Replace all instances of `john.miller@codemag.com` with `AIPractitioner@pdata.com`
 - Update contact information throughout the post
 - Maintain professional communication channels
 
@@ -114,7 +114,7 @@ image: [Original Image]
 - Main H1 heading restored at beginning if missing
 - Original heading hierarchy maintained
 - All URLs updated to blog.pdata.com format
-- All email addresses updated to AIP@pdata.com
+- All email addresses updated to AIPractitioner@pdata.com
 - Links tested for functionality
 - Formatting preserved exactly
 
@@ -153,7 +153,7 @@ Please restore the CODE Magazine post from CODE/2026-01-26-AIAGSD4.md back to bl
 
 1. Reads `CODE/2026-01-26-AIAGSD4.md`
 2. Replaces all CODE Magazine URLs with blog.pdata.com URLs
-3. Replaces john.miller@codemag.com with AIP@pdata.com
+3. Replaces john.miller@codemag.com with AIPractitioner@pdata.com
 4. Restores the main H1 heading if it was removed
 5. Saves the result as `jekyll-src/_posts/2026-01-26-AIAGSD4-CODE.md`
 6. Reports statistics on changes made

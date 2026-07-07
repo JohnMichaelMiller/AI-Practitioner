@@ -40,7 +40,7 @@ The AI Practitioner blog posts are originally published at blog.pdata.com and ne
 
 ### Email Address Updates
 
-- Replace all instances of `AIP@pdata.com` with `john.miller@codegroup.io`
+- Replace all instances of `AIPractitioner@pdata.com` with `john.miller@codegroup.io`
 - Update contact information throughout the post
 - Maintain professional communication channels
 
@@ -74,9 +74,9 @@ The AI Practitioner blog posts are originally published at blog.pdata.com and ne
    - Plain URLs in text
    - HTML anchor tags
 
-2. **Email Pattern Matching**: Identify `AIP@pdata.com` in:
+2. **Email Pattern Matching**: Identify `AIPractitioner@pdata.com` in:
    - Plain text mentions
-   - Mailto links: `mailto:AIP@pdata.com`
+   - Mailto links: `mailto:AIPractitioner@pdata.com`
    - Contact sections
 
 3. **Replacement Strategy**:
@@ -84,7 +84,7 @@ The AI Practitioner blog posts are originally published at blog.pdata.com and ne
    - Replace complete URL paths
    - Maintain URL structure and parameters
 
-**Important**: Do not modify the original post file in the jekyll-src/_posts/ directory.
+**Important**: Do not modify the original post file in the jekyll-src/\_posts/ directory.
 
 ### File Operations
 
@@ -122,7 +122,7 @@ image: [Original Image]
 ### Validation Checks
 
 - [ ] All `blog.pdata.com/` instances replaced
-- [ ] All `AIP@pdata.com` instances replaced
+- [ ] All `AIPractitioner@pdata.com` instances replaced
 - [ ] No broken link references
 - [ ] Front matter preserved correctly
 - [ ] Main H1 heading removed from content body

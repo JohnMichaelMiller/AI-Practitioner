@@ -25,7 +25,7 @@ Create a comprehensive blog post (AIAGSD Part 9) explaining the implementation o
 2. **CODE/2026-06-28-AIAGSD9.md**
    - CODE Magazine publication-ready variant
    - Adapted URLs: `blog.pdata.com/` → `www.codemag.com/blog/AIPractitioner/`
-   - Adapted contact: `AIP@pdata.com` → `john.miller@codemag.com`
+   - Adapted contact: `AIPractitioner@pdata.com` → `john.miller@codemag.com`
    - Preserves all technical content and narrative structure
 
 3. **README.md update**
