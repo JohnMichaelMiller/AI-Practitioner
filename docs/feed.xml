@@ -1,4 +1,182 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-07-07T12:23:13-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice</title><link href="https://blog.pdata.com/AIAGSD9/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice" /><published>2026-06-28T00:00:00-07:00</published><updated>2026-06-28T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD9</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD9/"><![CDATA[<p>Part 8 established that foundational slices cannot be verified by code alone. Database constraints, migration artifacts, and durable enforcement are required. Part 9 takes that lesson into the first reference-data slice: ManageRanks. This slice is where the implementation chain proves itself under realistic constraints. Without a single source of truth for rank codes, registration, access control, and reporting each risk hardcoding or duplicating the rank definitions. The ManageRanks reference-data slice solves this by establishing a canonical repository of rank codes (P, SL, L) and their access-level mappings, enforced through database constraints and validation rules that all downstream slices depend upon.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-08-03T07:14:37-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 10: Implementing the ManageDegrees Reference-Data Slice</title><link href="https://blog.pdata.com/AIAGSD10/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 10: Implementing the ManageDegrees Reference-Data Slice" /><published>2026-07-27T00:00:00-07:00</published><updated>2026-07-27T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD10</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD10/"><![CDATA[<p>This is the tenth post in the AIAGSD series, and it focuses on a deceptively simple idea: a reference-data slice can become the contract that every later workflow depends on. I used the ManageDegrees implementation prompt as a guide for that contract, and the lesson is clear. If the catalog is not defined carefully, registration, qualification, and reporting all inherit ambiguity.</p>
+
+<p>This post continues the series from <a href="https://blog.pdata.com/AIAGSD9/">Part 9</a>, and it assumes the repository already has the shared-kernel and foundational-slice patterns from earlier posts. It explains how the prompt structures the slice, why its sequence matters, and what makes the implementation durable rather than merely functional.</p>
+
+<!--more-->
+
+<p><img src="../assets/images/AIAGSD10/AIAGSD10_Header_Large.png" alt="ManageDegrees reference-data slice illustration" /></p>
+
+<h2 id="but-first-rework">But first, rework.</h2>
+
+<p>In review the implementation of the ManageRanks slice, I noticed that the folder structure did not conform to the vertical-slice pattern. Files were organized by layers and not features with the Shared Kernel and Manage Ranks implementations in a <code class="language-plaintext highlighter-rouge">backend</code> folder. That was a minor oversight, but it was enough to make the slice harder to reason about. I added instructions to emphasize the vertical-slice implementation instructions.</p>
+
+<p>I then deleted the Part-Eight (Shared Kernel) and Part-Nine (Manage Ranks) slices from the repository and proceeded to re-implement using the following rework process. The goal was to minimize the review comments by having Copilot generate code that would pass a review.</p>
+
+<p>The rework loop below shows how I handle implementation, pull request review, and branch hygiene for each slice.</p>
+
+<p><img src="../assets/images/AIAGSD10/rework-workflow.png" alt="Vertical Slice Implementation Rework Workflow" /></p>
+
+<p>The prompt I used to update the instruction files and prompt files is something like:</p>
+
+<blockquote>
+  <p>Review the comments on PR nn and propose changes to the .github files to keep from generating code that fails review. If implementation prompt generation instructions are changed, review the implementation prompts for needed changes as well.</p>
+</blockquote>
+
+<p>For the Shared Kernel slice, this required many iterations of the rework loop to get the instructions to a point where the implementation prompts would produce code that passed the Copilot review. These were mostly to fill in gaps in the instructions and to clarify the prompt. If you look at the closed pull requests, you’ll see review findings and if you look at the instruction and prompt file changes committed to main, you’ll see how the instructions and prompt files evolved to produce code that passed review.</p>
+
+<p>The ManageRanks slice was simpler, but it still required a few iterations to get the implementation to pass review. The ManageDegrees slice was the simplest of all, and it passed review on the first attempt. This demonstrates that value of updating the instructions and prompt files to produce code that passes review rather than making the changes directly to the slice implementation.</p>
+
+<h2 id="why-the-managedegrees-slice-matters">Why The <code class="language-plaintext highlighter-rouge">ManageDegrees</code> Slice Matters</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">ep-1-2-manage-degrees-implementation.prompt.md</code> prompt treats <code class="language-plaintext highlighter-rouge">ManageDegrees</code> as infrastructure rather than a feature-rich business workflow. That distinction matters because academic systems become brittle when degree values are allowed to drift across screens, APIs, and reports.</p>
+
+<p>When degree values are entered as free text, teams usually end up with duplicate variants of the same concept, inconsistent filters, and validation rules that are impossible to enforce consistently. By introducing a canonical degree catalog first, later slices can validate against known values instead of treating degrees as user-authored strings.</p>
+
+<h2 id="what-the-prompt-keeps-in-scope">What the Prompt Keeps in Scope</h2>
+
+<p>The implementation prompt keeps the slice intentionally narrow. That is a strength, not a limitation.</p>
+
+<p>In scope:</p>
+
+<ul>
+  <li>add degree records,</li>
+  <li>list degree records,</li>
+  <li>enforce uniqueness at both application and persistence layers,</li>
+  <li>verify behavior end to end.</li>
+</ul>
+
+<p>Out of scope:</p>
+
+<ul>
+  <li>assigning qualifications to academics,</li>
+  <li>university relationships,</li>
+  <li>reporting.</li>
+</ul>
+
+<p>That boundary protects delivery speed and prevents this slice from becoming a dumping ground for adjacent concerns. I would treat that scope discipline as one of the most important design lessons in the prompt.</p>
+
+<h2 id="how-the-workflow-is-sequenced">How the Workflow Is Sequenced</h2>
+
+<p>The prompt enforces a sequence that mirrors good vertical-slice discipline. It does not jump straight into persistence or endpoint wiring. Instead, it starts by clarifying where the canonical catalog lives and how the slice will expose it.</p>
+
+<h3 id="1-confirm-storage-and-route-shape-first">1. Confirm storage and route shape first</h3>
+
+<p>Before coding, the prompt asks for one canonical storage location and one consistent route shape. That prevents the implementation from accidentally building handlers around the wrong aggregate, the wrong table, or a temporary fixture.</p>
+
+<h3 id="2-implement-add-behavior">2. Implement add behavior</h3>
+
+<p>The second step builds the <code class="language-plaintext highlighter-rouge">AddDegree</code> flow: validator, handler, response contract, endpoint, and mapping. The acceptance gate is simple and useful. Valid records persist, and duplicates do not.</p>
+
+<h3 id="3-implement-list-behavior">3. Implement list behavior</h3>
+
+<p>The third step adds the <code class="language-plaintext highlighter-rouge">ListDegrees</code> query flow and returns stable, predictable records for downstream lookup scenarios. “Stable” here means deterministic ordering and shape so that later slices and tests do not break because the returned payload changed unexpectedly.</p>
+
+<h3 id="4-verify-end-to-end">4. Verify end to end</h3>
+
+<p>The final step requires validator, handler, and integration coverage. If the uniqueness schema changes, a migration artifact is part of the implementation contract. That keeps the persistence guarantee visible and reviewable.</p>
+
+<h2 id="why-uniqueness-is-the-real-quality-gate">Why Uniqueness Is the Real Quality Gate</h2>
+
+<p>One of the best parts of this prompt is that it treats validation and persistence as separate enforcement layers rather than interchangeable ones.</p>
+
+<p>It requires both application-level duplicate prevention and database-level uniqueness constraints. The first gives fast feedback to the caller. The second protects the system even when a future code path bypasses the endpoint or a retry causes duplicate work to be attempted.</p>
+
+<p>That combination is what makes the slice trustworthy for later workflows. A canonical catalog is only valuable if it is impossible to corrupt silently.</p>
+
+<p>The implementation strategy is easiest to understand when you split the responsibilities across layers:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Responsibility</th>
+      <th>Why it matters</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Application</td>
+      <td>Reject duplicates before they reach storage</td>
+      <td>Gives users immediate feedback and avoids unnecessary writes</td>
+    </tr>
+    <tr>
+      <td>Persistence</td>
+      <td>Enforce uniqueness in the database</td>
+      <td>Protects the system against bypasses, retries, and bad imports</td>
+    </tr>
+    <tr>
+      <td>Tests</td>
+      <td>Prove both behaviors end to end</td>
+      <td>Makes the invariant visible to future contributors</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>That layered approach is what turns a small CRUD-style slice into a durable architectural foundation.</p>
+
+<h2 id="what-the-acceptance-criteria-promise">What the Acceptance Criteria Promise</h2>
+
+<p>The acceptance criteria are practical and integration-oriented. They define what the slice must guarantee for downstream features:</p>
+
+<ul>
+  <li>a single canonical record per degree code,</li>
+  <li>duplicate inserts that fail cleanly,</li>
+  <li>list output that remains stable for downstream resolution,</li>
+  <li>validation and persistence rules that align,</li>
+  <li>tests that cover success, duplicate, and listing behavior.</li>
+</ul>
+
+<p>Those criteria are not just testing goals. They are compatibility promises for future registration and qualification slices. In other words, the slice is not only proving that it works once; it is proving that the contract will remain dependable as the system grows.</p>
+
+<h2 id="implementation-takeaways">Implementation Takeaways</h2>
+
+<p>The most useful lesson from this prompt is that a reference-data slice should be built like a contract, not like an isolated feature. The implementation should preserve a single source of truth, keep the scope narrow, and make the invariant obvious to anyone who touches the code later.</p>
+
+<p>That means a few practical habits matter:</p>
+
+<ul>
+  <li>keep degree management focused on catalog behavior and not on qualification rules,</li>
+  <li>use validation to protect the user experience and the database to protect the system,</li>
+  <li>expose stable list responses so downstream slices can depend on them without reinterpreting the shape,</li>
+  <li>treat migration artifacts as part of the implementation, not as a side note,</li>
+  <li>prove the rules with tests that describe the business behavior, not just the happy path.</li>
+</ul>
+
+<p>Those habits are what make the slice reusable. Without them, later features inherit hidden assumptions and the architecture becomes harder to reason about.</p>
+
+<h2 id="why-the-demo-flow-matters">Why the Demo Flow Matters</h2>
+
+<p>The prompt also includes a simple human demo path, which is easy to overlook but highly valuable. It asks for a flow that seeds baseline codes, queries the catalog, and shows how later workflows can consume controlled values.</p>
+
+<p>That makes the slice more than a CRUD routine. It turns a reference-data capability into visible platform functionality that other features can build on without inventing their own definitions.</p>
+
+<h2 id="what-i-would-carry-forward">What I Would Carry Forward</h2>
+
+<p>If I were implementing this slice, I would keep the same discipline the prompt teaches. The biggest anti-pattern to avoid is blending qualification behavior into <code class="language-plaintext highlighter-rouge">ManageDegrees</code>. This slice should stay focused on the canonical degree catalog, and dependent slices should build on top of that clean contract.</p>
+
+<p>The broader takeaway is straightforward. Reference-data work is rarely glamorous, but it is often the difference between a system that grows coherently and one that accumulates hidden coupling.</p>
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>I will continue the sequence by using the implementation pattern from this slice to shape the next reference-data work in the series, with an eye on how each slice contributes to a stronger architectural backbone for the overall system.</p>
+
+<h2 id="feedback-loop">Feedback Loop</h2>
+
+<p>Feedback is always welcome. Send your thoughts to <strong>AIPractitioner@pdata.com</strong>.</p>
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<h2 id="prompts">Prompts</h2>
+
+<ul>
+  <li>Draft a blog post that explains the ManageDegrees implementation prompt and its architectural implications.</li>
+  <li>Expand the post with the slice workflow, uniqueness strategy, acceptance criteria, and implementation takeaways.</li>
+</ul>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Create a new blog post, 2026-07-27-AIAGSD10, that explains the implementation of slice .github\prompts\academia-implementation\ep-1-2-manage-degrees-implementation.prompt.md
+</code></pre></div></div>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="vertical-slices" /><category term="reference-data" /><category term="vertical-slices" /><category term="reference-data" /><category term="implementation" /><category term="domain-driven-design" /><category term="validation" /><summary type="html"><![CDATA[Part 10 of the AIAGSD series explains how the ManageDegrees implementation prompt turns a small reference-data slice into a reliable foundation for downstream academic workflows.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/AIAGSD10/AIAGSD10_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/AIAGSD10/AIAGSD10_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice</title><link href="https://blog.pdata.com/AIAGSD9/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice" /><published>2026-06-28T00:00:00-07:00</published><updated>2026-06-28T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD9</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD9/"><![CDATA[<p>Part 8 established that foundational slices cannot be verified by code alone. Database constraints, migration artifacts, and durable enforcement are required. Part 9 takes that lesson into the first reference-data slice: ManageRanks. This slice is where the implementation chain proves itself under realistic constraints. Without a single source of truth for rank codes, registration, access control, and reporting each risk hardcoding or duplicating the rank definitions. The ManageRanks reference-data slice solves this by establishing a canonical repository of rank codes (P, SL, L) and their access-level mappings, enforced through database constraints and validation rules that all downstream slices depend upon.</p>
 
 <!--more-->
 
@@ -2811,111 +2989,4 @@ project_purpose: Academic Management System</li>
   <li>Write a paragraph explaining trunk-based development. What are other popular methods?</li>
 </ul>
 
-<p><small><small><small>Original <a href="https://blog.pdata.com/AIAGSD3">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="devops" /><category term="git-workflow" /><summary type="html"><![CDATA[This is the 3rd post in the series on AI assisted greenfield software development. This post builds on the first AI-Assisted Greenfield Software Development, Part 1: Business Requirements and subsequent posts. If you haven’t read these posts, you might consider starting there. In Part 1 we defined the high-level business requirements and in Part 2 we started building out the scaffolding supporting AI code generation. In part 3, we’ll continue to add guidance for AI code generation. Starting with project guidance and process definitions, we’ll create prompts that create project overview instructions, AI code generation guidance, and Git workflow instructions.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-12-30/header-AIAGSD3.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-12-30/header-AIAGSD3.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">What’s the Big Deal?</title><link href="https://blog.pdata.com/WTBD/" rel="alternate" type="text/html" title="What’s the Big Deal?" /><published>2025-12-01T00:00:00-08:00</published><updated>2025-12-01T00:00:00-08:00</updated><id>https://blog.pdata.com/WTBD</id><content type="html" xml:base="https://blog.pdata.com/WTBD/"><![CDATA[<p>A look at the revolutionary impact of AI on software development, comparing it to previous paradigm shifts in programming. This post explores how natural language coding is changing the way we build software and why this transformation is different from past technological advances.</p>
-
-<!--more-->
-
-<p><img src="/assets/images/2025-12-01/header-WTBD.png" alt="Header Image" /></p>
-
-<p>I’ve been reading posts describing AI-assisted software development as revolutionary. As if something fundamental has changed. While this take is understandable, in my view, it misses the mark. In my opinion programming hasn’t changed, but how we go about it has changed, again. In this post I’ll compare programming’s past, present and future and talk about what has changed and what hasn’t. Let’s first look at the past.</p>
-
-<h2 id="a-brief-history-of-programming-innovations-the-past">A Brief History of Programming Innovations (The Past)</h2>
-
-<p>Ever since the first computer was booted, there has been a need for coders to instruct the computer to get it to do something useful. This need has not changed and likely, will never change. What has changed is how coders instruct the computer. Over the decades, programming has evolved through several major innovations, each enabled by new technologies that transformed how humans express intent to machines. Below is a brief overview of when these innovations and their enabling technologies became mainstream.</p>
-
-<h3 id="machine-code--assembly-1940s1940s">Machine Code &amp; Assembly (1940s–1940s)</h3>
-
-<p>Machine code was the raw binary language of early computers, executed directly by hardware built on vacuum tubes and electro-mechanical relays. Programs were entered through physical means: flipping panel switches, plugging cables, feeding punched cards into IBM readers, or threading perforated paper tape into tape readers. These input devices were the enabling technologies that allowed binary instructions to be stored and executed. Programming was a mechanical ritual defined by the hum of machinery, the clatter of card punches, and the whir of tape readers.</p>
-
-<p>Assembly language introduced symbolic mnemonics like MOV, ADD, and JMP to replace raw binary. Assemblers—software tools that translated these mnemonics into machine code—were the enabling technology that made this possible. While programmers still thought in terms of registers and memory addresses, assembly reduced the burden of direct binary coding. It remains mainstream today in embedded systems, operating system kernels, and performance-critical applications.</p>
-
-<h3 id="high-level-languages-1950s-1970s">High-Level Languages (1950s-1970s)</h3>
-
-<p>High-level languages abstracted away hardware details, allowing humans to write code in math-like or business-oriented syntax. This leap was enabled by compilers and interpreters, which translated human-readable instructions into machine code. FORTRAN (1957) pioneered scientific programming, COBOL (1959) became mainstream in business and government, and C (1972) spread with UNIX thanks to portable compilers. The clack of typewriter-style terminals replaced the grind of card punches, shifting programming from physical manipulation to linguistic expression.</p>
-
-<h3 id="structured--object-oriented-programming-1970s-1980s">Structured &amp; Object-Oriented Programming (1970s-1980s)</h3>
-
-<p>Structured and object-oriented programming emphasized modularity, reuse, and abstraction. Compiler innovations enabled structured paradigms in Pascal (1970), while object-oriented compilers supported inheritance and polymorphism in C++ (1985). These enabling technologies made modular, reusable code possible, while developers worked with CRT monitors glowing green text and floppy disks snapping into drives</p>
-
-<h3 id="ides--libraries-1990s">IDEs &amp; Libraries (1990s)</h3>
-
-<p>Integrated development environments (IDEs) combined compilers, debuggers, and editors into graphical interfaces. Visual Studio was enabled by faster processors, GUI tool-kits, and extensible plug-in architectures. Java introduced the JVM in 1995, a virtual machine that allowed “write once, run anywhere.” Reusable libraries and frameworks amplified productivity by abstracting common functionality. The tactile experience shifted to mouse clicks, drag-and-drop interfaces, and the buzz of desktop towers under desks.</p>
-
-<h3 id="web--scripting-languages-late-1990s-2000s">Web &amp; Scripting Languages (Late 1990s-2000s)</h3>
-
-<p>Web and scripting languages thrived thanks to browser engines, dynamic interpreters, and frameworks. JavaScript became mainstream with Netscape (1995) and later engines like V8 (2008) powered dynamic web applications. Python (first released in 1991) gained widespread adoption for web development in the 2000s and later dominated data science. Eclipse IDE (2001) provided powerful development environments. Ruby’s Rails framework (2004) abstracted web complexity, enabling rapid development. Lightweight editors and laptops made coding portable, fueling the sensory experience of programming in coffee shops and classrooms</p>
-
-<h3 id="cloud-apis-and-low-code-platforms-2010s">Cloud, APIs, and Low-Code Platforms (2010s)</h3>
-
-<p>Cloud computing, APIs, and low-code platforms transformed programming into orchestration. Virtualization and containerization (Docker, Kubernetes) enabled scalable infrastructure. REST and GraphQL APIs allowed modular integration, while low-code platforms like Mendix, OutSystems, and PowerApps used visual compilers to abstract coding. These enabling technologies shifted programming from hardware-bound tasks to swiping, clicking, and dragging in browser dashboards and they remain mainstream today.</p>
-
-<h2 id="the-modern-mainstream-coding-experience-present">The Modern Mainstream Coding Experience (Present)</h2>
-
-<p>The modern mainstream coding experience interprets intent by bridging human goals with machine execution through layers of abstraction. Developers no longer need to think in terms of raw hardware instructions; instead, they express intent in higher-level languages, frameworks, and APIs. Compilers, interpreters, and virtual machines translate this intent into executable code, while libraries and cloud services provide ready-made building blocks that align with common patterns. The act of coding is less about micromanaging hardware and more about shaping logic, workflows, and integrations that reflect human objectives.</p>
-
-<h3 id="ai-assisted-coding-future">AI-Assisted Coding (Future)</h3>
-
-<p>AI-assisted coding is enabled by large language models trained on vast amounts of code, contextual intent recognition, and integration into IDEs. Tools like GitHub Copilot, CodeWhisperer, and Tabnine embed AI directly into workflows. The enabling technology here is the LLM itself, which translates natural language into executable code. Programming has become dialogue—developers express goals in plain language, and AI generates code, tests, and documentation.</p>
-
-<p>For example, instead of manually writing a function to validate email addresses with regex patterns, error handling, and edge cases, a developer can simply prompt: “Create a function that validates email addresses and returns helpful error messages.” The AI generates the complete implementation, including the regex pattern, input validation, and descriptive error messages. The developer then reviews, tests, and refines the output. What previously required searching documentation, writing boilerplate, and debugging syntax now happens through conversational iteration.</p>
-
-<h2 id="programming-has-always-been-about-intent">Programming has Always Been About Intent</h2>
-
-<p>From punch cards to Python, the core idea has stayed the same: humans express intent, machines execute it. Early programmers had to speak in binary or assembly. Then came higher-level languages like C, Java, and Python, which abstracted away the low-level details. What has changed is how coders express intent so that machines can execute it.</p>
-
-<h3 id="natural-language-coding-is-a-paradigm-shift">Natural Language Coding Is a Paradigm Shift</h3>
-
-<p>The real shift isn’t just accessibility, it’s responsibility. Until now, it was solely the coder’s job to translate intent (business requirements, industry policies, government regulations) into executable code. That translation required fluency in syntax, architecture, and tooling.</p>
-
-<p>Now, intent can be expressed in natural language. AI can interpret that context to generate machine-executable instructions. This doesn’t democratize coding so much as it re-positions the boundary between domain expertise and implementation. The programmer becomes a curator of context, a validator of output, and a steward of alignment between human goals and machine behavior.</p>
-
-<h3 id="ai-understands-what-you-meannot-just-what-you-say">AI Understands What You Mean—Not Just What You Say</h3>
-
-<p>AI doesn’t just parse commands—it understands intent. You can say “make this faster,” “add error handling,” or “log the output,” and AI will revise the code accordingly. This conversational loop mirrors how humans collaborate, making development more fluid, iterative, and intuitive.</p>
-
-<p>It also unlocks new modes of interaction: sketches, examples, test cases, bug reports. AI can interpret these as expressions of intent and generate code accordingly. This expands the number of ways developers can express goals and accelerates problem-solving across disciplines.</p>
-
-<h3 id="its-just-another-toollike-ides-compilers-and-libraries">It’s Just Another Tool—Like IDEs, Compilers, and Libraries</h3>
-
-<p>Every generation of developers has used tools to amplify their productivity. IDEs gave us auto-complete and debugging. Libraries gave us reusable components. AI gives us intelligent scaffolding, pattern recognition, and code generation. AI is not replacing developers; it’s helping them move faster and think bigger.</p>
-
-<h3 id="verification-still-matters">Verification Still Matters</h3>
-
-<p>Just like with compilers and frameworks, AI-generated code still needs testing, review, and validation. Developers remain responsible for architecture, correctness, security, and ethics. The shift is in how we express our goals, not in whether we need to think critically.</p>
-
-<h3 id="the-future-is-still-intent-driven-development">The Future Is Still Intent-Driven Development</h3>
-
-<p>In a real sense, AI assistance is just another improvement in the long line of improvements in how we write software. The goal remains the same, getting computers to do what we need them to do. Instead of writing and debugging code, we’re creating prompts and refining context to guide the AI in implementing our intent. Like with all of the improvements to date we need to learn how to effectively leverage the new technology to achieve our aims.</p>
-
-<h2 id="conclusion">Conclusion</h2>
-
-<p>The narrative of AI as a revolutionary force in programming overlooks a fundamental truth: programming has always been about translating human intent into machine action. From the earliest days of flipping switches and punching cards to today’s natural language interactions with AI, the core challenge remains unchanged, bridging the gap between what we want and what machines can do. What evolves is not the essence of programming, but the sophistication of our tools for expressing intent. AI-assisted coding represents the latest chapter in this ongoing story, offering more intuitive ways to communicate with computers while preserving the essential human responsibilities of design, validation, and ethical oversight. As we embrace this new paradigm, we’re not abandoning programming, we’re refining it, making it more accessible and efficient while keeping human creativity and judgment at its center.</p>
-
-<h2 id="feedback-loop">Feedback Loop</h2>
-
-<p>Feedback is always welcome. Please direct it to <a href="mailto:AIPractitioner@pdata.com" target="_blank">AIPractitioner@pdata.com</a></p>
-
-<h3 id="disclaimer">Disclaimer</h3>
-
-<p>AI contributed to the writing of this blog post, but humans reviewed it, refined it, and gave it soul.</p>
-
-<p>Prompts:</p>
-
-<ul>
-  <li>Support this thesis: Using AI to write code is no different then when programming first became a thing. You are giving the computer instructions in order to get it to do what you want.</li>
-  <li>Add the point, the ability to code in natural language is a game changer.</li>
-  <li>Add the point, the ability of AI to understand intent is a game changer.</li>
-  <li>Add a section in the beginning that describes the major innovations in how computers are programmed.</li>
-  <li>Include the physical act (flipping panel switches, punching cards, punching paper tape) required to program the computer. Make these separate points: “Machine Code &amp; Assembly (1940s–1950s)”</li>
-  <li>Break these points into sections and include the year when they became mainstream technologies</li>
-  <li>Add dates these technologies became mainstream</li>
-  <li>Apply this approach to the rest of the post</li>
-  <li>Move the Assembly language point to it’s own section</li>
-  <li>Cloud, APIs, and Low Code have not fallen out of the mainstream in the 20’s. Make sure all currently mainstream tech is dated as such</li>
-  <li>For each section, such as Machine Code (1940s–1950s), instead of listing the Enabling technologies, describe the technology (Machine Code) and include the enabling technologies in the description</li>
-  <li>Every technology except for Machine Code is currently being used. Drop the until dates</li>
-  <li>Drop the until date. Machine Code (1940s–1950s) should be: Machine Code (1940s)</li>
-  <li>In two paragraphs, describe how the modern mainstream coding experience interprets intent?</li>
-</ul>
-
-<p><small><small><small>2025-12-01-wtbd.md</small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="programming-history" /><category term="software-engineering" /><category term="natural-language-coding" /><summary type="html"><![CDATA[A look at the revolutionary impact of AI on software development, comparing it to previous paradigm shifts in programming. This post explores how natural language coding is changing the way we build software and why this transformation is different from past technological advances.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-12-01/header-WTBD.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-12-01/header-WTBD.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+<p><small><small><small>Original <a href="https://blog.pdata.com/AIAGSD3">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="devops" /><category term="git-workflow" /><summary type="html"><![CDATA[This is the 3rd post in the series on AI assisted greenfield software development. This post builds on the first AI-Assisted Greenfield Software Development, Part 1: Business Requirements and subsequent posts. If you haven’t read these posts, you might consider starting there. In Part 1 we defined the high-level business requirements and in Part 2 we started building out the scaffolding supporting AI code generation. In part 3, we’ll continue to add guidance for AI code generation. Starting with project guidance and process definitions, we’ll create prompts that create project overview instructions, AI code generation guidance, and Git workflow instructions.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-12-30/header-AIAGSD3.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-12-30/header-AIAGSD3.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
