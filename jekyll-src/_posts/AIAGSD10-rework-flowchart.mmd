@@ -1,0 +1,27 @@
+flowchart TD
+  A["Run implementation prompt on slice branch"] --> B["Commit changes and push to slice branch"]
+  B --> C["Create PR"]
+  C --> D{"Unresolved Copilot review comments on PR?"}
+
+  D -->|No| I["No comments remaining: merge slice branch to main"]
+  D -->|Yes| E["Select next review comment"]
+
+  E --> F{"Trivial change for this comment?"}
+  F -->|Yes| G["Commit comment fix to slice branch"]
+  F -->|No| L["Run prompt to identify instruction and prompt file updates"]
+  G --> D
+  L --> M["Commit instruction and prompt file updates to main"]
+  M --> N["Delete slice branch local and remote"]
+  N --> K["Create new slice branch"]
+  K --> A
+
+  classDef start fill:#E3F2FD,stroke:#1565C0,stroke-width:2px;
+  classDef action fill:#E8F5E9,stroke:#2E7D32,stroke-width:1.5px;
+  classDef decision fill:#FFF8E1,stroke:#EF6C00,stroke-width:2px;
+  classDef rework fill:#F3E5F5,stroke:#6A1B9A,stroke-width:1.5px;
+  classDef loop fill:#FCE4EC,stroke:#AD1457,stroke-width:1.5px;
+
+  class A start;
+  class B,C,E,G,I,K action;
+  class D,F decision;
+  class L,M,N rework;
