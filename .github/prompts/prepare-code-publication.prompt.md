@@ -38,6 +38,15 @@ The AI Practitioner blog posts are originally published at blog.pdata.com and ne
 - Maintain relative paths and anchors in URL structure
 - Preserve link functionality and accessibility
 
+### Image Link Transformation
+
+- Transform image links from Markdown format:
+  - `![{{altText}}](../assets/images/{{slug}}/{{imagefile}})`
+- To HTML format:
+  - `<img src="https://raw.githubusercontent.com/JohnMichaelMiller/AI-Practitioner/main/jekyll-src/assets/images/{{slug}}/{{imagefile}}" alt="{{altText}}" />`
+- Preserve `{{slug}}`, `{{imagefile}}`, and `{{altText}}` values exactly during replacement
+- Apply this transformation only to the matching image pattern above
+
 ### Email Address Updates
 
 - Replace all instances of `AIPractitioner@pdata.com` with `john.miller@codegroup.io`
@@ -84,6 +93,11 @@ The AI Practitioner blog posts are originally published at blog.pdata.com and ne
    - Replace complete URL paths
    - Maintain URL structure and parameters
 
+4. **Image Pattern Matching**: Identify and transform image links in this exact form:
+   - `![{{altText}}](../assets/images/{{slug}}/{{imagefile}})`
+   - Replace with:
+     - `<img src="https://raw.githubusercontent.com/JohnMichaelMiller/AI-Practitioner/main/jekyll-src/assets/images/{{slug}}/{{imagefile}}" alt="{{altText}}" />`
+
 **Important**: Do not modify the original post file in the jekyll-src/\_posts/ directory.
 
 ### File Operations
@@ -123,6 +137,7 @@ image: [Original Image]
 
 - [ ] All `blog.pdata.com/` instances replaced
 - [ ] All `AIPractitioner@pdata.com` instances replaced
+- [ ] Matching image links converted to raw GitHub HTML `<img>` tags
 - [ ] No broken link references
 - [ ] Front matter preserved correctly
 - [ ] Main H1 heading removed from content body
