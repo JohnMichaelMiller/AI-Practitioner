@@ -130,7 +130,7 @@ This repository includes tools for managing multiple GitHub accounts:
 
 ## Comments
 
-- **[jekyll-src/_includes/giscus.html](jekyll-src/_includes/giscus.html)**: Adds Giscus-based reader comments to blog posts through the Jekyll post layout.
+- **[jekyll-src/\_includes/giscus.html](jekyll-src/_includes/giscus.html)**: Adds Giscus-based reader comments to blog posts through the Jekyll post layout.
 
 ## CODE Publication Copies
 

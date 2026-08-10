@@ -2,27 +2,39 @@
 layout: default
 ---
 
-<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+<article
+  class="post h-entry"
+  itemscope
+  itemtype="http://schema.org/BlogPosting"
+>
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">{{ page.title | escape }}</h1>
+    <h1 class="post-title p-name" itemprop="name headline">
+      {{ page.title | escape }}
+    </h1>
     <p class="post-meta">
-      <time class="dt-published" datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
+      <time
+        class="dt-published"
+        datetime="{{ page.date | date_to_xmlschema }}"
+        itemprop="datePublished"
+      >
         {{ page.date | date: site.date_format | default: "%b %-d, %Y" }}
       </time>
-      {%- if page.author -%}
-        • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">{{ page.author }}</span></span>
+      {%- if page.author -%} •
+      <span itemprop="author" itemscope itemtype="http://schema.org/Person"
+        ><span class="p-author h-card" itemprop="name"
+          >{{ page.author }}</span
+        ></span
+      >
       {%- endif -%}
     </p>
   </header>
 
-  <div class="post-content e-content" itemprop="articleBody">
-    {{ content }}
-  </div>
+  <div class="post-content e-content" itemprop="articleBody">{{ content }}</div>
 
   {%- if page.comments != false and site.comments.giscus.enabled -%}
-    <div class="giscus-comments" style="margin-top: 2rem;">
-      <h2>Comments</h2>
-      {% include giscus.html %}
-    </div>
+  <div class="giscus-comments" style="margin-top: 2rem">
+    <h2>Comments</h2>
+    {% include giscus.html %}
+  </div>
   {%- endif -%}
 </article>
