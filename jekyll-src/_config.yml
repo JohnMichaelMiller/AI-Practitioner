@@ -38,5 +38,18 @@ external: # accepts {file, title, url, icon, sidebaricon}
   - { title: Subscribe, icon: rss, url: "/feed.xml" }
 
 comments:
+  giscus:
+    enabled: true
+    repo: "JohnMichaelMiller/AI-Practitioner"
+    repo_id: "1138527485"
+    category: "General"
+    category_id: "" # optional; leave blank to use the category name above
+    mapping: "pathname"
+    strict: "0"
+    reactions_enabled: "1"
+    emit_metadata: "0"
+    input_position: "bottom"
+    theme: "preferred_color_scheme"
+    lang: "en"
 #  disqus_shortname: ""         # see https://disqus.com
 #  isso_domain: ""              # see https://isso-comments.de

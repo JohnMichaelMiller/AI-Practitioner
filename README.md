@@ -128,6 +128,10 @@ This repository includes tools for managing multiple GitHub accounts:
 
 - **[.github/prompts/create-blog-section.prompt.md](.github/prompts/create-blog-section.prompt.md)**: Reusable prompt to generate or revise a single AIAGSD-style blog section with explicit constraints and scope.
 
+## Comments
+
+- **[jekyll-src/_includes/giscus.html](jekyll-src/_includes/giscus.html)**: Adds Giscus-based reader comments to blog posts through the Jekyll post layout.
+
 ## CODE Publication Copies
 
 - **[CODE/2026-04-17-AIAGSD7.md](CODE/2026-04-17-AIAGSD7.md)**: CODE Magazine publication copy of AIAGSD Part 7 with CODE links/contact details preserved for publication workflow.
