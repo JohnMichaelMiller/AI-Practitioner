@@ -1,6 +1,6 @@
 ---
 ai_generated: false
-applyTo: "jekyll-src/_posts/*.md, CODE/*.md"
+applyTo: "jekyll-src/_posts/*.blog.md, CODE/*.blog.md"
 ---
 
 # Blog Post Writing Instructions
@@ -75,6 +75,8 @@ image: /assets/images/2026-02-24/AIAGSD5_Header_Large.png
 ## Post Structure
 
 Use this baseline structure for all blog posts:
+
+Blog post files **must** use the `.blog.md` extension. Store Jekyll posts in `jekyll-src/_posts/` and CODE Magazine versions in `CODE/`; do not create blog posts with a plain `.md` extension.
 
 1. **YAML front matter** (as above)
 2. **TL;DR or lead paragraph** (1-2 sentences establishing context and value)
@@ -482,20 +484,20 @@ Before finalizing any blog post, verify:
 
 ## Examples from Recent Posts
 
-**Well-structured post**: [AIAGSD6](jekyll-src/_posts/2026-03-01-AIAGSD6.md)
+**Well-structured post**: [AIAGSD6](jekyll-src/_posts/2026-03-01-AIAGSD6.blog.md)
 
 - Governance checkpoint section validates artifact coherence
 - Thesis-first artifact summaries
 - Clear prompt documentation pattern
 - Complete closing sections with Prompts log
 
-**Architectural deep dive**: [AIAGSD5](jekyll-src/_posts/2026-02-24-AIAGSD5.md)
+**Architectural deep dive**: [AIAGSD5](jekyll-src/_posts/2026-02-24-AIAGSD5.blog.md)
 
 - Problem framing ("Why Technology Instruction Files Matter")
 - Meta-prompt workflow (creating prompts that generate prompts)
 - Technology-specific guidance sections
 
-**Series foundation post**: [AIAGSD4](jekyll-src/_posts/2026-01-26-AIAGSD4.md)
+**Series foundation post**: [AIAGSD4](jekyll-src/_posts/2026-01-26-AIAGSD4.blog.md)
 
 - Pattern explanation with visual metaphors
 - Step-by-step process documentation

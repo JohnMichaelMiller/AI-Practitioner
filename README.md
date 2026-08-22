@@ -7,17 +7,17 @@ jMM's AI Practitioner Blog
 ### Structure
 
 - **jekyll-src/**: Jekyll source files (edit here)
-  - `_posts/`: Blog posts in Markdown format
+   - `_posts/`: Blog posts in `.blog.md` format
   - `_config.yml`: Site configuration
   - `index.md`, `about.md`: Page content
 - **docs/**: Generated static HTML (served via GitHub Pages)
 
 ### Creating a New Post
 
-1. Create a new Markdown file in `jekyll-src/_posts/` with the naming format:
+1. Create a new `.blog.md` file in `jekyll-src/_posts/` with the naming format:
 
    ```
-   YYYY-MM-DD-your-post-title.md
+   YYYY-MM-DD-your-post-title.blog.md
    ```
 
 2. Add front matter at the top of the file:
@@ -134,7 +134,7 @@ This repository includes tools for managing multiple GitHub accounts:
 
 ## CODE Publication Copies
 
-- **[CODE/2026-04-17-AIAGSD7.md](CODE/2026-04-17-AIAGSD7.md)**: CODE Magazine publication copy of AIAGSD Part 7 with CODE links/contact details preserved for publication workflow.
-- **[CODE/2026-04-23-AIAGSD8.md](CODE/2026-04-23-AIAGSD8.md)**: CODE Magazine publication copy of AIAGSD Part 8 covering the first implementation wave, starting with the shared kernel and foundational reference-data slices. [AI log](ai-logs/2026/04/23/08140724-bc73-4680-9f5f-2f3b307fc6b5/conversation.md)
-- **[CODE/2026-06-28-AIAGSD9.md](CODE/2026-06-28-AIAGSD9.md)**: CODE Magazine publication copy of AIAGSD Part 9 implementing the ManageRanks reference-data slice for canonical rank codes and access-level mappings.
-- **[CODE/2026-07-27-AIAGSD10.md](CODE/2026-07-27-AIAGSD10.md)**: CODE Magazine publication copy of AIAGSD Part 10 describing how the ManageDegrees implementation prompt establishes a durable reference-data slice for downstream academic workflows.
+- **[CODE/2026-04-17-AIAGSD7.blog.md](CODE/2026-04-17-AIAGSD7.blog.md)**: CODE Magazine publication copy of AIAGSD Part 7 with CODE links/contact details preserved for publication workflow.
+- **[CODE/2026-04-23-AIAGSD8.blog.md](CODE/2026-04-23-AIAGSD8.blog.md)**: CODE Magazine publication copy of AIAGSD Part 8 covering the first implementation wave, starting with the shared kernel and foundational reference-data slices. [AI log](ai-logs/2026/04/23/08140724-bc73-4680-9f5f-2f3b307fc6b5/conversation.md)
+- **[CODE/2026-06-28-AIAGSD9.blog.md](CODE/2026-06-28-AIAGSD9.blog.md)**: CODE Magazine publication copy of AIAGSD Part 9 implementing the ManageRanks reference-data slice for canonical rank codes and access-level mappings.
+- **[CODE/2026-07-27-AIAGSD10.blog.md](CODE/2026-07-27-AIAGSD10.blog.md)**: CODE Magazine publication copy of AIAGSD Part 10 describing how the ManageDegrees implementation prompt establishes a durable reference-data slice for downstream academic workflows.

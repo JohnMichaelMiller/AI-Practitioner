@@ -146,16 +146,16 @@ To restore a CODE Magazine post back to blog format, submit this prompt with the
 ```
 @.github/prompts/restore-blog-publication.prompt.md
 
-Please restore the CODE Magazine post from CODE/2026-01-26-AIAGSD4.md back to blog format.
+Please restore the CODE Magazine post from CODE/2026-01-26-AIAGSD4.blog.md back to blog format.
 ```
 
 ### What This Does
 
-1. Reads `CODE/2026-01-26-AIAGSD4.md`
+1. Reads `CODE/2026-01-26-AIAGSD4.blog.md`
 2. Replaces all CODE Magazine URLs with blog.pdata.com URLs
 3. Replaces john.miller@codemag.com with AIPractitioner@pdata.com
 4. Restores the main H1 heading if it was removed
-5. Saves the result as `jekyll-src/_posts/2026-01-26-AIAGSD4-CODE.md`
+5. Saves the result as `jekyll-src/_posts/2026-01-26-AIAGSD4-CODE.blog.md`
 6. Reports statistics on changes made
 
 ### Alternative: Restore All Files
@@ -166,7 +166,7 @@ Please restore the CODE Magazine post from CODE/2026-01-26-AIAGSD4.md back to bl
 Restore all CODE Magazine posts from the CODE/ folder back to blog format.
 ```
 
-This will process all .md files in the CODE/ folder and create corresponding -CODE versions in jekyll-src/\_posts/.
+This will process all `.blog.md` files in the CODE/ folder and create corresponding `-CODE.blog.md` versions in jekyll-src/\_posts/.
 
 ## Deliverable
 
@@ -175,7 +175,7 @@ Transform the specified CODE Magazine post by:
 1. Reading the complete source file from CODE/
 2. Performing URL and email replacements as specified
 3. Restoring the main H1 heading at the beginning of content if missing
-4. Creating the transformed file in jekyll-src/\_posts/ with -CODE appended to filename
+4. Creating the transformed `.blog.md` file in jekyll-src/\_posts/ with -CODE appended to the basename
 5. Validating all transformations completed successfully
 6. Reporting transformation statistics (URLs changed, emails updated, H1 restored, filename)
 

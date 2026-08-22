@@ -13,7 +13,7 @@ Create or revise one section in a blog post for this repository, following the A
 
 Provide:
 
-- `post_file`: Target markdown file path (for example: `jekyll-src/_posts/2026-03-01-AIAGSD6.md`)
+- `post_file`: Target blog post path (for example: `jekyll-src/_posts/2026-03-01-AIAGSD6.blog.md`)
 - `section_title`: Section heading to create or update
 - `objective`: What this section must accomplish
 - `sources`: Optional list of files/URLs that must be reflected
