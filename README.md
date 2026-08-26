@@ -62,12 +62,7 @@ jMM's AI Practitioner Blog
 ---
 
 ```powershell
-cd jekyll-src
-bundle install
-bundle exec jekyll build --destination ../docs
-git add jekyll-src/ docs/
-git commit -m "Transfer repo to j0hnnymiller"
-git push origin main
+$msg="update post: AIAGSD11";cd jekyll-src; bundle exec jekyll build --destination ../docs; cd ..; git add jekyll-src/ docs/; git commit -m $msg; git push origin main
 ```
 
 ---
