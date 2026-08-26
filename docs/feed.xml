@@ -1,4 +1,230 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-08-06T08:40:46-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 10: Implementing the ManageDegrees Reference-Data Slice</title><link href="https://blog.pdata.com/AIAGSD10/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 10: Implementing the ManageDegrees Reference-Data Slice" /><published>2026-07-27T00:00:00-07:00</published><updated>2026-07-27T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD10</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD10/"><![CDATA[<p>This is the tenth post in the AIAGSD series, and it focuses on a deceptively simple idea: a reference-data slice can become the contract that every later workflow depends on. I used the ManageDegrees implementation prompt as a guide for that contract, and the lesson is clear. If the catalog is not defined carefully, registration, qualification, and reporting all inherit ambiguity.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://blog.pdata.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.pdata.com/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-08-26T15:19:50-07:00</updated><id>https://blog.pdata.com/feed.xml</id><title type="html">AI Practitioner</title><subtitle>jMM&apos;s AI Practitioner Blog</subtitle><author><name>John Michael Miller</name></author><entry><title type="html">AI-Assisted Greenfield Software Development, Part 11: How Reference Data Was Executed with AI Subagents</title><link href="https://blog.pdata.com/AIASD11.blog/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 11: How Reference Data Was Executed with AI Subagents" /><published>2026-08-22T00:00:00-07:00</published><updated>2026-08-22T00:00:00-07:00</updated><id>https://blog.pdata.com/AIASD11.blog</id><content type="html" xml:base="https://blog.pdata.com/AIASD11.blog/"><![CDATA[<p>This is the eleventh post in the AIAGSD series. <a href="https://blog.pdata.com/AIAGSD9/">Part 9</a> and <a href="https://blog.pdata.com/AIAGSD10/">Part 10</a> of this series established the reference-data foundations that Zeus Academia depends on. This post closes that sequence by showing how the remaining <code class="language-plaintext highlighter-rouge">ManageUniversities</code> and <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> slices were delegated to specialized subagents and executed in parallel.</p>
+
+<p>The <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/5d42d3d50b14dcf0103b0b47462f905aedacab22/.github/prompts/academia-implementation/ep-1-3-manage-universities-implementation.prompt.md">ManageUniversities implementation prompt</a> and <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/5d42d3d50b14dcf0103b0b47462f905aedacab22/.github/prompts/academia-implementation/ep-1-4-provision-extension-implementation.prompt.md">ProvisionExtension implementation prompt</a> divided the remaining work into two clearly bounded vertical slices. Together, they demonstrate how specialized AI subagents could implement separate parts of the repository without assigning the entire feature to one general-purpose agent.</p>
+
+<!--more-->
+
+<p><img src="../assets/images/AIAGSD11/AIAGSD11_Header_Large.png" alt="{Subagent workflow for university catalog and extension pool implementation}" /></p>
+
+<h2 id="why-these-two-slices-mattered">Why These Two Slices Mattered</h2>
+
+<p>Both prompts followed the Shared Kernel and prepared inputs for <code class="language-plaintext highlighter-rouge">RegisterAcademic</code>, but neither owned the later assignment, qualification, release, or reporting workflows. Their independence made them good candidates for parallel delivery, while their invariants made careless parallel edits risky.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Prompt</th>
+      <th>Owned</th>
+      <th>Did not own</th>
+      <th>Key invariant</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ManageUniversities</code></td>
+      <td>Add/list university catalog</td>
+      <td>Qualification assignment and reporting</td>
+      <td>Canonical, unique university codes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ProvisionExtension</code></td>
+      <td>Provision/deprovision extension pool</td>
+      <td>Assignment, reassignment, release, and reporting</td>
+      <td>Unique numeric extensions; assigned extensions cannot be removed</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="what-each-prompt-required">What Each Prompt Required</h2>
+
+<p>The prompts were deliberately narrow. Each one described the implementation surface, the evidence required, and the boundary to preserve.</p>
+
+<h3 id="manageuniversities">ManageUniversities</h3>
+
+<p>The prompt required an <code class="language-plaintext highlighter-rouge">AddUniversity</code> command and a <code class="language-plaintext highlighter-rouge">ListUniversities</code> query with validation, handlers, responses, endpoints, mappings, and tests in the feature/use-case structure. Code trimming, casing, uniqueness, and error messages had to derive from one canonical definition. Invalid input had to identify the <code class="language-plaintext highlighter-rouge">Code</code> property, duplicates had to fail without partial persistence, and listing had to remain stable. The scope described add/list behavior rather than full CRUD.</p>
+
+<h3 id="provisionextension">ProvisionExtension</h3>
+
+<p>The prompt required provision and deprovision commands. Provisioning accepted only valid numeric values and rejected duplicates. Deprovisioning removed a free extension but protected an assigned one. Tests covered the valid paths and both guard conditions. Assignment, reassignment, release, and reporting remained separate slices for later implementation.</p>
+
+<pre><code class="language-mermaid">flowchart TD
+    SK[Shared Kernel] --&gt; U[ManageUniversities]
+    SK --&gt; E[ProvisionExtension]
+    U --&gt; R[RegisterAcademic]
+    E --&gt; R
+    U --&gt; Q[Qualification maintenance]
+    E --&gt; A[Extension assignment]
+</code></pre>
+
+<p>The scheduling rule was simple: confirm the Shared Kernel and the ownership boundaries, then run the two tracks concurrently. Each subagent inspected the existing models, persistence roots, fixtures, and neighboring conventions before changing code.</p>
+
+<h2 id="how-both-prompts-were-submitted-in-parallel">How Both Prompts Were Submitted in Parallel</h2>
+
+<p>The two slices shared the Shared Kernel but did not depend on each other’s data. That made them good candidates for parallel execution, provided the slice coordinator confirmed the prerequisites first and each implementation agent worked in an isolated branch, worktree, or clearly separated change set. Parallel submission reduced waiting time without creating two agents that edited the same files or made incompatible shared-model decisions.</p>
+
+<h3 id="the-prerequisite-check-was-submitted-once">The prerequisite check was submitted once</h3>
+
+<p>Before either prompt was launched, I submitted a short coordination request. Its response became the shared context for both parallel tracks:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Prepare parallel execution for these prompts:
+- .github/prompts/academia-implementation/ep-1-3-manage-universities-implementation.prompt.md
+- .github/prompts/academia-implementation/ep-1-4-provision-extension-implementation.prompt.md
+
+Act as slice-coordinator. Confirm that Shared Kernel is available, identify each slice's feature and persistence targets, and verify that the university catalog and extension pool do not already have conflicting models. Return one artifact map per prompt, the route and schema decisions, known blockers, and the files each track may change.
+
+Do not implement either slice yet. The two tracks must remain independently reviewable and must not edit the same file without an explicit coordination decision.
+</code></pre></div></div>
+
+<p>What this prompt produced:</p>
+
+<ul>
+  <li>A feature map for each slice, including routes, migration ownership, and persistence targets</li>
+  <li>Shared-Kernel validation for conflicting university or extension models</li>
+  <li>A clear rule that each track would remain independently reviewable and would not edit the same file without escalation</li>
+</ul>
+
+<p>Why this mattered: it prevented the two agents from introducing conflicting schema or model assumptions before the implementation itself began.</p>
+
+<p>If this check found a conflict in the Shared Kernel, persistence root, or existing fixtures, we resolved it before parallel implementation started. If one track was blocked, we paused only that track, recorded the blocker and affected files, and allowed the independent track to continue only when it did not depend on the unresolved decision.</p>
+
+<h2 id="issues-discovered">Issues Discovered</h2>
+
+<p>The prerequisite check showed that the project had several architectural issues. Earlier reference-data slices had been self-contained, so the cross-slice coordination problem had not been visible yet. The extension slice exposed those hidden dependencies and coordination needs.</p>
+
+<ul>
+  <li>Application host ownership was unclear. There was no single, explicit owner for endpoint registration, dependency injection, SQL Server configuration, or migration execution.</li>
+  <li>Persistence boundaries were not explicit. <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> was being directed toward the Shared Kernel DbContext even though the project used feature-local persistence boundaries.</li>
+  <li>University identity was ambiguous. <code class="language-plaintext highlighter-rouge">University.Name</code> was being confused with the canonical university catalog code, which was represented as <code class="language-plaintext highlighter-rouge">University_code</code> in the domain model.</li>
+  <li>The distinction between shared domain rules and feature-owned persistence was not clearly defined.</li>
+</ul>
+
+<h2 id="changes-made">Changes Made</h2>
+
+<p>To resolve those issues, I added an application-host and persistence-composition prompt and clarified that hosting, endpoint registration, dependency injection, authentication, and migration execution belonged outside the Shared Kernel. The updated guidance defined feature-local DbContexts with one migration owner per table, assigning <code class="language-plaintext highlighter-rouge">ProvisionExtensionDbContext</code> sole ownership of the <code class="language-plaintext highlighter-rouge">Extensions</code> migration while keeping the <code class="language-plaintext highlighter-rouge">Extension</code> entity and its reusable mapping semantics in the Shared Kernel. It also clarified that <code class="language-plaintext highlighter-rouge">ManageUniversities</code> uses a feature-local catalog keyed by <code class="language-plaintext highlighter-rouge">Code</code> rather than treating <code class="language-plaintext highlighter-rouge">University.Name</code> as the catalog identifier.</p>
+
+<p>The decision was whether to restart the implementation from scratch with the clarified architecture or continue with the existing tracks while carefully managing the identified conflicts and ownership boundaries. I chose to continue with the existing work and create a <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/f07376eb56049bd077d471296f5a7e1e79b5ec0b/.github/prompts/academia-implementation/application-host-and-persistence-composition-implementation.prompt.md">refactoring plan</a> to address the gaps before proceeding with the <code class="language-plaintext highlighter-rouge">ManageUniversities</code> and <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> slices.</p>
+
+<h2 id="executing-the-refactoring-plan">Executing the Refactoring Plan</h2>
+
+<p>The refactoring plan consisted of the following steps:</p>
+
+<ol>
+  <li>Establish the application host and persistence composition boundary so endpoint registration, dependency injection, authentication, and migration execution were owned in the correct layer.</li>
+  <li>Isolate reference-data persistence by creating feature-local DbContexts for <code class="language-plaintext highlighter-rouge">ManageUniversities</code> and <code class="language-plaintext highlighter-rouge">ProvisionExtension</code>, ensuring each slice had its own migration ownership and that the <code class="language-plaintext highlighter-rouge">Extensions</code> table was managed only by <code class="language-plaintext highlighter-rouge">ProvisionExtensionDbContext</code>.</li>
+  <li>Assign migration ownership explicitly so each feature-local DbContext owned its own schema while Shared Kernel rules stayed in the Shared Kernel.</li>
+  <li>Reconcile Shared Kernel persistence by separating shared domain rules from feature-owned persistence responsibilities.</li>
+  <li>Reconcile university identity by clarifying that <code class="language-plaintext highlighter-rouge">University.Name</code> was not the canonical university catalog code and that the domain model’s canonical code should be used instead.</li>
+  <li>Update downstream consumers so any components or services relying on the university catalog used the canonical identifier rather than the display name.</li>
+</ol>
+
+<p>This plan addressed the architectural issues systematically, reduced the risk of double ownership, and maintained clear boundaries across the different slices. You can find the implementation in commit <code class="language-plaintext highlighter-rouge">9fe5dc30d927d3bc7b3568dee01044f4d1b4213a</code>.</p>
+
+<h3 id="the-two-implementation-tracks-were-launched">The two implementation tracks were launched</h3>
+
+<p>I launched the tracks in two separate VS Code agent chats:</p>
+
+<ol>
+  <li>I opened an isolated worktree for each track so the agents could work independently. In VS Code, I opened the <strong>Source Control</strong> view, selected the <strong>…</strong> menu, and chose <strong>Worktrees</strong> &gt; <strong>Create Worktree</strong>. I created one worktree from a dedicated branch for <code class="language-plaintext highlighter-rouge">ManageUniversities</code> and another from a dedicated branch for <code class="language-plaintext highlighter-rouge">ProvisionExtension</code>. VS Code opened each worktree in its own window, which made the file boundaries and branch being modified visible before I started either agent. I verified the active branch in the status bar and confirmed that both worktrees were based on the same up-to-date commit.</li>
+  <li>I attached the appropriate implementation prompt to each chat. In each VS Code worktree window, I opened <strong>Chat</strong>, started a new agent chat, and used the attachment button to add that track’s implementation prompt from the repository’s <code class="language-plaintext highlighter-rouge">.github/prompts/academia-implementation</code> folder. I pasted the coordinator’s handoff after the prompt and stated the approved scope, worktree branch, and requirement to report changed files, decisions, tests, and unresolved risks. I then checked the chat context before selecting <strong>Run</strong> so the <code class="language-plaintext highlighter-rouge">ManageUniversities</code> agent received only its prompt and the <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> agent received only its prompt.</li>
+  <li>I selected the custom agent or agents authorized by that prompt.</li>
+  <li>I pasted the coordinator’s handoff into the initial message for each agent.</li>
+  <li>I instructed each agent to remain within its approved scope and to report changed files, decisions, tests, and unresolved risks.</li>
+</ol>
+
+<p>The <code class="language-plaintext highlighter-rouge">ManageUniversities</code> prompt explicitly assigned the <code class="language-plaintext highlighter-rouge">data-persistence</code> role. The <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> track used the <code class="language-plaintext highlighter-rouge">backend-domain</code> role, with persistence work coordinated by the <code class="language-plaintext highlighter-rouge">slice-coordinator</code>. If either track revealed schema-heavy work outside its approved scope, the agent had to stop and escalate before making those changes.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parallel track</th>
+      <th>Agent and scope</th>
+      <th>Handoff returned</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ManageUniversities</td>
+      <td><code class="language-plaintext highlighter-rouge">backend-domain</code> plus <code class="language-plaintext highlighter-rouge">data-persistence</code>; add/list behavior, canonical code normalization, and uniqueness</td>
+      <td>Changed files, API contract, canonical-rule decision, tests, and persistence evidence</td>
+    </tr>
+    <tr>
+      <td>ProvisionExtension</td>
+      <td><code class="language-plaintext highlighter-rouge">backend-domain</code>; numeric provision/deprovision behavior and the assigned-extension guard</td>
+      <td>Changed files, API contract, guard decision, tests, and unresolved risks</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each track had to change only its approved files and artifacts. If an agent needed to modify a shared file, alter another track’s model, or make a decision that affected both slices, it had to stop, document the conflict and its evidence, and escalate to the coordinator. It could resume only after the coordinator approved the change and assigned ownership.</p>
+
+<p>As with prior reference-data slices, Copilot code reviews identified potential issues and areas for improvement in the implementation, and, as with the prior slices, that feedback was used to improve both the implementation and the prompts for future slice iterations.</p>
+
+<h3 id="the-tracks-were-synchronized-before-final-verification">The tracks were synchronized before final verification</h3>
+
+<p>When both agents reported completion, the changes existed only in their own worktrees and branches. Before verification could run against a single view of the work, I merged both branches into a shared integration branch. I reviewed each branch’s diff individually, merged <code class="language-plaintext highlighter-rouge">ManageUniversities</code> first, then merged <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> on top, and resolved any trivial conflicts in shared files such as project references or DI registration. I ran a full build and the existing test suite on the integration branch to confirm both merges compiled together before submitting anything to a verifier. Only after that merged branch was in a known-good state did I collect the changed-file lists, contracts, migrations or mapping evidence, test output, and unresolved risks from both tracks. I did not ask a verifier to inspect two vague “done” messages. I submitted one combined verification request after both tracks were available:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Verify these two completed tracks against their source prompts:
+- .github/prompts/academia-implementation/ep-1-3-manage-universities-implementation.prompt.md
+- .github/prompts/academia-implementation/ep-1-4-provision-extension-implementation.prompt.md
+
+ManageUniversities handoff:
+[paste changed files, API contract, persistence evidence, and test output]
+
+ProvisionExtension handoff:
+[paste changed files, API contract, persistence evidence, and test output]
+
+Act as testing-verification. Run focused checks for university add, duplicate rejection, stable listing, numeric extension validation, duplicate provision, free-extension deprovision, and assigned-extension protection. Check that the two tracks do not introduce conflicting shared models, that persistence evidence matches the target provider, and that integration-test cleanup is best effort in finally blocks. Return separate evidence and blockers for each slice, plus any cross-slice issue that must be resolved before RegisterAcademic.
+</code></pre></div></div>
+
+<p>This verification prompt also identified gaps in the implementation that needed to be addressed before final integration could be considered reliable. As with the code-review feedback, that input was used to refine both the implementation and the prompts for future slices. This emphasized the importance of a verification step to ensure that implementations meet their requirements and do not introduce conflicts.</p>
+
+<h2 id="how-subagents-executed-the-prompts">How Subagents Executed the Prompts</h2>
+
+<p>Specialized agents kept each track focused. The coordinator resolved scope and dependencies, the implementation agents changed only approved artifacts, persistence support protected the durable rules, and verification agents returned evidence. The prompts provided the handoff contract; humans still resolved boundary decisions and reviewed the final result.</p>
+
+<h2 id="what-good-escalation-looked-like">What Good Escalation Looked Like</h2>
+
+<p>The prompts included escalation triggers because specialized agents had to stop when a decision changed the slice boundary. Examples included competing university catalogs, unclear extension identity semantics, and an inability to determine whether an extension was assigned.</p>
+
+<p>Escalation had to produce a specific question and the evidence behind it: which files conflicted, which rule was ambiguous, and which implementation choices were affected. A coordinator or human could then decide without reviewing an entire speculative implementation. This was where subagents improved engineering throughput: they reduced mechanical work while preserving a deliberate decision point for the choices that needed judgment.</p>
+
+<h2 id="final-parallel-execution-checklist">Final Parallel-Execution Checklist</h2>
+
+<p>Before completion, AI confirmed:</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Shared Kernel dependency had been confirmed</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Track ownership and file boundaries had been agreed</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />No overlapping edits had remained between tracks</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Both implementation handoffs had been received</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Slice-specific tests had passed</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Cross-slice model conflicts had been checked</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Human showcase had been completed</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />README and provenance links had been updated</li>
+</ul>
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>This post concludes the reference-data implementations. Now that <code class="language-plaintext highlighter-rouge">ManageUniversities</code> and <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> have been verified, <code class="language-plaintext highlighter-rouge">RegisterAcademic</code> can consume canonical university codes and a protected extension pool, while later slices own assignment, reassignment, release, and qualification behavior.</p>
+
+<p>The larger lesson was that subagents work best when prompts describe collaboration rather than output alone. These two prompts made that operating model concrete: bounded slices were delegated, independent work was run in parallel, and evidence was required before the next phase could proceed.</p>
+
+<h2 id="feedback-loop">Feedback Loop</h2>
+
+<p>Feedback is welcome at <a href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a>.</p>
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to this post, but humans reviewed and refined it.</p>
+
+<p>Authoring prompts used for this post:</p>
+
+<ul>
+  <li>“write a blog post explaining the #file:ep-1-3-manage-universities-implementation.prompt.md prompt and the #file:ep-1-4-provision-extension-implementation.prompt.md prompt. include an explanation for using subagents to execute both prompts”</li>
+  <li>“add to the blog post the instructions for submitting the prompts so that the execute in parallel”</li>
+  <li>“The prompts that blog instructions are referring to are the prompts used to create and modify the blog posts, not the implementation prompts that are the subject of the blog post. Update the blog post instructions to make this clear.”</li>
+  <li>“Keep How to Submit Both Prompts in Parallel as the primary operational section. Reduce How Subagents Execute the Prompts to one short paragraph explaining the role of specialized agents.”</li>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="architecture" /><category term="vertical-slices" /><category term="subagents" /><category term="reference-data" /><category term="cqrs" /><category term="testing" /><summary type="html"><![CDATA[Building on Parts 9 and 10, this post concludes the Zeus Academia reference-data implementation series by explaining how to delegate ManageUniversities and ProvisionExtension to subagents and execute them in parallel.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-08-22/reference-data-subagents.svg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-08-22/reference-data-subagents.svg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 10: Implementing the ManageDegrees Reference-Data Slice</title><link href="https://blog.pdata.com/AIAGSD10.blog/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 10: Implementing the ManageDegrees Reference-Data Slice" /><published>2026-07-27T00:00:00-07:00</published><updated>2026-07-27T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD10.blog</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD10.blog/"><![CDATA[<p>This is the tenth post in the AIAGSD series, and it focuses on a deceptively simple idea: a reference-data slice can become the contract that every later workflow depends on. I used the ManageDegrees implementation prompt as a guide for that contract, and the lesson is clear. If the catalog is not defined carefully, registration, qualification, and reporting all inherit ambiguity.</p>
 
 <p>This post continues the series from <a href="https://blog.pdata.com/AIAGSD9/">Part 9</a>, and it assumes the repository already has the shared-kernel and foundational-slice patterns from earlier posts. It explains how the prompt structures the slice, why its sequence matters, and what makes the implementation durable rather than merely functional.</p>
 
@@ -176,7 +402,7 @@
 </ul>
 
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Create a new blog post, 2026-07-27-AIAGSD10, that explains the implementation of slice .github\prompts\academia-implementation\ep-1-2-manage-degrees-implementation.prompt.md
-</code></pre></div></div>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="vertical-slices" /><category term="reference-data" /><category term="vertical-slices" /><category term="reference-data" /><category term="implementation" /><category term="domain-driven-design" /><category term="validation" /><summary type="html"><![CDATA[Part 10 of the AIAGSD series explains how the ManageDegrees implementation prompt turns a small reference-data slice into a reliable foundation for downstream academic workflows.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/AIAGSD10/AIAGSD10_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/AIAGSD10/AIAGSD10_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice</title><link href="https://blog.pdata.com/AIAGSD9/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice" /><published>2026-06-28T00:00:00-07:00</published><updated>2026-06-28T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD9</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD9/"><![CDATA[<p>Part 8 established that foundational slices cannot be verified by code alone. Database constraints, migration artifacts, and durable enforcement are required. Part 9 takes that lesson into the first reference-data slice: ManageRanks. This slice is where the implementation chain proves itself under realistic constraints. Without a single source of truth for rank codes, registration, access control, and reporting each risk hardcoding or duplicating the rank definitions. The ManageRanks reference-data slice solves this by establishing a canonical repository of rank codes (P, SL, L) and their access-level mappings, enforced through database constraints and validation rules that all downstream slices depend upon.</p>
+</code></pre></div></div>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="vertical-slices" /><category term="reference-data" /><category term="vertical-slices" /><category term="reference-data" /><category term="implementation" /><category term="domain-driven-design" /><category term="validation" /><summary type="html"><![CDATA[Part 10 of the AIAGSD series explains how the ManageDegrees implementation prompt turns a small reference-data slice into a reliable foundation for downstream academic workflows.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/AIAGSD10/AIAGSD10_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/AIAGSD10/AIAGSD10_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice</title><link href="https://blog.pdata.com/AIAGSD9.blog/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 9: Implementing the ManageRanks Reference-Data Slice" /><published>2026-06-28T00:00:00-07:00</published><updated>2026-06-28T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD9.blog</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD9.blog/"><![CDATA[<p>Part 8 established that foundational slices cannot be verified by code alone. Database constraints, migration artifacts, and durable enforcement are required. Part 9 takes that lesson into the first reference-data slice: ManageRanks. This slice is where the implementation chain proves itself under realistic constraints. Without a single source of truth for rank codes, registration, access control, and reporting each risk hardcoding or duplicating the rank definitions. The ManageRanks reference-data slice solves this by establishing a canonical repository of rank codes (P, SL, L) and their access-level mappings, enforced through database constraints and validation rules that all downstream slices depend upon.</p>
 
 <!--more-->
 
@@ -589,7 +815,7 @@
 
 <ul>
   <li>Create a new blog post, 2026-06-28-AIAGSD9, that explains the implementation of slice <code class="language-plaintext highlighter-rouge">ep-1-1-manage-ranks-implementation.prompt.md</code></li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="vertical-slices" /><category term="reference-data" /><category term="vertical-slices" /><category term="reference-data" /><category term="domain-driven-design" /><category term="implementation" /><category term="mediatr" /><category term="fluent-validation" /><summary type="html"><![CDATA[Part 9 of the AIAGSD series implements the ManageRanks reference-data slice, demonstrating how vertical-slice patterns enforce data integrity, prevent duplication, and simplify downstream dependencies.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-06-28/AIAGSD9_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-06-28/AIAGSD9_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants</title><link href="https://blog.pdata.com/AIAGSD8/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants" /><published>2026-04-23T00:00:00-07:00</published><updated>2026-04-23T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD8</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD8/"><![CDATA[<p>This is the point where the AIAGSD workflow has to prove it can survive contact with real implementation. Up to now, the series has focused on requirements, scaffolding, governance, architecture, workflow models, and implementation prompts. In Part 8, I move from planning artifacts into the first bounded delivery wave and show what the first real implementation work taught us: passing unit tests is not enough if the database can still accept invalid state.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="vertical-slices" /><category term="reference-data" /><category term="vertical-slices" /><category term="reference-data" /><category term="domain-driven-design" /><category term="implementation" /><category term="mediatr" /><category term="fluent-validation" /><summary type="html"><![CDATA[Part 9 of the AIAGSD series implements the ManageRanks reference-data slice, demonstrating how vertical-slice patterns enforce data integrity, prevent duplication, and simplify downstream dependencies.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-06-28/AIAGSD9_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-06-28/AIAGSD9_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants</title><link href="https://blog.pdata.com/AIAGSD8.blog/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 8: Durable Database Invariants" /><published>2026-04-23T00:00:00-07:00</published><updated>2026-04-23T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD8.blog</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD8.blog/"><![CDATA[<p>This is the point where the AIAGSD workflow has to prove it can survive contact with real implementation. Up to now, the series has focused on requirements, scaffolding, governance, architecture, workflow models, and implementation prompts. In Part 8, I move from planning artifacts into the first bounded delivery wave and show what the first real implementation work taught us: passing unit tests is not enough if the database can still accept invalid state.</p>
 
 <!--more-->
 
@@ -899,7 +1125,7 @@
   <li>Create a blog post for AIAGSD Part 8 that explains why foundational slices need durable database invariants, migration-centric verification, and explicit multi-agent handoffs.</li>
   <li>Summarize this file in one paragraph.</li>
   <li>Turn the foundational slice set into a dependency-aware implementation checklist for a human reviewer.</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="implementation" /><category term="database" /><category term="vertical-slice" /><category term="implementation" /><category term="shared-kernel" /><category term="reference-data" /><category term="verification" /><category term="custom-agents" /><category term="ef-core" /><category term="migrations" /><category term="database-constraints" /><summary type="html"><![CDATA[This post shows how the first implementation wave in Zeus Academia forced a shift from code-only verification to durable schema enforcement, migration-centric evidence, and more explicit multi-agent handoffs.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-04-23/AIAGSD8_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-04-23/AIAGSD8_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 7: Implementation Prompts</title><link href="https://blog.pdata.com/AIAGSD7/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 7: Implementation Prompts" /><published>2026-04-17T00:00:00-07:00</published><updated>2026-04-17T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD7</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD7/"><![CDATA[<p>This post introduces the working framework for AI-assisted delivery in the Zeus Academia repository. Its purpose is to create the structure needed to plan, specify, and implement work in a disciplined way. The core addition is the repository guidance for custom agents, vertical-slice implementation, and Academia-specific workflow modeling. This provides the context AI needs so that future implementation work can be driven by explicit roles, repeatable prompts, and domain-aware plans instead of ad-hoc instructions.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="implementation" /><category term="database" /><category term="vertical-slice" /><category term="implementation" /><category term="shared-kernel" /><category term="reference-data" /><category term="verification" /><category term="custom-agents" /><category term="ef-core" /><category term="migrations" /><category term="database-constraints" /><summary type="html"><![CDATA[This post shows how the first implementation wave in Zeus Academia forced a shift from code-only verification to durable schema enforcement, migration-centric evidence, and more explicit multi-agent handoffs.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-04-23/AIAGSD8_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-04-23/AIAGSD8_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 7: Implementation Prompts</title><link href="https://blog.pdata.com/AIAGSD7.blog/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 7: Implementation Prompts" /><published>2026-04-17T00:00:00-07:00</published><updated>2026-04-17T00:00:00-07:00</updated><id>https://blog.pdata.com/AIAGSD7.blog</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD7.blog/"><![CDATA[<p>This post introduces the working framework for AI-assisted delivery in the Zeus Academia repository. Its purpose is to create the structure needed to plan, specify, and implement work in a disciplined way. The core addition is the repository guidance for custom agents, vertical-slice implementation, and Academia-specific workflow modeling. This provides the context AI needs so that future implementation work can be driven by explicit roles, repeatable prompts, and domain-aware plans instead of ad-hoc instructions.</p>
 
 <!--more-->
 
@@ -1336,7 +1562,7 @@
   <li>Examine the changes made on the Part-Seven branch and describe in prose targeted for human consumption, the intent of the change, the justification for the change, and the implementation.</li>
   <li>Summarize this file in one paragraph.</li>
   <li>List all of the slices in a Markdown table. Include a link to the file on GitHub. Also include the slice number, the functional and non-functional requirements, and the slice numbers this slice depends on.</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="prompts" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><category term="implementation-prompts" /><summary type="html"><![CDATA[This post shows how I moved from architecture and planning guidance to implementation-ready prompts for Zeus Academia, including project overview instructions, execution planning, slice-level prompts, and agent handoffs.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-04-17/AIAGSD7_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-04-17/AIAGSD7_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI Practitioner Resources: A Brief History of the Repository and Its Evolution</title><link href="https://blog.pdata.com/AIPR1/" rel="alternate" type="text/html" title="AI Practitioner Resources: A Brief History of the Repository and Its Evolution" /><published>2026-04-14T00:00:00-07:00</published><updated>2026-04-14T00:00:00-07:00</updated><id>https://blog.pdata.com/AIPR1</id><content type="html" xml:base="https://blog.pdata.com/AIPR1/"><![CDATA[<p>I’m turning my attention back to the ai-practitioner-resources repository. This project has been my case study in AI-first software development practices. If you’re not familiar, it started as prompt to return a list of resources relevant to AI assisted software developers. Today it is an AI integrated platform with automated resource curation, AI project management, and a fully autonomous issue lifecycle.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="prompts" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><category term="implementation-prompts" /><summary type="html"><![CDATA[This post shows how I moved from architecture and planning guidance to implementation-ready prompts for Zeus Academia, including project overview instructions, execution planning, slice-level prompts, and agent handoffs.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-04-17/AIAGSD7_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-04-17/AIAGSD7_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI Practitioner Resources: A Brief History of the Repository and Its Evolution</title><link href="https://blog.pdata.com/AIPR1.blog/" rel="alternate" type="text/html" title="AI Practitioner Resources: A Brief History of the Repository and Its Evolution" /><published>2026-04-14T00:00:00-07:00</published><updated>2026-04-14T00:00:00-07:00</updated><id>https://blog.pdata.com/AIPR1.blog</id><content type="html" xml:base="https://blog.pdata.com/AIPR1.blog/"><![CDATA[<p>I’m turning my attention back to the ai-practitioner-resources repository. This project has been my case study in AI-first software development practices. If you’re not familiar, it started as prompt to return a list of resources relevant to AI assisted software developers. Today it is an AI integrated platform with automated resource curation, AI project management, and a fully autonomous issue lifecycle.</p>
 
 <!--more-->
 
@@ -1856,7 +2082,7 @@ ed3b588 2026-02-24 — feat: add configurable resource count and update mode sup
   <li>Examine key diffs (first commit, Copilot’s first PR, OpenAI→Claude migration, modularization, PM review pipeline) to quantify change scope</li>
   <li>Read all project documentation (README, CONTRIBUTORS, DEV_NOTES, REFACTORING_SUMMARY, IMPLEMENTATION_SUMMARY, DETERMINISM_GUIDE, SESSION_MANAGEMENT_README, QUICK_REFERENCE, scripts/README) for architectural context</li>
   <li>Draft a chronological blog post following AIAGSD series conventions with evidence from git history</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Tracing the evolution of AI Practitioner Resources: from static HTML to AI-first platform with automated workflows and autonomous issue management.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-04-14/AIPR1_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-04-14/AIPR1_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning</title><link href="https://blog.pdata.com/AIAGSD6/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning" /><published>2026-03-01T00:00:00-08:00</published><updated>2026-03-01T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD6</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD6/"><![CDATA[<p><strong>TL;DR:</strong> This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Tracing the evolution of AI Practitioner Resources: from static HTML to AI-first platform with automated workflows and autonomous issue management.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-04-14/AIPR1_Header_Large.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-04-14/AIPR1_Header_Large.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning</title><link href="https://blog.pdata.com/AIAGSD6.blog/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 6: Vertical Slices and Implementation Planning" /><published>2026-03-01T00:00:00-08:00</published><updated>2026-03-01T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD6.blog</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD6.blog/"><![CDATA[<p><strong>TL;DR:</strong> This post defines a vertical-slice implementation pattern and shows how to use meta-prompts and AI agents to generate planning artifacts—custom-agent standards, PRDs, workflow models, and dependency diagrams—that guide slice-by-slice delivery. Read this if you’re building a greenfield project and need a structured handoff from planning into execution.</p>
 
 <p>We’re moving from architecture into implementation, but first we need a plan that defines tasks, dependencies, and execution order. This post shows how to generate planning artifacts — vertical-slice definitions, Product Requirements Documents (PRDs), workflow models, and dependency diagrams — that create a roadmap for coordinated, predictable slice-by-slice delivery. <a href="https://blog.pdata.com/AIAGSD1/">See earlier posts in the AIAGSD series for context.</a></p>
 
@@ -2341,7 +2567,7 @@ scope_note: The universe of discourse is Academia Management” and the file “
   <li>Insert a governance checkpoint: After the vertical-slice introduction, add a section validating that the planning artifacts (agent standards, agent profiles, PRD template, and implementation instructions) form a coherent system</li>
   <li>Refactor artifact summaries: Convert feature lists to thesis-first paragraphs where appropriate</li>
   <li>Add a definition of prompt drift</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-03-01/AIAGSD6_Header_Large.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-03-01/AIAGSD6_Header_Large.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails</title><link href="https://blog.pdata.com/AIAGSD5/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD5</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD5/"><![CDATA[<p>In this post, I’ll shift from <em>architecture-level</em> instructions to <em>technology-level</em> instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="AIAGSD" /><category term="vertical-slice" /><category term="agents" /><category term="planning" /><category term="meta-prompts" /><category term="workflow-modeling" /><category term="implementation-planning" /><summary type="html"><![CDATA[Part 6 of the AIAGSD series shows how to use meta-prompts, custom agents, and AI to generate planning artifacts that bridge architecture into implementation. Includes custom-agent standards, PRD prompts, workflow models, and implementation plans.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-03-01/AIAGSD6_Header_Large.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-03-01/AIAGSD6_Header_Large.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails</title><link href="https://blog.pdata.com/AIAGSD5.blog/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 5: Technology Guardrails" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD5.blog</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD5.blog/"><![CDATA[<p>In this post, I’ll shift from <em>architecture-level</em> instructions to <em>technology-level</em> instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
 
 <!--more-->
 
@@ -2699,7 +2925,7 @@ project_purpose: Academic Management System</li>
   <li>write a paragraph describing these instructions #file:fluentvalidation-implementation.instructions.md</li>
   <li>write a paragraph describing these instructions #file:vitest-implementation.instructions.md</li>
   <li>write a paragraph describing these instructions #file:pinia-implementation.instructions.md</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="architecture" /><category term="cqrs" /><summary type="html"><![CDATA[In this post, I’ll shift from architecture-level instructions to technology-level instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-02-24/AIAGSD5_Header_Large.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-02-24/AIAGSD5_Header_Large.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files</title><link href="https://blog.pdata.com/AIAGSD4/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files" /><published>2026-01-26T00:00:00-08:00</published><updated>2026-01-26T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD4</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD4/"><![CDATA[<p>In this post, I’ll shift from <em>project-level</em> instructions to <em>architecture-level</em> instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="architecture" /><category term="cqrs" /><summary type="html"><![CDATA[In this post, I’ll shift from architecture-level instructions to technology-level instructions. This is where I’ll define the standards and practices that guide AI agents as they generate code-ensuring consistency, correctness, and architectural integrity across the entire solution.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-02-24/AIAGSD5_Header_Large.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-02-24/AIAGSD5_Header_Large.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files</title><link href="https://blog.pdata.com/AIAGSD4.blog/" rel="alternate" type="text/html" title="AI-Assisted Greenfield Software Development, Part 4: Architecture Instruction Files" /><published>2026-01-26T00:00:00-08:00</published><updated>2026-01-26T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD4.blog</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD4.blog/"><![CDATA[<p>In this post, I’ll shift from <em>project-level</em> instructions to <em>architecture-level</em> instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.</p>
 
 <!--more-->
 
@@ -2853,7 +3079,7 @@ project_purpose: Academic Management System</li>
   <li>Summarize <code class="language-plaintext highlighter-rouge">generate-cqrs-eventsourcing-instructions.prompt.md</code> in prose. don’t explain CQRS or Event Sourcing. Describe what the file instructs an AI agent to do.</li>
   <li>Write a paragraph defining Event Sourcing</li>
   <li>Explain the CQRS architecture pattern</li>
-</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="architecture" /><category term="cqrs" /><summary type="html"><![CDATA[In this post, I’ll shift from project-level instructions to architecture-level instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-01-26/AIAGSD4_2_Header_Rectangle.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-01-26/AIAGSD4_2_Header_Rectangle.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Welcome to the AI Practitioner’s Blog</title><link href="https://blog.pdata.com/WTAIP/" rel="alternate" type="text/html" title="Welcome to the AI Practitioner’s Blog" /><published>2026-01-20T07:00:00-08:00</published><updated>2026-01-20T07:00:00-08:00</updated><id>https://blog.pdata.com/WTAIP</id><content type="html" xml:base="https://blog.pdata.com/WTAIP/"><![CDATA[<p>This is the retro-inaugural post of the AI Practitioner’s Blog. When I started the blog I jumped right into the content without a proper introduction. While I been in software development for many years, my only qualifications for writing a blog about AI is my experiences using the technology in anger creating real-world applications.</p>
+</ul>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="architecture" /><category term="cqrs" /><summary type="html"><![CDATA[In this post, I’ll shift from project-level instructions to architecture-level instructions. This is where I’ll define the structural rules that guide AI agents as they generate code—ensuring consistency, correctness, and architectural integrity across the entire solution.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-01-26/AIAGSD4_2_Header_Rectangle.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-01-26/AIAGSD4_2_Header_Rectangle.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Welcome to the AI Practitioner’s Blog</title><link href="https://blog.pdata.com/WTAIP.blog/" rel="alternate" type="text/html" title="Welcome to the AI Practitioner’s Blog" /><published>2026-01-20T07:00:00-08:00</published><updated>2026-01-20T07:00:00-08:00</updated><id>https://blog.pdata.com/WTAIP.blog</id><content type="html" xml:base="https://blog.pdata.com/WTAIP.blog/"><![CDATA[<p>This is the retro-inaugural post of the AI Practitioner’s Blog. When I started the blog I jumped right into the content without a proper introduction. While I been in software development for many years, my only qualifications for writing a blog about AI is my experiences using the technology in anger creating real-world applications.</p>
 
 <p>When I started the blog, my goal was to create a resource for professionals interested in the practical applications of artificial intelligence. By sharing my experiences I hoped to provide insights and guidance to those looking to leverage AI in their own projects and organizations.</p>
 
@@ -2861,132 +3087,4 @@ project_purpose: Academic Management System</li>
 
 <p><img src="/assets/images/2026-01-20/header-WTAIP.png" alt="Header Image" /></p>
 
-<p>Feel free to share your thoughts and experiences on AI Assisted Software Development.</p>]]></content><author><name>John Michael Miller</name></author><category term="blog" /><summary type="html"><![CDATA[This is the retro-inaugural post of the AI Practitioner’s Blog. When I started the blog I jumped right into the content without a proper introduction. While I been in software development for many years, my only qualifications for writing a blog about AI is my experiences using the technology in anger creating real-world applications. When I started the blog, my goal was to create a resource for professionals interested in the practical applications of artificial intelligence. By sharing my experiences I hoped to provide insights and guidance to those looking to leverage AI in their own projects and organizations.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-01-20/header-WTAIP.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-01-20/header-WTAIP.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI Assisted Greenfield Software Development, Part 3: Generating the Process Instruction Files</title><link href="https://blog.pdata.com/AIAGSD3/" rel="alternate" type="text/html" title="AI Assisted Greenfield Software Development, Part 3: Generating the Process Instruction Files" /><published>2025-12-30T00:00:00-08:00</published><updated>2025-12-30T00:00:00-08:00</updated><id>https://blog.pdata.com/AIAGSD3</id><content type="html" xml:base="https://blog.pdata.com/AIAGSD3/"><![CDATA[<p>This is the 3rd post in the series on AI assisted greenfield software development. This post builds on the first <a href="https://blog.pdata.com/AIAGSD1" target="_blank">AI-Assisted Greenfield Software Development, Part 1: Business Requirements</a> and subsequent posts. If you haven’t read these posts, you might consider starting there.</p>
-
-<p>In Part 1 we defined the high-level business requirements and in Part 2 we started building out the scaffolding supporting AI code generation. In part 3, we’ll continue to add guidance for AI code generation. Starting with project guidance and process definitions, we’ll create prompts that create project overview instructions, AI code generation guidance, and Git workflow instructions.</p>
-
-<!--more-->
-
-<p><img src="/assets/images/2025-12-30/header-AIAGSD3.png" alt="Header Image" /> We’ll use these prompt’s to create instruction files and then check the guidance for errors and redundancies.</p>
-
-<p>To achieve quality in AI code generation you need to constrain the AI model and focus it on what you intend to accomplish. Unconstrained, AI has many options to choose from and the chances that the AI will choose the wrong option are the greatest. This is where models are most non-deterministic and subject to hallucinations and errors.</p>
-
-<p>By specifying custom chat-modes, prompts and instructions, you set the expectations for the intended output and how it’s produced. As long as the instructions are clear and unambiguous, the model will respect the constraints. This isn’t about slowing down; it’s about moving fast <em>safely.</em></p>
-
-<h2 id="provenance-is-king-ai-assisted-outputinstructionsmd">Provenance Is King (<code class="language-plaintext highlighter-rouge">ai-assisted-output.instructions.md</code>)</h2>
-
-<p><a href="https://blog.pdata.com/AIAGSD2">In Part 2</a> we added our <strong>AI Provenance Policy.</strong> We can no longer accept code if we don’t know where it came from. We’ve defined a metadata schema that <em>must</em> accompany every AI-generated artifact. Whether it’s a Python script, a documentation file, or a diagram, it needs a “birth certificate.” We also want to record the conversation with AI that led to the generation of an artifact and a summery of the context used in producing the artifact. The AI assisted output instructions ensure that this provenance is recorded for standards compliance and as breadcrumbs for our AI generation effort. We’ll see this in all generated artifacts from here on.</p>
-
-<h2 id="the-development-life-cycle-ai-dev-processinstructionsmd">The Development Life Cycle (<code class="language-plaintext highlighter-rouge">ai-dev-process.instructions.md</code>)</h2>
-
-<p>In addition to the AI output instructions, we’re adding instructions that formalizes the dance between <strong>human</strong> and <strong>machine.</strong> It’s no longer just “generate and commit.” This file introduces a specific workflow:</p>
-
-<ol>
-  <li><strong>AI Code Generation:</strong> Must include provenance and pass existing tests.</li>
-  <li><strong>AI Code Review::</strong> The AI reviews its own work (or another agent’s work) for security, performance, and style <em>before</em> a human sees it.</li>
-  <li><strong>Human Code Review:</strong> We focus on high-level architecture and intent, letting the AI handle the linting and boilerplate checks.</li>
-</ol>
-
-<p>We also define <strong>Quality Gates.</strong> You can’t merge unless you have:</p>
-
-<ul>
-  <li>Technical Gates (CI/CD passing)</li>
-  <li>AI Review (Automated pass)</li>
-  <li>Human Approval (Final sign-off)</li>
-</ul>
-
-<p>This process can be enhanced to increase the ability of AI to produce quality code. For example:</p>
-
-<ul>
-  <li>Use a different model to review the code than the model that generated it.</li>
-  <li>Use three models to review the code and only pass the review if two of the three models agree on the quality of the code.</li>
-  <li>Use multiple models to generate code and have AI review the pros and cons of each implementation.</li>
-</ul>
-
-<p>Models have biases, if only to their own work. By utilizing multiple models you mitigate for these biases and the different perspectives can add to the robustness of the implementations.</p>
-
-<p>Here is a link to the
-<a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Three/.github/instructions/ai-dev-process.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">ai-dev-process.instructions.md</code></a> file.</p>
-
-<p>The AI-assisted software development process further constrains what the AI can do when working with code in the project. It’s important to note that these constraints only apply when AI is actively working. If you want these constrains to apply to human developers on your team, you’ll want to add gates to the repository to enforce the constraints across the board.</p>
-
-<h2 id="git-workflow-integration-git-workflowinstructionsmd">Git Workflow Integration (<code class="language-plaintext highlighter-rouge">git-workflow.instructions.md</code>)</h2>
-
-<p>Another process we should nail down is how AI generated code is incorporated into the life cycle. While AI generated code should follow the same process as developer written code, there are some differences we might want to require.</p>
-
-<p>In the Git Workflow instructions file, we’ve required a <strong>trunk-based Development (TBD)</strong> model. TBD is the practice of merging small, frequent updates to a single core branch (often called main or trunk), rather than maintaining long-lived feature branches. By requiring developers and AI agents to merge code at least daily, we minimize the “drift” that leads to catastrophic merge conflicts. It forces a discipline of continuous integration, ensuring the codebase is always in a deployable state. It relies heavily on automated testing to prevent breaking the build for everyone.</p>
-
-<p>While we’ve chosen TBD for speed, <a href="https://www.gitkraken.com/learn/git/git-flow" target="_blank">Git Flow</a> remains a popular alternative, utilizing a strict structure of develop, release, and feature branches that is excellent for managed release cycles but often cumbersome for rapid iteration. <a href="https://docs.github.com/en/get-started/using-github/github-flow" target="_blank">GitHub Flow</a> is another common contender, simplifying Git Flow by deploying directly from feature branches, but for our high-velocity AI workflow, the immediate integration of TBD is essential. If you prefer Git Flow or GitHub flow you can modify the prompt that generated the instruction file (the prompts are covered later in this post) and create a Git Flow or GitHub specific instruction file.</p>
-
-<p>Here are the AI specific features of the workflow:</p>
-
-<ul>
-  <li><strong>AI branches:</strong> We use a specific naming convention <code class="language-plaintext highlighter-rouge">ai/&lt;chat-id&gt;-&lt;description&gt;</code>. This makes it instantly obvious which branches are machine-generated.</li>
-  <li><strong>Commit messages:</strong> Must reference the Chat ID and Model.</li>
-  <li><strong>Orphan cleanup:</strong> AI branches are ephemeral. If they aren’t merged in 7 days, they are deleted.</li>
-</ul>
-
-<p>Here is a link to the <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Three/.github/instructions/git-workflow.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">git-workflow.instructions.md</code></a> file.</p>
-
-<p>Like the AI development instructions, some of the requirement enforcement should be implemented through repo or pipeline configuration. This is called out in the <strong>Enforcement</strong> section of the instruction file.</p>
-
-<h2 id="the-big-picture-project-overviewinstructionsmd">The Big Picture (<code class="language-plaintext highlighter-rouge">project-overview.instructions.md</code>)</h2>
-
-<p>Finally, we created the project overview instructions to tie everything together. It acts as the entry point for any new agent (or human) joining the project, pointing them to the standards and critical files they need to respect.</p>
-
-<p>Here is a link to the <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Three/.github/instructions/project-overview.instructions.md" target="_blank"><code class="language-plaintext highlighter-rouge">project-overview.instructions.md</code></a> file.</p>
-
-<p>The project overview instructions are a snapshot of the project in time. As the project evolves we’ll update the project overview so that it always contains the current state of the project.</p>
-
-<h2 id="checking-the-context">Checking the Context</h2>
-
-<p>When adding or changing instruction files it’s important to verify that all of the instructions are complimentary. The <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Three/.github/prompts/check-context.prompt.md" target="_blank">check-context.prompt.md</a> prompt file examines the current context for conflicting instructions, factual inconsistencies, logical contradictions, priority conflicts, technical incompatibilities, terminology gaps, and redundancies.</p>
-
-<p>It’s a good idea to submit this prompt to a different model than was used to generate the instruction files to avoid the model favoring it’s own output.</p>
-
-<h2 id="why-this-matters">Why This Matters</h2>
-
-<p>By codifying these rules into <code class="language-plaintext highlighter-rouge">.instructions.md</code> files, we are doing something powerful: <strong>We are programming the process.</strong></p>
-
-<p>When we load these instructions into our AI context, the AI <em>knows</em> how to behave. It knows it needs to generate metadata. It knows it needs to create a log entry. It becomes a compliant member of the team, rather than a chaotic tool.</p>
-
-<h2 id="the-prompt-files">The Prompt Files</h2>
-
-<p>Looking at the metadata for each of these artifacts you can see that a prompt file was used to create each instruction file. The prompt files, in concert with the <code class="language-plaintext highlighter-rouge">instruction-file-generation.instructions.md</code> instructions, define the contents of the generated instruction files.</p>
-
-<p>While the instructions could have been created directly, the benefit of using a prompt file is that it codifies the structure and contents of the generated instruction files. If the process or tooling changes, the prompt can be modified and the instruction files updated.</p>
-
-<p>This helps to maintain the instruction files. For example, if the Git process changes from trunk-based to Git Flow or GitHub Flow, the prompt can be updated and the instructions regenerated.</p>
-
-<p>More importantly, the process of creating the instruction files is documented and committed to the repo.</p>
-
-<p>How were the prompt files created? With AI assistance, of course. Using a simple prompt like:</p>
-
-<p><em>Create a prompt file to create an Project Overview instruction file containing the high level context for the project. The instruction file should be optimized for AI agents and to minimize the token requirements.</em></p>
-
-<p>When submitted, AI will create a prompt file that conforms to the <code class="language-plaintext highlighter-rouge">prompt-file-generation.instructions.md</code> instructions and meets the intent of creating the project overview instructions.</p>
-
-<p>Here are links to the prompt files that created the instruction files: <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Three/.github/prompts/create-ai-dev-process.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-ai-dev-process.prompt.md</code></a>, <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Three/.github/prompts/create-git-workflow-instructions.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-git-workflow-instructions.prompt.md</code></a>, and <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/Part-Three/.github/prompts/create-project-overview.prompt.md" target="_blank"><code class="language-plaintext highlighter-rouge">create-project-overview.prompt.md</code></a></p>
-
-<h2 id="whats-next">What’s Next?</h2>
-
-<p>This concludes the work of establishing the core instructions we need and moves us closer to starting an implementation. In Part 4 we’ll add instructions that define the architecture and the architecture implementation. Establishing a path that the AI can follow when implementing the solution.</p>
-
-<p>If you’re interested in seeing the files, you can find them in the <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b" target="_blank">Academia GitHub repository</a>. If you like to follow along with your own implementation, fork this repo and use the fork to build you own implementation.</p>
-
-<h2 id="feedback-loop">Feedback Loop</h2>
-
-<p>Feedback is always welcome. Please direct it to <a href="mailto:AIPractitioner@pdata.com" target="_blank">AIPractitioner@pdata.com</a></p>
-
-<h3 id="disclaimer">Disclaimer</h3>
-
-<p>AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul.</p>
-
-<p>Prompts:</p>
-
-<ul>
-  <li>Write a blog post describing the changes made to the Part-Three branch of the <code class="language-plaintext highlighter-rouge">zeus.academia.3b</code> repo</li>
-  <li>Write a paragraph explaining trunk-based development. What are other popular methods?</li>
-</ul>
-
-<p><small><small><small>Original <a href="https://blog.pdata.com/AIAGSD3">post</a></small></small></small></p>]]></content><author><name>John Michael Miller</name></author><category term="ai-assisted-development" /><category term="software-engineering" /><category term="devops" /><category term="git-workflow" /><summary type="html"><![CDATA[This is the 3rd post in the series on AI assisted greenfield software development. This post builds on the first AI-Assisted Greenfield Software Development, Part 1: Business Requirements and subsequent posts. If you haven’t read these posts, you might consider starting there. In Part 1 we defined the high-level business requirements and in Part 2 we started building out the scaffolding supporting AI code generation. In part 3, we’ll continue to add guidance for AI code generation. Starting with project guidance and process definitions, we’ll create prompts that create project overview instructions, AI code generation guidance, and Git workflow instructions.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2025-12-30/header-AIAGSD3.jpg" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2025-12-30/header-AIAGSD3.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+<p>Feel free to share your thoughts and experiences on AI Assisted Software Development.</p>]]></content><author><name>John Michael Miller</name></author><category term="blog" /><summary type="html"><![CDATA[This is the retro-inaugural post of the AI Practitioner’s Blog. When I started the blog I jumped right into the content without a proper introduction. While I been in software development for many years, my only qualifications for writing a blog about AI is my experiences using the technology in anger creating real-world applications. When I started the blog, my goal was to create a resource for professionals interested in the practical applications of artificial intelligence. By sharing my experiences I hoped to provide insights and guidance to those looking to leverage AI in their own projects and organizations.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://blog.pdata.com/assets/images/2026-01-20/header-WTAIP.png" /><media:content medium="image" url="https://blog.pdata.com/assets/images/2026-01-20/header-WTAIP.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
