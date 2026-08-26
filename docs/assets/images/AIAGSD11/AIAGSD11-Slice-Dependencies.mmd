@@ -1,0 +1,15 @@
+flowchart TD
+    SK[Shared Kernel] --> U[ManageUniversities]
+    SK --> E[ProvisionExtension]
+    U --> R[RegisterAcademic]
+    E --> R
+    U --> Q[Qualification maintenance]
+    E --> A[Extension assignment]
+
+  classDef kernel fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a
+  classDef slice fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+  classDef downstream fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+
+  class SK kernel
+  class U,E slice
+  class R,Q,A downstream

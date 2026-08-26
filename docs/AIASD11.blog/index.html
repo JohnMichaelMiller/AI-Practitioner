@@ -108,14 +108,7 @@
 
 <p>The prompt required provision and deprovision commands. Provisioning accepted only valid numeric values and rejected duplicates. Deprovisioning removed a free extension but protected an assigned one. Tests covered the valid paths and both guard conditions. Assignment, reassignment, release, and reporting remained separate slices for later implementation.</p>
 
-<pre><code class="language-mermaid">flowchart TD
-    SK[Shared Kernel] --&gt; U[ManageUniversities]
-    SK --&gt; E[ProvisionExtension]
-    U --&gt; R[RegisterAcademic]
-    E --&gt; R
-    U --&gt; Q[Qualification maintenance]
-    E --&gt; A[Extension assignment]
-</code></pre>
+<p><img src="../assets/images/AIAGSD11/AIAGSD11-Slice-Dependencies.png" alt="AIAGSD11 Slice Dependencies (AIAGSD11-Slice-Dependencies.mmd)" /></p>
 
 <p>The scheduling rule was simple: confirm the Shared Kernel and the ownership boundaries, then run the two tracks concurrently. Each subagent inspected the existing models, persistence roots, fixtures, and neighboring conventions before changing code.</p>
 
