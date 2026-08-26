@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>AI-Assisted Greenfield Software Development, Part 11: How Reference Data Was Executed with AI Subagents | AI Practitioner</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="AI-Assisted Greenfield Software Development, Part 11: How Reference Data Was Executed with AI Subagents" />
+<meta name="author" content="John Michael Miller" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Building on Parts 9 and 10, this post concludes the Zeus Academia reference-data implementation series by explaining how to delegate ManageUniversities and ProvisionExtension to subagents and execute them in parallel." />
+<meta property="og:description" content="Building on Parts 9 and 10, this post concludes the Zeus Academia reference-data implementation series by explaining how to delegate ManageUniversities and ProvisionExtension to subagents and execute them in parallel." />
+<link rel="canonical" href="https://blog.pdata.com/AIASD11.blog/" />
+<meta property="og:url" content="https://blog.pdata.com/AIASD11.blog/" />
+<meta property="og:site_name" content="AI Practitioner" />
+<meta property="og:image" content="https://blog.pdata.com/assets/images/AIAGSD11/AIAGSD11_Header_Large.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-08-22T00:00:00-07:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://blog.pdata.com/assets/images/AIAGSD11/AIAGSD11_Header_Large.png" />
+<meta property="twitter:title" content="AI-Assisted Greenfield Software Development, Part 11: How Reference Data Was Executed with AI Subagents" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2026-08-22T00:00:00-07:00","datePublished":"2026-08-22T00:00:00-07:00","description":"Building on Parts 9 and 10, this post concludes the Zeus Academia reference-data implementation series by explaining how to delegate ManageUniversities and ProvisionExtension to subagents and execute them in parallel.","headline":"AI-Assisted Greenfield Software Development, Part 11: How Reference Data Was Executed with AI Subagents","image":"https://blog.pdata.com/assets/images/AIAGSD11/AIAGSD11_Header_Large.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIASD11.blog/"},"url":"https://blog.pdata.com/AIASD11.blog/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">AI Practitioner</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/">Home</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article
+  class="post h-entry"
+  itemscope
+  itemtype="http://schema.org/BlogPosting"
+>
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">
+      AI-Assisted Greenfield Software Development, Part 11: How Reference Data Was Executed with AI Subagents
+    </h1>
+    <p class="post-meta">
+      <time
+        class="dt-published"
+        datetime="2026-08-22T00:00:00-07:00"
+        itemprop="datePublished"
+      >
+        August 22, 2026
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody"><p>This is the eleventh post in the AIAGSD series. <a href="https://blog.pdata.com/AIAGSD9/">Part 9</a> and <a href="https://blog.pdata.com/AIAGSD10/">Part 10</a> of this series established the reference-data foundations that Zeus Academia depends on. This post closes that sequence by showing how the remaining <code class="language-plaintext highlighter-rouge">ManageUniversities</code> and <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> slices were delegated to specialized subagents and executed in parallel.</p>
+
+<p>The <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/5d42d3d50b14dcf0103b0b47462f905aedacab22/.github/prompts/academia-implementation/ep-1-3-manage-universities-implementation.prompt.md">ManageUniversities implementation prompt</a> and <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/5d42d3d50b14dcf0103b0b47462f905aedacab22/.github/prompts/academia-implementation/ep-1-4-provision-extension-implementation.prompt.md">ProvisionExtension implementation prompt</a> divided the remaining work into two clearly bounded vertical slices. Together, they demonstrate how specialized AI subagents could implement separate parts of the repository without assigning the entire feature to one general-purpose agent.</p>
+
+<!--more-->
+
+<p><img src="../assets/images/AIAGSD11/AIAGSD11_Header_Large.png" alt="Subagent workflow for university catalog and extension pool implementation" /></p>
+
+<h2 id="why-these-two-slices-mattered">Why These Two Slices Mattered</h2>
+
+<p>Both prompts followed the Shared Kernel and prepared inputs for <code class="language-plaintext highlighter-rouge">RegisterAcademic</code>, but neither owned the later assignment, qualification, release, or reporting workflows. Their independence made them good candidates for parallel delivery, while their invariants made careless parallel edits risky.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Prompt</th>
+      <th>Owned</th>
+      <th>Did not own</th>
+      <th>Key invariant</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ManageUniversities</code></td>
+      <td>Add/list university catalog</td>
+      <td>Qualification assignment and reporting</td>
+      <td>Canonical, unique university codes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ProvisionExtension</code></td>
+      <td>Provision/deprovision extension pool</td>
+      <td>Assignment, reassignment, release, and reporting</td>
+      <td>Unique numeric extensions; assigned extensions cannot be removed</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="what-each-prompt-required">What Each Prompt Required</h2>
+
+<p>The prompts were deliberately narrow. Each one described the implementation surface, the evidence required, and the boundary to preserve.</p>
+
+<h3 id="manageuniversities">ManageUniversities</h3>
+
+<p>The prompt required an <code class="language-plaintext highlighter-rouge">AddUniversity</code> command and a <code class="language-plaintext highlighter-rouge">ListUniversities</code> query with validation, handlers, responses, endpoints, mappings, and tests in the feature/use-case structure. Code trimming, casing, uniqueness, and error messages had to derive from one canonical definition. Invalid input had to identify the <code class="language-plaintext highlighter-rouge">Code</code> property, duplicates had to fail without partial persistence, and listing had to remain stable. The scope described add/list behavior rather than full CRUD.</p>
+
+<h3 id="provisionextension">ProvisionExtension</h3>
+
+<p>The prompt required provision and deprovision commands. Provisioning accepted only valid numeric values and rejected duplicates. Deprovisioning removed a free extension but protected an assigned one. Tests covered the valid paths and both guard conditions. Assignment, reassignment, release, and reporting remained separate slices for later implementation.</p>
+
+<pre><code class="language-mermaid">flowchart TD
+    SK[Shared Kernel] --&gt; U[ManageUniversities]
+    SK --&gt; E[ProvisionExtension]
+    U --&gt; R[RegisterAcademic]
+    E --&gt; R
+    U --&gt; Q[Qualification maintenance]
+    E --&gt; A[Extension assignment]
+</code></pre>
+
+<p>The scheduling rule was simple: confirm the Shared Kernel and the ownership boundaries, then run the two tracks concurrently. Each subagent inspected the existing models, persistence roots, fixtures, and neighboring conventions before changing code.</p>
+
+<h2 id="how-both-prompts-were-submitted-in-parallel">How Both Prompts Were Submitted in Parallel</h2>
+
+<p>The two slices shared the Shared Kernel but did not depend on each other’s data. That made them good candidates for parallel execution, provided the slice coordinator confirmed the prerequisites first and each implementation agent worked in an isolated branch, worktree, or clearly separated change set. Parallel submission reduced waiting time without creating two agents that edited the same files or made incompatible shared-model decisions.</p>
+
+<h3 id="the-prerequisite-check-was-submitted-once">The prerequisite check was submitted once</h3>
+
+<p>Before either prompt was launched, I submitted a short coordination request. Its response became the shared context for both parallel tracks:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Prepare parallel execution for these prompts:
+- .github/prompts/academia-implementation/ep-1-3-manage-universities-implementation.prompt.md
+- .github/prompts/academia-implementation/ep-1-4-provision-extension-implementation.prompt.md
+
+Act as slice-coordinator. Confirm that Shared Kernel is available, identify each slice's feature and persistence targets, and verify that the university catalog and extension pool do not already have conflicting models. Return one artifact map per prompt, the route and schema decisions, known blockers, and the files each track may change.
+
+Do not implement either slice yet. The two tracks must remain independently reviewable and must not edit the same file without an explicit coordination decision.
+</code></pre></div></div>
+
+<p>What this prompt produced:</p>
+
+<ul>
+  <li>A feature map for each slice, including routes, migration ownership, and persistence targets</li>
+  <li>Shared-Kernel validation for conflicting university or extension models</li>
+  <li>A clear rule that each track would remain independently reviewable and would not edit the same file without escalation</li>
+</ul>
+
+<p>Why this mattered: it prevented the two agents from introducing conflicting schema or model assumptions before the implementation itself began.</p>
+
+<p>If this check found a conflict in the Shared Kernel, persistence root, or existing fixtures, we resolved it before parallel implementation started. If one track was blocked, we paused only that track, recorded the blocker and affected files, and allowed the independent track to continue only when it did not depend on the unresolved decision.</p>
+
+<h2 id="issues-discovered">Issues Discovered</h2>
+
+<p>The prerequisite check showed that the project had several architectural issues. Earlier reference-data slices had been self-contained, so the cross-slice coordination problem had not been visible yet. The extension slice exposed those hidden dependencies and coordination needs.</p>
+
+<ul>
+  <li>Application host ownership was unclear. There was no single, explicit owner for endpoint registration, dependency injection, SQL Server configuration, or migration execution.</li>
+  <li>Persistence boundaries were not explicit. <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> was being directed toward the Shared Kernel DbContext even though the project used feature-local persistence boundaries.</li>
+  <li>University identity was ambiguous. <code class="language-plaintext highlighter-rouge">University.Name</code> was being confused with the canonical university catalog code, which was represented as <code class="language-plaintext highlighter-rouge">University_code</code> in the domain model.</li>
+  <li>The distinction between shared domain rules and feature-owned persistence was not clearly defined.</li>
+</ul>
+
+<h2 id="changes-made">Changes Made</h2>
+
+<p>To resolve those issues, I added an application-host and persistence-composition prompt and clarified that hosting, endpoint registration, dependency injection, authentication, and migration execution belonged outside the Shared Kernel. The updated guidance defined feature-local DbContexts with one migration owner per table, assigning <code class="language-plaintext highlighter-rouge">ProvisionExtensionDbContext</code> sole ownership of the <code class="language-plaintext highlighter-rouge">Extensions</code> migration while keeping the <code class="language-plaintext highlighter-rouge">Extension</code> entity and its reusable mapping semantics in the Shared Kernel. It also clarified that <code class="language-plaintext highlighter-rouge">ManageUniversities</code> uses a feature-local catalog keyed by <code class="language-plaintext highlighter-rouge">Code</code> rather than treating <code class="language-plaintext highlighter-rouge">University.Name</code> as the catalog identifier.</p>
+
+<p>The decision was whether to restart the implementation from scratch with the clarified architecture or continue with the existing tracks while carefully managing the identified conflicts and ownership boundaries. I chose to continue with the existing work and create a <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/f07376eb56049bd077d471296f5a7e1e79b5ec0b/.github/prompts/academia-implementation/application-host-and-persistence-composition-implementation.prompt.md">refactoring plan</a> to address the gaps before proceeding with the <code class="language-plaintext highlighter-rouge">ManageUniversities</code> and <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> slices.</p>
+
+<h2 id="executing-the-refactoring-plan">Executing the Refactoring Plan</h2>
+
+<p>The refactoring plan consisted of the following steps:</p>
+
+<ol>
+  <li>Establish the application host and persistence composition boundary so endpoint registration, dependency injection, authentication, and migration execution were owned in the correct layer.</li>
+  <li>Isolate reference-data persistence by creating feature-local DbContexts for <code class="language-plaintext highlighter-rouge">ManageUniversities</code> and <code class="language-plaintext highlighter-rouge">ProvisionExtension</code>, ensuring each slice had its own migration ownership and that the <code class="language-plaintext highlighter-rouge">Extensions</code> table was managed only by <code class="language-plaintext highlighter-rouge">ProvisionExtensionDbContext</code>.</li>
+  <li>Assign migration ownership explicitly so each feature-local DbContext owned its own schema while Shared Kernel rules stayed in the Shared Kernel.</li>
+  <li>Reconcile Shared Kernel persistence by separating shared domain rules from feature-owned persistence responsibilities.</li>
+  <li>Reconcile university identity by clarifying that <code class="language-plaintext highlighter-rouge">University.Name</code> was not the canonical university catalog code and that the domain model’s canonical code should be used instead.</li>
+  <li>Update downstream consumers so any components or services relying on the university catalog used the canonical identifier rather than the display name.</li>
+</ol>
+
+<p>This plan addressed the architectural issues systematically, reduced the risk of double ownership, and maintained clear boundaries across the different slices. You can find the implementation in commit <code class="language-plaintext highlighter-rouge">9fe5dc30d927d3bc7b3568dee01044f4d1b4213a</code>.</p>
+
+<h3 id="the-two-implementation-tracks-were-launched">The two implementation tracks were launched</h3>
+
+<p>I launched the tracks in two separate VS Code agent chats:</p>
+
+<ol>
+  <li>I opened an isolated worktree for each track so the agents could work independently. In VS Code, I opened the <strong>Source Control</strong> view, selected the <strong>…</strong> menu, and chose <strong>Worktrees</strong> &gt; <strong>Create Worktree</strong>. I created one worktree from a dedicated branch for <code class="language-plaintext highlighter-rouge">ManageUniversities</code> and another from a dedicated branch for <code class="language-plaintext highlighter-rouge">ProvisionExtension</code>. VS Code opened each worktree in its own window, which made the file boundaries and branch being modified visible before I started either agent. I verified the active branch in the status bar and confirmed that both worktrees were based on the same up-to-date commit.</li>
+  <li>I attached the appropriate implementation prompt to each chat. In each VS Code worktree window, I opened <strong>Chat</strong>, started a new agent chat, and used the attachment button to add that track’s implementation prompt from the repository’s <code class="language-plaintext highlighter-rouge">.github/prompts/academia-implementation</code> folder. I pasted the coordinator’s handoff after the prompt and stated the approved scope, worktree branch, and requirement to report changed files, decisions, tests, and unresolved risks. I then checked the chat context before selecting <strong>Run</strong> so the <code class="language-plaintext highlighter-rouge">ManageUniversities</code> agent received only its prompt and the <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> agent received only its prompt.</li>
+  <li>I selected the custom agent or agents authorized by that prompt.</li>
+  <li>I pasted the coordinator’s handoff into the initial message for each agent.</li>
+  <li>I instructed each agent to remain within its approved scope and to report changed files, decisions, tests, and unresolved risks.</li>
+</ol>
+
+<p>The <code class="language-plaintext highlighter-rouge">ManageUniversities</code> prompt explicitly assigned the <code class="language-plaintext highlighter-rouge">data-persistence</code> role. The <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> track used the <code class="language-plaintext highlighter-rouge">backend-domain</code> role, with persistence work coordinated by the <code class="language-plaintext highlighter-rouge">slice-coordinator</code>. If either track revealed schema-heavy work outside its approved scope, the agent had to stop and escalate before making those changes.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parallel track</th>
+      <th>Agent and scope</th>
+      <th>Handoff returned</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ManageUniversities</td>
+      <td><code class="language-plaintext highlighter-rouge">backend-domain</code> plus <code class="language-plaintext highlighter-rouge">data-persistence</code>; add/list behavior, canonical code normalization, and uniqueness</td>
+      <td>Changed files, API contract, canonical-rule decision, tests, and persistence evidence</td>
+    </tr>
+    <tr>
+      <td>ProvisionExtension</td>
+      <td><code class="language-plaintext highlighter-rouge">backend-domain</code>; numeric provision/deprovision behavior and the assigned-extension guard</td>
+      <td>Changed files, API contract, guard decision, tests, and unresolved risks</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each track had to change only its approved files and artifacts. If an agent needed to modify a shared file, alter another track’s model, or make a decision that affected both slices, it had to stop, document the conflict and its evidence, and escalate to the coordinator. It could resume only after the coordinator approved the change and assigned ownership.</p>
+
+<p>As with prior reference-data slices, Copilot code reviews identified potential issues and areas for improvement in the implementation, and, as with the prior slices, that feedback was used to improve both the implementation and the prompts for future slice iterations.</p>
+
+<h3 id="the-tracks-were-synchronized-before-final-verification">The tracks were synchronized before final verification</h3>
+
+<p>When both agents reported completion, the changes existed only in their own worktrees and branches. Before verification could run against a single view of the work, I merged both branches into a shared integration branch. I reviewed each branch’s diff individually, merged <code class="language-plaintext highlighter-rouge">ManageUniversities</code> first, then merged <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> on top, and resolved any trivial conflicts in shared files such as project references or DI registration. I ran a full build and the existing test suite on the integration branch to confirm both merges compiled together before submitting anything to a verifier. Only after that merged branch was in a known-good state did I collect the changed-file lists, contracts, migrations or mapping evidence, test output, and unresolved risks from both tracks. I did not ask a verifier to inspect two vague “done” messages. I submitted one combined verification request after both tracks were available:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Verify these two completed tracks against their source prompts:
+- .github/prompts/academia-implementation/ep-1-3-manage-universities-implementation.prompt.md
+- .github/prompts/academia-implementation/ep-1-4-provision-extension-implementation.prompt.md
+
+ManageUniversities handoff:
+[paste changed files, API contract, persistence evidence, and test output]
+
+ProvisionExtension handoff:
+[paste changed files, API contract, persistence evidence, and test output]
+
+Act as testing-verification. Run focused checks for university add, duplicate rejection, stable listing, numeric extension validation, duplicate provision, free-extension deprovision, and assigned-extension protection. Check that the two tracks do not introduce conflicting shared models, that persistence evidence matches the target provider, and that integration-test cleanup is best effort in finally blocks. Return separate evidence and blockers for each slice, plus any cross-slice issue that must be resolved before RegisterAcademic.
+</code></pre></div></div>
+
+<p>This verification prompt also identified gaps in the implementation that needed to be addressed before final integration could be considered reliable. As with the code-review feedback, that input was used to refine both the implementation and the prompts for future slices. This emphasized the importance of a verification step to ensure that implementations meet their requirements and do not introduce conflicts.</p>
+
+<h2 id="how-subagents-executed-the-prompts">How Subagents Executed the Prompts</h2>
+
+<p>Specialized agents kept each track focused. The coordinator resolved scope and dependencies, the implementation agents changed only approved artifacts, persistence support protected the durable rules, and verification agents returned evidence. The prompts provided the handoff contract; humans still resolved boundary decisions and reviewed the final result.</p>
+
+<h2 id="what-good-escalation-looked-like">What Good Escalation Looked Like</h2>
+
+<p>The prompts included escalation triggers because specialized agents had to stop when a decision changed the slice boundary. Examples included competing university catalogs, unclear extension identity semantics, and an inability to determine whether an extension was assigned.</p>
+
+<p>Escalation had to produce a specific question and the evidence behind it: which files conflicted, which rule was ambiguous, and which implementation choices were affected. A coordinator or human could then decide without reviewing an entire speculative implementation. This was where subagents improved engineering throughput: they reduced mechanical work while preserving a deliberate decision point for the choices that needed judgment.</p>
+
+<h2 id="final-parallel-execution-checklist">Final Parallel-Execution Checklist</h2>
+
+<p>Before completion, AI confirmed:</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Shared Kernel dependency had been confirmed</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Track ownership and file boundaries had been agreed</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />No overlapping edits had remained between tracks</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Both implementation handoffs had been received</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Slice-specific tests had passed</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Cross-slice model conflicts had been checked</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Human showcase had been completed</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />README and provenance links had been updated</li>
+</ul>
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>This post concludes the reference-data implementations. Now that <code class="language-plaintext highlighter-rouge">ManageUniversities</code> and <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> have been verified, <code class="language-plaintext highlighter-rouge">RegisterAcademic</code> can consume canonical university codes and a protected extension pool, while later slices own assignment, reassignment, release, and qualification behavior.</p>
+
+<p>The larger lesson was that subagents work best when prompts describe collaboration rather than output alone. These two prompts made that operating model concrete: bounded slices were delegated, independent work was run in parallel, and evidence was required before the next phase could proceed.</p>
+
+<h2 id="feedback-loop">Feedback Loop</h2>
+
+<p>Feedback is welcome at <a href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a>.</p>
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to this post, but humans reviewed and refined it.</p>
+
+<p>Authoring prompts used for this post:</p>
+
+<ul>
+  <li>“write a blog post explaining the #file:ep-1-3-manage-universities-implementation.prompt.md prompt and the #file:ep-1-4-provision-extension-implementation.prompt.md prompt. include an explanation for using subagents to execute both prompts”</li>
+  <li>“add to the blog post the instructions for submitting the prompts so that the execute in parallel”</li>
+  <li>“The prompts that blog instructions are referring to are the prompts used to create and modify the blog posts, not the implementation prompts that are the subject of the blog post. Update the blog post instructions to make this clear.”</li>
+  <li>“Keep How to Submit Both Prompts in Parallel as the primary operational section. Reduce How Subagents Execute the Prompts to one short paragraph explaining the role of specialized agents.”</li>
+</ul>
+</div><div class="giscus-comments" style="margin-top: 2rem">
+    <h2>Comments</h2>
+    
+<script
+  src="https://giscus.app/client.js"
+  data-repo="JohnMichaelMiller/AI-Practitioner"
+  data-repo-id="1138527485"
+  data-category="General"
+  
+  data-mapping="pathname"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="bottom"
+  data-theme="preferred_color_scheme"
+  data-lang="en"
+  crossorigin="anonymous"
+  async
+></script>
+
+
+  </div></article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">AI Practitioner</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">John Michael Miller</li><li><a class="u-email" href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>jMM&#39;s AI Practitioner Blog</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

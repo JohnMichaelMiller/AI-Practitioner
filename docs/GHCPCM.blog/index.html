@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Modes of Chatting with GitHub Copilot | AI Practitioner</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Modes of Chatting with GitHub Copilot" />
+<meta name="author" content="John Michael Miller" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="In this post I’ll explore GitHub Copilot chat modes. I’ll cover the built-in chat modes and custom chat modes. We’ll dive into custom chat modes and look at some examples. To be clear, when I reference Copilot, I’m referring to GitHub Copilot, not any other Microsoft Copilot-branded AI." />
+<meta property="og:description" content="In this post I’ll explore GitHub Copilot chat modes. I’ll cover the built-in chat modes and custom chat modes. We’ll dive into custom chat modes and look at some examples. To be clear, when I reference Copilot, I’m referring to GitHub Copilot, not any other Microsoft Copilot-branded AI." />
+<link rel="canonical" href="https://blog.pdata.com/GHCPCM.blog/" />
+<meta property="og:url" content="https://blog.pdata.com/GHCPCM.blog/" />
+<meta property="og:site_name" content="AI Practitioner" />
+<meta property="og:image" content="https://blog.pdata.com/assets/images/2025-07-30/header-GHCPCM.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-07-30T00:00:00-07:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://blog.pdata.com/assets/images/2025-07-30/header-GHCPCM.jpg" />
+<meta property="twitter:title" content="Modes of Chatting with GitHub Copilot" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2025-07-30T00:00:00-07:00","datePublished":"2025-07-30T00:00:00-07:00","description":"In this post I’ll explore GitHub Copilot chat modes. I’ll cover the built-in chat modes and custom chat modes. We’ll dive into custom chat modes and look at some examples. To be clear, when I reference Copilot, I’m referring to GitHub Copilot, not any other Microsoft Copilot-branded AI.","headline":"Modes of Chatting with GitHub Copilot","image":"https://blog.pdata.com/assets/images/2025-07-30/header-GHCPCM.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/GHCPCM.blog/"},"url":"https://blog.pdata.com/GHCPCM.blog/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">AI Practitioner</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/">Home</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article
+  class="post h-entry"
+  itemscope
+  itemtype="http://schema.org/BlogPosting"
+>
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">
+      Modes of Chatting with GitHub Copilot
+    </h1>
+    <p class="post-meta">
+      <time
+        class="dt-published"
+        datetime="2025-07-30T00:00:00-07:00"
+        itemprop="datePublished"
+      >
+        July 30, 2025
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody"><p>In this post I’ll explore GitHub Copilot chat modes. I’ll cover the built-in chat modes and custom chat modes. We’ll dive into custom chat modes and look at some examples.</p>
+
+<p>To be clear, when I reference Copilot, I’m referring to GitHub Copilot, not any other Microsoft Copilot-branded AI.</p>
+
+<!--more-->
+
+<p><img src="/assets/images/2025-07-30/header-GHCPCM.jpg" alt="Header Image" /></p>
+
+<p>At first, Ask was the only Copilot chat mode. Ask mode only responds to prompts. Edit mode allowed the AI to change files. Agent mode allows Copilot to plan and execute work on it’s own. In addition to these built-in chat modes, Copilot also supports custom chat modes which allow you to focus Copilot on specific tasks. You can have as many custom chat mode files as you like in a project. I’ll discuss the cost of using custom chat modes later in the post.</p>
+
+<h2 id="github-copilot-chat-modes">GitHub Copilot Chat Modes</h2>
+
+<p>These four GitHub Copilot modes in VS Code each serve distinct purposes, and knowing when to use which can dramatically streamline your coding and automation tasks:</p>
+
+<h3 id="-ask-modequick-qa-and-conceptual-guidance">🗣 Ask Mode–Quick Q&amp;A and Conceptual Guidance</h3>
+
+<ul>
+  <li>Purpose: Conversational support for understanding code, tech concepts, or brainstorming.</li>
+  <li>Behavior: Responds to natural language questions using context from your current file or selection.</li>
+  <li>Use cases:
+    <ul>
+      <li>“Explain this PowerShell function.”</li>
+      <li>“What’s the best way to implement RBAC in Azure SQL?”</li>
+      <li>“Give me three ways to optimize this loop.”</li>
+    </ul>
+  </li>
+  <li>Control: No code changes—just suggestions and explanations.</li>
+  <li>Best for: Learning, debugging, and quick clarifications.</li>
+</ul>
+
+<h3 id="️-edit-modetargeted-code-changes-with-review-control">✍️ Edit Mode–Targeted Code Changes with Review Control</h3>
+
+<ul>
+  <li>Purpose: Apply inline edits across selected files based on your instructions.</li>
+  <li>Behavior: You choose the files and describe the change; Copilot proposes edits you can accept or reject.</li>
+  <li>Use cases:
+    <ul>
+      <li>“Refactor this to use async/await.”</li>
+      <li>“Add error handling to this script.”</li>
+      <li>“Write unit tests for this class.”</li>
+    </ul>
+  </li>
+  <li>Control: Full review before applying changes.</li>
+  <li>Best for: Surgical updates, refactoring, and enforcing coding standards.</li>
+</ul>
+
+<h3 id="-agent-modeautonomous-multi-step-execution">🤖 Agent Mode–Autonomous Multi-Step Execution</h3>
+
+<ul>
+  <li>Purpose: Copilot acts as a coding agent, planning and executing complex tasks across your workspace.</li>
+  <li>Behavior: Analyzes your codebase, runs terminal commands, edits files, and iterates until the task is complete.</li>
+  <li>Use cases:
+    <ul>
+      <li>“Migrate this app from React to Vue.”</li>
+      <li>“Audit all scripts for deprecated cmdlets.”</li>
+      <li>“Build a PowerShell script to automate Azure SQL import with error handling.”</li>
+    </ul>
+  </li>
+  <li>Control: Edits are applied automatically, but risky commands require approval.</li>
+  <li>Best for: Large-scale automation, scaffolding, and multi-file refactoring.</li>
+</ul>
+
+<h3 id="-️custom-chat-modepersona-based-ai-behavior">🛠 ️Custom Chat Mode–Persona-Based AI Behavior</h3>
+
+<ul>
+  <li>Purpose: Define reusable modes with tailored instructions, tools, and model preferences.</li>
+  <li>Behavior: You create <code class="language-plaintext highlighter-rouge">.chatmode.md</code> files that shape Copilot’s tone, task focus, and tool access.</li>
+  <li>Use cases:
+    <ul>
+      <li>“Security Scout” mode for vulnerability checks.</li>
+      <li>“Clean Code” mode for refactoring with style guides.</li>
+      <li>“PowerShell Admin” mode for scripting and automation.</li>
+    </ul>
+  </li>
+  <li>Control: You define the persona, tools, and scope.</li>
+  <li>Best for: Consistency across teams, specialized workflows, and repeatable tasks.</li>
+</ul>
+
+<p>Looking at the use cases, you can see that there is a progression of increasingly complex use cases. There is also a progression of cost that you should understand. More on that later. Try to align your uses of Copilot with the mode that is best for your case.</p>
+
+<h3 id="-github-copilot-summary-table">🔍 GitHub Copilot Summary Table</h3>
+
+<p>Here are the differences between the modes at a glance.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mode</th>
+      <th>Scope</th>
+      <th>Code Changes</th>
+      <th>Best For</th>
+      <th>Control Level</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ask</td>
+      <td>Current file</td>
+      <td>❌ No</td>
+      <td>Learning, Q&amp;A, brainstorming</td>
+      <td>Full user control</td>
+    </tr>
+    <tr>
+      <td>Edit</td>
+      <td>Selected files</td>
+      <td>✅ Proposed</td>
+      <td>Refactoring, bug fixes, test writing</td>
+      <td>Review required</td>
+    </tr>
+    <tr>
+      <td>Agent</td>
+      <td>Entire workspace</td>
+      <td>✅ Automatic</td>
+      <td>Automation, scaffolding, multi-step</td>
+      <td>Semi-autonomous</td>
+    </tr>
+    <tr>
+      <td>Custom Chat</td>
+      <td>User-defined</td>
+      <td>✅/❌ Varies</td>
+      <td>Specialized tasks, team consistency</td>
+      <td>Fully customizable</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Do what you can to align your use of Copilot with the appropriate mode.</p>
+
+<p>Let’s take a deeper dive into custom chat modes.</p>
+
+<h2 id="-what-is-a-custom-chat-mode">🔧 What Is a Custom Chat Mode?</h2>
+
+<p>It’s essentially a user-defined configuration file (<code class="language-plaintext highlighter-rouge">chatmode.md</code>) that tells Copilot how to think, act, and respond. For example, you can create modes tailored for:</p>
+
+<ul>
+  <li>🔄 Script refactoring with PowerShell best practices</li>
+  <li>🛡️ Compliance audits for RBAC in Azure SQL</li>
+  <li>📚 Clean documentation with markdown linting</li>
+</ul>
+
+<p>Pretty much any repeated workflow or process is a good candidate for a custom chat mode.</p>
+
+<p>Let’s walk through the steps for creating a custom chat mode.</p>
+
+<h2 id="-step-by-step-creating-your-custom-chat-mode">🪜 Step-by-Step: Creating Your Custom Chat Mode</h2>
+
+<ol>
+  <li>Create a <code class="language-plaintext highlighter-rouge">chatmode.md</code> file.</li>
+</ol>
+
+<ul>
+  <li>Open a new file in your repo or workspace and name it <code class="language-plaintext highlighter-rouge">chatmode.md</code>.</li>
+</ul>
+
+<ol>
+  <li>Define the mode’s identity.</li>
+</ol>
+
+<ul>
+  <li>Start with a name and focus area, for example:</li>
+</ul>
+
+<pre><code class="language-txt"># Mode Name: PowerShell Admin
+## Focus: Automation, CLI consistency, error handling
+</code></pre>
+
+<p>The Mode Name will show up in the Set Mode drop-down in the VS Code Copilot Chat UI.</p>
+
+<p><img src="../assets/images/2025-07-30/Custome-Chat-Modes-In-Copilot-UI.png" alt="Custom Chat Modes as shown in the Copilot UI" /></p>
+
+<h3 id="-what-the-chat-mode-focus-does">🎯 What the Chat Mode Focus Does</h3>
+
+<ul>
+  <li>Defines the mode’s core purpose—e.g., automation, refactoring, auditing.</li>
+  <li>Guides Copilot’s response strategy—what to prioritize, what to avoid.</li>
+  <li>Improves consistency—especially when switching between modes or sharing with teammates.</li>
+</ul>
+
+<h4 id="-how-copilot-uses-focus">🧠 How Copilot Uses Focus</h4>
+
+<p>When you load a mode with a Focus section, Copilot interprets it as a high-level directive. For example:</p>
+
+<pre><code class="language-txt">## Focus
+- Automation, error handling, and CLI consistency
+</code></pre>
+
+<p>This tells Copilot to:</p>
+
+<ul>
+  <li>Prefer modular PowerShell scripts</li>
+  <li>Emphasize robust error handling</li>
+  <li>Avoid speculative or overly creative suggestions</li>
+</ul>
+
+<h4 id="-focus-best-practices">🧩 Focus Best Practices</h4>
+
+<p>Here a some practices to keep in mind when setting focus.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tip</th>
+      <th>Why It Helps</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Use short, clear phrases</td>
+      <td>Keeps the mode readable and scannable</td>
+    </tr>
+    <tr>
+      <td>Align with tools and instructions</td>
+      <td>Ensures coherence across the mode</td>
+    </tr>
+    <tr>
+      <td>Avoid vague goals like “be helpful”</td>
+      <td>Specificity improves output quality</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="-example-comparison">🔍 Example Comparison</h4>
+
+<p>Here are some example foci and how the foci would affect Copilot’s behavior.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mode Name</th>
+      <th>Focus</th>
+      <th>Resulting Behavior</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PowerShell Admin</td>
+      <td>Automation, error handling</td>
+      <td>Precise CLI scripts with retries and logging</td>
+    </tr>
+    <tr>
+      <td>Clean Code</td>
+      <td>Refactoring, readability</td>
+      <td>Style-guide compliant suggestions</td>
+    </tr>
+    <tr>
+      <td>Security Scout</td>
+      <td>Vulnerability checks</td>
+      <td>Highlights insecure patterns and recommends fixes</td>
+    </tr>
+  </tbody>
+</table>
+
+<ol>
+  <li>Specify instructions and behavior.</li>
+</ol>
+
+<ul>
+  <li>Set tone, priorities, and response style:</li>
+</ul>
+
+<pre><code class="language-txt">- Be concise, use advanced scripting patterns
+- Always propose modular solutions
+- Prefer `$env:` for environment variables
+</code></pre>
+
+<ol>
+  <li>List the tools Copilot can use.</li>
+</ol>
+
+<ul>
+  <li>Map out relevant tools the mode should invoke:</li>
+</ul>
+
+<pre><code class="language-txt">tools:
+  - PowerShell CLI
+  - Azure SQL API
+  - Markdown Linter
+</code></pre>
+
+<ol>
+  <li>Set model preferences (optional).</li>
+</ol>
+
+<ul>
+  <li>You can guide the underlying model with instructions like:</li>
+</ul>
+
+<pre><code class="language-txt">model:
+  temperature: 0.4  # Less randomness, more precision
+  style: structured
+</code></pre>
+
+<ol>
+  <li>Save, load, and test.</li>
+</ol>
+
+<ul>
+  <li>In VS Code, activate the mode by opening the chat interface and selecting your saved <code class="language-plaintext highlighter-rouge">chatmode.md</code>. Try commands like:</li>
+</ul>
+
+<pre><code class="language-txt">- "Build a CLI script for importing Azure SQL with retry logic."
+- "Audit PowerShell scripts for deprecated cmdlets."
+</code></pre>
+
+<h3 id="-pro-tip-for-modular-workflow">🎯 Pro Tip for Modular Workflow</h3>
+
+<p>Use multiple modes for different task scopes:</p>
+
+<ul>
+  <li>One for RBAC auditing</li>
+  <li>One for documentation linting</li>
+  <li>One for script automation</li>
+</ul>
+
+<p>You can switch between them or embed them in your MCP configs for seamless productivity.</p>
+
+<h2 id="managing-multiple-custom-chat-modes">Managing Multiple Custom Chat Modes</h2>
+
+<p>Managing multiple custom chat mode files is a smart way to modularize your workflows. Here’s how to keep things clean, scalable, and switchable:</p>
+
+<p>🗂️ 1. Organize your chat mode files.</p>
+
+<ul>
+  <li>Create a dedicated folder.</li>
+  <li>Use <code class="language-plaintext highlighter-rouge">.github/chatmodes/</code> in your workspace to store all your <code class="language-plaintext highlighter-rouge">*.chatmode.md</code> files.</li>
+  <li>Example structure:</li>
+</ul>
+
+<pre><code class="language-txt">.github/
+  chatmodes/
+    powershell-admin.chatmode.md
+    security-scout.chatmode.md
+    clean-code.chatmode.md
+</code></pre>
+
+<p>📦 2. Use clear naming conventions.</p>
+
+<ul>
+  <li>Prefix by domain or task: <code class="language-plaintext highlighter-rouge">rbac-audit.chatmode.md</code>, <code class="language-plaintext highlighter-rouge">markdown-linter.chatmode.md</code>.</li>
+  <li>Helps with discoverability and switching modes quickly.</li>
+</ul>
+
+<h2 id="-switching-between-modes-in-vs-code">🔄 Switching Between Modes in VS Code</h2>
+
+<ul>
+  <li>Open the Copilot Chat panel.</li>
+  <li>Click the mode dropdown at the bottom.</li>
+  <li>Select the desired mode from your saved list.</li>
+  <li>Each mode loads its own tools, instructions, and model preferences.</li>
+</ul>
+
+<h2 id="-pro-tips-for-managing-many-modes">🧠 Pro Tips for Managing Many Modes</h2>
+
+<p>Here are some tips on managing multiple custom chat mode files.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Strategy</th>
+      <th>Benefit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tag modes by team or task</td>
+      <td>Easier collaboration and onboarding</td>
+    </tr>
+    <tr>
+      <td>Use shared repo for team-wide modes</td>
+      <td>Centralized updates and version control</td>
+    </tr>
+    <tr>
+      <td>Document each mode’s purpose in comments</td>
+      <td>Faster understanding and maintenance</td>
+    </tr>
+    <tr>
+      <td>Group modes by folder if needed</td>
+      <td>e.g., chatmodes/security/, chatmodes/automation/</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="-bonus-mcp-integration">🧩 Bonus: MCP Integration</h3>
+
+<p>If you’re using MCP instruction files, you can reference specific chat modes within those workflows—making it seamless to switch personas mid-task.</p>
+
+<h2 id="custom-chat-mode-examples">Custom Chat Mode Examples</h2>
+
+<p>Here are three examples of custom chat modes.</p>
+
+<h3 id="sample-custom-chat-mode-files">Sample Custom Chat Mode Files</h3>
+
+<p>🧮 1. Structured Git coach for branch discipline.</p>
+
+<ul>
+  <li>Great for repositories with complex Git workflows, rebasing policies, and automation gates.</li>
+</ul>
+
+<pre><code class="language-txt"># Name: Git Flow Strategist
+# Focus: Branching policies, merge style enforcement, and CI/CD hygiene
+# Temperature: 0.3
+# Style: Confident, pragmatic, and slightly opinionated
+
+You help developers navigate complex Git workflows with a focus on clean history and team compliance. You enforce rebase discipline, squash merge standards, and CI policy triggers.
+
+## Capabilities
+- Compare merge strategies and visualize commit impacts
+- Suggest rebase workflows for feature branches
+- Identify potential CI/CD integration gaps
+- Recommend automated checks in GitHub Actions
+
+## Expectations
+When contributors ask about Git:
+- Always provide examples or diagrams showing branching logic
+- Explain tradeoffs clearly and offer team-friendly defaults
+- Respect security and traceability concerns across environments
+</code></pre>
+
+<p>This mode specializes in guiding developers through advanced Git workflows by promoting best practices that maintain clean commit history and ensure team-wide compliance. When supporting contributors, it responds with visual branching examples, clearly outlines tradeoffs in workflow decisions, and tailors guidance to uphold both security standards and traceability across development environments.
+Note the temperature preference that instructs the NLM to be more precise.</p>
+
+<h3 id="️-common-model-preferences">⚙️ Common Model Preferences</h3>
+
+<p>Here is a list of the common model preferences:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Preference</th>
+      <th>Description</th>
+      <th>Typical Use</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Temperature</td>
+      <td>Controls randomness and creativity</td>
+      <td>Lower for precision, higher for brainstorming</td>
+    </tr>
+    <tr>
+      <td>Style</td>
+      <td>Shapes formatting and tone</td>
+      <td>Structured, concise, analytical, etc.</td>
+    </tr>
+    <tr>
+      <td>Top-p (nucleus sampling)</td>
+      <td>Limits token selection to top probability mass</td>
+      <td>Fine-tunes diversity vs. focus</td>
+    </tr>
+    <tr>
+      <td>Frequency penalty</td>
+      <td>Reduces repetition of common tokens</td>
+      <td>Helps avoid redundant output</td>
+    </tr>
+    <tr>
+      <td>Presence penalty</td>
+      <td>Encourages introducing new topics</td>
+      <td>Useful for ideation or exploration</td>
+    </tr>
+    <tr>
+      <td>Max tokens</td>
+      <td>Sets response length limit</td>
+      <td>Prevents overly long or short replies</td>
+    </tr>
+    <tr>
+      <td>Stop sequences</td>
+      <td>Defines where generation should halt</td>
+      <td>Useful for code blocks or markdown</td>
+    </tr>
+    <tr>
+      <td>Tool access</td>
+      <td>Enables specific tools (e.g., CLI, linter)</td>
+      <td>Tailors responses to your workflow</td>
+    </tr>
+    <tr>
+      <td>Persona instructions</td>
+      <td>Guides tone, behavior, and task focus</td>
+      <td>Core to custom chat modes</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>✍️ 2. Markdown doc optimizer with Mermaid Fluenc
+Perfect for technical writing and diagram-rich README generation.</p>
+
+<pre><code class="language-txt"># Name: Doc Design Architect
+# Focus: Technical documentation, diagramming with Mermaid, and readability improvements
+# Temperature: 0.4
+# Style: Friendly, precise, and formatting-conscious
+
+You structure documentation to maximize clarity and impact. You incorporate Mermaid diagrams, annotate flows, and guide contributors on best practices for accessibility and skimmability.
+
+## Capabilities
+- Generate diagrams from architecture or workflow inputs
+- Refactor markdown for better navigation and scanning
+- Suggest formatting changes to improve comprehension
+
+## Expectations
+When asked to document code:
+- Break content into sections with proper headers and lists
+- Use diagrams to illustrate complex concepts
+- Annotate Mermaid output and flag ambiguity in user stories
+</code></pre>
+
+<p>This mode specializes in crafting technical documentation that is both visually structured and easy to absorb, combining markdown precision with fluent Mermaid diagramming. It continuously refines formatting for accessibility and readability, flagging vague areas and guiding contributors toward concise, user-friendly documentation aligned with best practices.
+Note that this mode is asking for less precision and is requesting the response be friendly, precise, and formatting-conscious.</p>
+
+<p>🔐 3. Playwright Compliance Guardian for secure automation</p>
+
+<p>This example focuses Copilot on assisting with securing test automation.</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh"># Name: Secure Test Engineer</span>
+
+<span class="gh"># Focus: Playwright MCP automation with risk mitigation and CI pipeline integration</span>
+
+<span class="gh"># Temperature: 0.2</span>
+
+<span class="gh"># Style: Direct, risk-aware, and methodical</span>
+
+You evaluate and strengthen Playwright test scripts for security, isolation, and CI traceability. Your responses prioritize reliability, scalability, and audit compliance.
+
+<span class="gu">## Capabilities</span>
+<span class="p">
+-</span> Review selectors and identify flakiness
+<span class="p">-</span> Recommend secure test design and data handling
+<span class="p">-</span> Suggest CI/CD improvements with annotated YAML snippets
+
+<span class="gu">## Expectations</span>
+
+When reviewing test automation:
+<span class="p">
+-</span> Flag potential injection risks or environment bleed
+<span class="p">-</span> Encourage modular test architecture and coverage modeling
+<span class="p">-</span> Offer alternatives for flaky or insecure patterns
+</code></pre></div></div>
+
+<p>This mode specializes in enhancing Playwright test scripts by enforcing high standards for security, test isolation, and CI/CD traceability. When reviewing automation, it flags potential vulnerabilities like injection risks or environment bleed, advocates for modular test architecture, and proposes scalable solutions to address brittle or insecure testing patterns—all with a clear emphasis on long-term maintainability.
+This mode is asking for the most precision and is requesting the response be direct, risk-aware, and methodical.</p>
+
+<h2 id="chat-mode-cost-implications">Chat Mode Cost Implications</h2>
+
+<p>It should come as no surprise that the more capable modes are more expensive. The cost implications depend on which mode you use and which model powers the response. Here’s a breakdown based on GitHub Copilot’s current pricing structure as of mid-2025:</p>
+
+<h3 id="-cost-implications-by-mode">💰 Cost Implications by Mode</h3>
+
+<p>Here are the cost implication by chat mode.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mode</th>
+      <th>Cost Impact</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ask Mode</td>
+      <td>✅ Free with included models (e.g., GPT‑4o, GPT‑4.1) <br /> ❌ Premium if using GPT‑4.5, Claude, Gemini, etc.</td>
+      <td>Ask mode is cheapest if you stick to default models.</td>
+    </tr>
+    <tr>
+      <td>Edit Mode</td>
+      <td>✅ Same as Ask Mode</td>
+      <td>Charges apply only if premium models are used.</td>
+    </tr>
+    <tr>
+      <td>Agent Mode</td>
+      <td>❌ Always counts as 1 premium request per prompt</td>
+      <td>Even with default models, Agent mode consumes premium quota.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="-monthly-premium-request-allowance">📦 Monthly Premium Request Allowance</h3>
+
+<p>Here are the monthly premium request allowances per plan.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Plan</th>
+      <th>Premium Requests</th>
+      <th>Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Copilot Free</td>
+      <td>50/month</td>
+      <td>$0</td>
+    </tr>
+    <tr>
+      <td>Copilot Pro</td>
+      <td>300/month</td>
+      <td>$10/month</td>
+    </tr>
+    <tr>
+      <td>Copilot Pro+</td>
+      <td>1500/month</td>
+      <td>$39.99/month</td>
+    </tr>
+    <tr>
+      <td>Extra Requests</td>
+      <td>$0.04/request</td>
+      <td>Pay-as-you-go</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="-key-takeaways">🧠 Key Takeaways</h3>
+
+<ul>
+  <li>Ask/edit modes are cost-efficient if you use included models.</li>
+  <li>Agent mode always consumes premium requests—even for simple tasks.</li>
+  <li>If you’re running high-volume automation or multi-step refactoring, Agent mode can burn through your quota quickly.</li>
+  <li>You can monitor usage in VS Code under Copilot › Settings › Billing &amp; Usage.</li>
+</ul>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Effective use of chat modes is a key in both controlling Copilot and in managing costs. Custom chat modes allow you to change hats and tailor Copilot to work efficiently and effectively in different problem domains. Chat modes work in concert with instruction files, which is another way of controlling Copilot. I’ll explore instruction files in another blog post soon.</p>
+
+<h3 id="feedback-loop">Feedback Loop</h3>
+
+<p>Feedback is always welcome. Please direct it to <a href="mailto:AIPractitioner@pdata.com" target="_blank">AIPractitioner@pdata.com</a></p>
+
+<h4 id="disclaimer">Disclaimer</h4>
+
+<p>AI contributed to the writing to this blog post, but humans reviewed it, refined it, enhanced it and gave it soul.</p>
+
+<p><strong>Prompts:</strong></p>
+
+<ul>
+  <li>Compare and contrast Copilot Ask, Edit, Agent, and Custom chat modes</li>
+  <li>Show me how to create a Custom chat mode</li>
+  <li>Can you show me three sample Custom chat mode files?</li>
+  <li>/explain model preferences - Temperature: 0.4 - Style: Structured</li>
+  <li>what other model preferences are there?</li>
+  <li>If you enter the same “ask” prompt in ask, edit and agent modes, what is the cost implications in terms of the expense to process the prompt</li>
+  <li>/Explain the use of the Focus property in a Copilot custom chat mode</li>
+</ul>
+
+<p><small><small><small>Original <a href="https://blog.pdata.com/GHCPCM">post</a></small></small></small></p>
+</div><div class="giscus-comments" style="margin-top: 2rem">
+    <h2>Comments</h2>
+    
+<script
+  src="https://giscus.app/client.js"
+  data-repo="JohnMichaelMiller/AI-Practitioner"
+  data-repo-id="1138527485"
+  data-category="General"
+  
+  data-mapping="pathname"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="bottom"
+  data-theme="preferred_color_scheme"
+  data-lang="en"
+  crossorigin="anonymous"
+  async
+></script>
+
+
+  </div></article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">AI Practitioner</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">John Michael Miller</li><li><a class="u-email" href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>jMM&#39;s AI Practitioner Blog</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
