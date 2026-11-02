@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>AI-Assisted Greenfield Software Development, Part 12: Executing, Verifying, and Understanding RegisterAcademic | AI Practitioner</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="AI-Assisted Greenfield Software Development, Part 12: Executing, Verifying, and Understanding RegisterAcademic" />
+<meta name="author" content="John Michael Miller" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Learn how the RegisterAcademic code path validates and resolves references, atomically claims an extension, and proves its behavior through route and SQL Server tests." />
+<meta property="og:description" content="Learn how the RegisterAcademic code path validates and resolves references, atomically claims an extension, and proves its behavior through route and SQL Server tests." />
+<link rel="canonical" href="https://blog.pdata.com/AIAGSD12.blog/" />
+<meta property="og:url" content="https://blog.pdata.com/AIAGSD12.blog/" />
+<meta property="og:site_name" content="AI Practitioner" />
+<meta property="og:image" content="https://blog.pdata.com/assets/images/2026-09-29/register-academic-implementation.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-09-29T00:00:00-07:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://blog.pdata.com/assets/images/2026-09-29/register-academic-implementation.svg" />
+<meta property="twitter:title" content="AI-Assisted Greenfield Software Development, Part 12: Executing, Verifying, and Understanding RegisterAcademic" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Michael Miller"},"dateModified":"2026-09-29T00:00:00-07:00","datePublished":"2026-09-29T00:00:00-07:00","description":"Learn how the RegisterAcademic code path validates and resolves references, atomically claims an extension, and proves its behavior through route and SQL Server tests.","headline":"AI-Assisted Greenfield Software Development, Part 12: Executing, Verifying, and Understanding RegisterAcademic","image":"https://blog.pdata.com/assets/images/2026-09-29/register-academic-implementation.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://blog.pdata.com/AIAGSD12.blog/"},"url":"https://blog.pdata.com/AIAGSD12.blog/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://blog.pdata.com/feed.xml" title="AI Practitioner" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">AI Practitioner</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/">Home</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article
+  class="post h-entry"
+  itemscope
+  itemtype="http://schema.org/BlogPosting"
+>
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">
+      AI-Assisted Greenfield Software Development, Part 12: Executing, Verifying, and Understanding RegisterAcademic
+    </h1>
+    <p class="post-meta">
+      <time
+        class="dt-published"
+        datetime="2026-09-29T00:00:00-07:00"
+        itemprop="datePublished"
+      >
+        September 29, 2026
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody"><p>This is the twelfth post in the AIAGSD series. <a href="https://blog.pdata.com/AIASD11.blog/">Part 11</a> completed the <code class="language-plaintext highlighter-rouge">ManageUniversities</code> and <code class="language-plaintext highlighter-rouge">ProvisionExtension</code> reference-data slices, preparing the foundation for academic registration. In this post, I explain how the <code class="language-plaintext highlighter-rouge">RegisterAcademic</code> slice is implemented, verified against its contract and SQL Server persistence requirements, and demonstrated through the API.</p>
+
+<p>A registration endpoint is only useful when the record it creates is complete, consistent, and safe to consume from the next feature. The RegisterAcademic prompt makes those requirements executable: it assigns implementation roles, defines the HTTP and persistence contract, and requires SQL Server evidence before dependent academic slices proceed.</p>
+
+<!--more-->
+
+<p><img src="https://epsenterprise.blob.core.windows.net/permanent-files/FileAttachments/cdbdde06_02c0_4cbf_8adb_aac5ee8ac3e3/AIAGSD12_Header_Large.png" alt="AIAGSD12_Header_Large.png" /></p>
+
+<h2 id="why-registeracademic-is-a-delivery-gate">Why RegisterAcademic Is a Delivery Gate</h2>
+
+<p>RegisterAcademic is the first command that turns reference data into a durable academic lifecycle record. It needs a rank, at least one degree and university, and an available extension. If any part is missing or assigned independently, a later profile or employment operation can encounter incomplete state.</p>
+
+<p>The <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/.github/prompts/academia-implementation/ep-2-1-register-academic-implementation.prompt.md">EP-2-1 implementation prompt</a> addresses that risk with a Contract Sheet, explicit persistence ownership, concurrency rules, route-level status requirements, and a final traceability table. It is more than a code-generation request: it defines what evidence must exist before dependent slices can start.</p>
+
+<p>The delivery boundary is precise. RegisterAcademic creates an academic with an exactly six-character <code class="language-plaintext highlighter-rouge">empNr</code>, a normalized name of one to 15 characters, a rank-derived access level, one or more unique qualification pairs, and one available extension. It does not implement profile viewing, later employment changes, extension reassignment, or reporting.</p>
+
+<h2 id="read-the-prompt-as-an-execution-contract">Read the Prompt as an Execution Contract</h2>
+
+<p>The prompt has four useful layers. The Contract Sheet defines each request field, normalization rule, canonical owner, and HTTP result. The persistence section identifies which context owns each table and which contexts only reuse mappings. The ordered steps specify the implementation sequence, and the test matrix translates the contract into validator, route, database, and concurrency evidence.</p>
+
+<p>Several boundaries are easy to miss if an agent reads only the endpoint requirements. The <code class="language-plaintext highlighter-rouge">RegisterAcademicDbContext</code> is mapping-only and owns no migrations. <code class="language-plaintext highlighter-rouge">SharedKernelDbContext</code> remains the owner of <code class="language-plaintext highlighter-rouge">Academics</code> and <code class="language-plaintext highlighter-rouge">AcademicQualifications</code>; <code class="language-plaintext highlighter-rouge">ProvisionExtensionDbContext</code> remains the owner of <code class="language-plaintext highlighter-rouge">Extensions</code>. The handler must resolve rank, degree, and university through their approved public contracts, and it must not inject another feature’s DbContext. Degree formatting alone does not prove that a degree code exists.</p>
+
+<p>The prompt also specifies an atomic extension claim. A relational handler must conditionally update the extension only when it is still unassigned, inside a transaction with academic and qualification writes. A zero-row claim becomes <code class="language-plaintext highlighter-rouge">ExtensionUnavailable</code>. A duplicate employee number maps to a conflict only after rollback and a narrow existence check; unrelated database failures must not be mislabeled as duplicates.</p>
+
+<h2 id="prepare-before-you-execute">Prepare Before You Execute</h2>
+
+<p>I start by opening the prompt and each context file listed at its top: the ORM constraints, execution plan, migration ownership matrix, AI development process, C# and ASP.NET Core standards, MediatR and FluentValidation standards, xUnit standards, and <code class="language-plaintext highlighter-rouge">eng/verify-slice.ps1</code>. That sequence prevents the implementation from drifting away from the actual model, route, or migration owners.</p>
+
+<p>The prerequisite set includes ManageRanks, ManageDegrees, ManageUniversities, ProvisionExtension, and Shared Kernel. The prompt also requires two bounded increments: add a public <code class="language-plaintext highlighter-rouge">GetDegreeByCodeQuery</code> contract under ManageDegrees, and align Shared Kernel so <code class="language-plaintext highlighter-rouge">empNr</code> is exactly six characters and an academic cannot be created without a qualification. Before editing, record the branch and base reference, inspect the ownership matrix and stored employee-number values, and run each prerequisite feature gate. Stop if an existing employee or extension-assignee value violates the new exact-length rule; do not convert that risk into an unreviewed migration.</p>
+
+<p>The prompt’s structure prevents two recurring implementation failures: convenient but invalid shortcuts across feature-owned data, and tests that prove only that code compiles. Its traceability requirement ties each Contract Sheet row to implementing files and named tests, so reviewers can identify a missing behavior without reverse-engineering the entire slice.</p>
+
+<h2 id="execute-the-prompt-in-agent-mode">Execute the Prompt in Agent Mode</h2>
+
+<p>The prompt declares <code class="language-plaintext highlighter-rouge">mode: agent</code> and lists the tools and roles it needs. In VS Code Copilot Chat, select an agent-capable mode, open the prompt, and invoke it by its repository path. I use an instruction that asks the agent to follow the prompt’s role boundaries and stop on blockers:</p>
+
+<p><em>Execute #file:ep-2-1-register-academic-implementation.prompt.md from the repository root. Read every context file named in it before editing. Follow its ordered steps and role boundaries, preserve the recorded branch/base and migration ownership, stop if prerequisites or identifier data are incompatible, and do not report completion without the required SQL Server evidence and criterion-to-test traceability table.</em></p>
+
+<p>Treat this as one coordinated workflow, not permission to skip a role. First have the coordinator record branch/base, inspect stored identifier lengths, confirm reference data, and run prerequisite gates. Then hand off Shared Kernel and persistence changes to the appropriate domain and persistence roles. Implement the public degree lookup before relying on it. Only after model, migrations, and feature-local mapping are aligned should the handler, endpoint, and host composition be completed. Finally, testing-verification runs the test matrix and both mechanical gates.</p>
+
+<p>The explicit feature set matters because the slice changes more than RegisterAcademic. It includes the bounded ManageDegrees lookup, Shared Kernel field rules, and ProvisionExtension schema. Git-based changed-feature discovery is supplementary; an empty discovered set does not prove the manifest impact set was checked.</p>
+
+<h2 id="how-the-registeracademic-implementation-works">How the RegisterAcademic Implementation Works</h2>
+
+<p>The implementation follows the request from the HTTP boundary into the domain and then across the persistence boundary. Each layer has a narrow job: the endpoint owns HTTP translation, the validator provides early field feedback, the handler coordinates reference data and the write, and the Shared Kernel aggregate protects domain invariants.</p>
+
+<h3 id="define-the-request-and-validate-its-shape">Define the request and validate its shape</h3>
+
+<p><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/src/features/Academics/RegisterAcademic/Register/RegisterAcademicCommand.cs"><code class="language-plaintext highlighter-rouge">RegisterAcademicCommand</code></a> is the MediatR request. It carries the employee number and name, rank code, a collection of degree/university pairs, the extension number, and optional tenure or contract details. The response returns the normalized academic identity, rank and derived access level, employment state, qualifications, and extension number.</p>
+
+<p><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/src/features/Academics/RegisterAcademic/Register/RegisterAcademicCommandValidator.cs"><code class="language-plaintext highlighter-rouge">RegisterAcademicCommandValidator</code></a> rejects missing strings, employee numbers that are not exactly six characters after trimming, names outside one to 15 characters, unsupported rank codes, empty or duplicate qualification pairs, malformed reference codes, nonpositive extension numbers, and a request that combines tenure with a contract end date. This is fast request feedback; it does not replace existence checks or aggregate invariants.</p>
+
+<h3 id="resolve-references-and-build-the-aggregate">Resolve references and build the aggregate</h3>
+
+<p><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/src/features/Academics/RegisterAcademic/Register/RegisterAcademicHandler.cs"><code class="language-plaintext highlighter-rouge">RegisterAcademicHandler</code></a> uses <code class="language-plaintext highlighter-rouge">RankCodeCatalog</code> for the closed rank set and sends <code class="language-plaintext highlighter-rouge">GetDegreeByCodeQuery</code> and <code class="language-plaintext highlighter-rouge">GetUniversityByCodeQuery</code> through MediatR. It checks that each reference exists, then checks that a found university is active. It uses the canonical codes from those query responses to create <code class="language-plaintext highlighter-rouge">Degree</code> and <code class="language-plaintext highlighter-rouge">University</code> values, rather than trusting formatted input as proof that a catalog entry exists.</p>
+
+<p>The handler normalizes <code class="language-plaintext highlighter-rouge">empNr</code> and <code class="language-plaintext highlighter-rouge">empName</code>, rejects duplicate qualification pairs, checks that the requested extension exists and appears available, and checks for an existing normalized employee number. It then calls <a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/src/features/SharedKernel/Foundation/Domain/Academic.cs"><code class="language-plaintext highlighter-rouge">Academic.Create</code></a>. The aggregate applies the same normalization and length rules, requires at least one qualification, rejects duplicate pairs and the mutually exclusive tenure/contract combination, and creates the qualification entities. <code class="language-plaintext highlighter-rouge">AccessLevel</code> is computed from <code class="language-plaintext highlighter-rouge">Rank</code>; callers cannot submit a separate access-level value that could disagree with the rank.</p>
+
+<h3 id="claim-the-extension-and-persist-atomically">Claim the extension and persist atomically</h3>
+
+<p>An availability read by itself cannot prevent two requests from selecting the same extension. For relational providers, the handler starts a database transaction and performs a conditional <code class="language-plaintext highlighter-rouge">ExecuteUpdateAsync</code> that sets <code class="language-plaintext highlighter-rouge">AssignedEmpNr</code> only when the requested extension still has no assignee. If the update affects zero rows, the handler returns <code class="language-plaintext highlighter-rouge">ExtensionUnavailable</code>; otherwise it adds the academic aggregate, saves the academic and its qualifications, and commits. This single conditional update is the concurrency boundary, while the transaction keeps the extension claim and academic write together.</p>
+
+<p>If a database update fails, the handler rolls the transaction back and clears tracked state before checking for the specific duplicate employee or extension assignment it can translate. It rethrows unrelated database failures instead of reporting every persistence error as a conflict. For nonrelational providers, the handler uses the tracked extension and aggregate save path; production concurrency evidence therefore comes from the SQL Server test, not an in-memory test alone.</p>
+
+<p><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/src/features/Academics/RegisterAcademic/Persistence/RegisterAcademicDbContext.cs"><code class="language-plaintext highlighter-rouge">RegisterAcademicDbContext</code></a> applies the Shared Kernel entity configurations for academics, qualifications, and extensions. It marks those tables <code class="language-plaintext highlighter-rouge">ExcludeFromMigrations()</code>, so it can query and write the model without becoming a second migration owner. Schema changes stay with <code class="language-plaintext highlighter-rouge">SharedKernelDbContext</code> and <code class="language-plaintext highlighter-rouge">ProvisionExtensionDbContext</code>.</p>
+
+<h3 id="translate-the-result-into-http">Translate the result into HTTP</h3>
+
+<p><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/src/features/Academics/RegisterAcademic/RegisterAcademicEndpoints.cs"><code class="language-plaintext highlighter-rouge">RegisterAcademicEndpoints</code></a> maps <code class="language-plaintext highlighter-rouge">POST /api/academics/register</code> under <code class="language-plaintext highlighter-rouge">/api/academics</code>. It validates before dispatching the command, turns invalid fields and invalid references into a 400 validation problem, maps duplicate employees and unavailable extensions to 409, and returns 201 with a <code class="language-plaintext highlighter-rouge">Location</code> header when registration succeeds. The response includes the access level derived from the saved rank and the canonical qualification codes.</p>
+
+<h3 id="match-tests-to-the-layers">Match tests to the layers</h3>
+
+<p>The tests cover different boundaries rather than repeating the same assertion at each layer:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Test surface</th>
+      <th>What it demonstrates</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/tests/Features/Academics/RegisterAcademic/RegisterAcademicCommandValidatorTests.cs">Validator tests</a></td>
+      <td>Request shape, boundary lengths, rank format, qualification rules, and employment-field validation</td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/tests/Features/Academics/RegisterAcademic/RegisterAcademicHandlerTests.cs">Handler tests</a></td>
+      <td>Successful coordination, duplicate employee rejection, and unavailable-extension behavior</td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/tests/Features/Academics/RegisterAcademic/RegisterAcademicRouteTests.cs">Route tests</a></td>
+      <td>HTTP status, response location, validation problem keys, and conflict responses</td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/tests/Features/Academics/RegisterAcademic/RegisterAcademicSqlServerIntegrationTests.cs">SQL Server integration tests</a></td>
+      <td>Migration-backed persistence and a fresh-context read-back of the academic, qualification, and extension assignment</td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/JohnMichaelMiller/zeus.academia.3b/blob/main/tests/Features/Academics/RegisterAcademic/RegisterAcademicSqlServerConcurrencyTests.cs">SQL Server concurrency tests</a></td>
+      <td>Two independent contexts competing for one extension produce one success and one conflict</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Together these layers explain why the acceptance criteria insist on both a happy-path record and clean failure behavior. The API response proves the route contract; the SQL Server read-back proves the committed database state; the concurrency test proves the extension cannot be double-claimed under a race.</p>
+
+<h2 id="verify-the-slice-from-contracts-to-sql-server">Verify the Slice from Contracts to SQL Server</h2>
+
+<p>Verification starts with narrow tests and ends with the repository gate. The implementation prompt requires actual SQL Server tests, route-level tests for declared statuses, migration discovery and application, a build, and traceability. Unit tests or EF Core InMemory tests alone do not prove this persistence boundary.</p>
+
+<p>Run focused feature tests while iterating. The current registration test project is:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dotnet</span><span class="w"> </span><span class="nx">test</span><span class="w"> </span><span class="nx">tests/Features/Academics/RegisterAcademic/Zeus.Academia.Tests.Features.Academics.RegisterAcademic.csproj</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Also run the Shared Kernel and ManageDegrees tests affected by the bounded increments. Confirm that the validator covers the listed boundaries (including <code class="language-plaintext highlighter-rouge">empNr</code> lengths 5, 6, and 7; name lengths 15 and 16; missing or duplicate qualifications; invalid rank; invalid extension; and mutually exclusive employment fields). Route tests must assert both status and response body shape for every declared outcome: 201, 400 validation problems, and 409 conflicts.</p>
+
+<p>The SQL Server integration database must be unique per test run. Its setup applies migrations from each owning context, not from the mapping-only registration context. After a write, use a fresh context to read the academic, qualifications, derived access level, and extension assignment. For rejected requests, prove there are no partial writes. Cleanup belongs in <code class="language-plaintext highlighter-rouge">finally</code> or deterministic async disposal, even when setup or assertions fail.</p>
+
+<p>Concurrency needs a provider-backed race test, not just two sequential requests. Start two handlers using separate contexts and the same unassigned extension. Exactly one may succeed; the other must return <code class="language-plaintext highlighter-rouge">ExtensionUnavailable</code>. A fresh third context must see one academic and the extension assigned to the winner. Repeat duplicate-employee verification and confirm the losing operation does not retain a claimed extension.</p>
+
+<p>Run the explicit impact gate and the full changed-feature gate from the repository root:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pwsh</span><span class="w"> </span><span class="nx">eng/verify-slice.ps1</span><span class="w"> </span><span class="nt">-Features</span><span class="w"> </span><span class="nx">Academics/RegisterAcademic</span><span class="p">,</span><span class="nx">ReferenceData/ManageDegrees</span><span class="p">,</span><span class="nx">SharedKernel/Foundation</span><span class="p">,</span><span class="nx">Extensions/ProvisionExtension</span><span class="w">
+</span><span class="n">pwsh</span><span class="w"> </span><span class="nx">eng/verify-slice.ps1</span><span class="w"> </span><span class="nt">-AllChangedFeatures</span><span class="w">
+</span></code></pre></div></div>
+
+<p>The script checks repository composition, route and validator tests, migration ownership and artifacts, Entity Framework drift, SQL Server prerequisites, concurrency guards, provenance, build, and feature tests. Do not add <code class="language-plaintext highlighter-rouge">-SkipTests</code> or <code class="language-plaintext highlighter-rouge">-SkipEfChecks</code> to turn a failed required check into a green handoff. If the base reference is unavailable, resolve it explicitly and retain the output; do not interpret an empty change set as success.</p>
+
+<p>The final handoff contains the script output and a table with one row for every Contract Sheet requirement: criterion, implementation file(s), test name(s), and status. Keep RegisterAcademic as a hard dependency gate until every row is covered and the SQL Server checks pass.</p>
+
+<h2 id="showcase-the-registration-endpoint">Showcase the Registration Endpoint</h2>
+
+<p>A useful demo begins with a clean database and known reference data: valid rank <code class="language-plaintext highlighter-rouge">P</code>, degree <code class="language-plaintext highlighter-rouge">BSC</code>, active university <code class="language-plaintext highlighter-rouge">MIT</code>, and extension <code class="language-plaintext highlighter-rouge">101</code> provisioned but unassigned. The test fixtures demonstrate the same shape; the live environment must be seeded through its supported setup rather than assuming the API creates catalogs implicitly. Start the API with the development SQL Server connection and use the route from the Contract Sheet, <code class="language-plaintext highlighter-rouge">POST /api/academics/register</code>.</p>
+
+<p>This PowerShell request follows the current command contract. Replace the host and port with the API URL shown by the active launch profile:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$baseUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'https://localhost:&lt;port&gt;'</span><span class="w">
+</span><span class="nv">$body</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">@{</span><span class="w">
+  </span><span class="nx">empNr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'A00001'</span><span class="w">
+  </span><span class="nx">empName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'Ada Lovelace'</span><span class="w">
+  </span><span class="nx">rankCode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'P'</span><span class="w">
+  </span><span class="nx">qualifications</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">@(</span><span class="w">
+    </span><span class="p">@{</span><span class="w">
+      </span><span class="nx">degreeCode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'BSC'</span><span class="w">
+      </span><span class="nx">universityCode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'MIT'</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">)</span><span class="w">
+  </span><span class="nx">extNr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">101</span><span class="w">
+  </span><span class="nx">isTenured</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$false</span><span class="w">
+  </span><span class="nx">contractEndDate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">$null</span><span class="w">
+</span><span class="p">}</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">ConvertTo-Json</span><span class="w"> </span><span class="nt">-Depth</span><span class="w"> </span><span class="nx">5</span><span class="w">
+
+</span><span class="nv">$response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Invoke-WebRequest</span><span class="w"> </span><span class="se">`
+</span><span class="w">  </span><span class="nt">-Uri</span><span class="w"> </span><span class="s2">"</span><span class="nv">$baseUrl</span><span class="s2">/api/academics/register"</span><span class="w"> </span><span class="se">`
+</span><span class="w">  </span><span class="nt">-Method</span><span class="w"> </span><span class="nx">Post</span><span class="w"> </span><span class="se">`
+</span><span class="w">  </span><span class="nt">-ContentType</span><span class="w"> </span><span class="s1">'application/json'</span><span class="w"> </span><span class="se">`
+</span><span class="w">  </span><span class="nt">-Body</span><span class="w"> </span><span class="nv">$body</span><span class="w">
+
+</span><span class="nv">$response</span><span class="o">.</span><span class="nf">StatusCode</span><span class="w">
+</span><span class="nv">$response</span><span class="o">.</span><span class="nf">Headers</span><span class="o">.</span><span class="nf">Location</span><span class="w">
+</span><span class="nv">$response</span><span class="o">.</span><span class="nf">Content</span><span class="w">
+</span></code></pre></div></div>
+
+<p>The expected result is <code class="language-plaintext highlighter-rouge">201 Created</code> with the response body and a <code class="language-plaintext highlighter-rouge">Location</code> for <code class="language-plaintext highlighter-rouge">/api/academics/A00001</code>. Read the record through the available academic query and inspect the assigned extension. Confirm that the stored employee number is normalized, the access level matches rank <code class="language-plaintext highlighter-rouge">P</code>, the qualification stores canonical codes, and the extension points to <code class="language-plaintext highlighter-rouge">A00001</code>.</p>
+
+<p>Then demonstrate the protection rules. Repost the same request and expect 409 for the duplicate employee number. Change <code class="language-plaintext highlighter-rouge">empNr</code> to <code class="language-plaintext highlighter-rouge">A00002</code> but keep the now-assigned extension <code class="language-plaintext highlighter-rouge">101</code>; expect 409 and no second record. Finally, use a well-formed unknown degree code such as <code class="language-plaintext highlighter-rouge">XYZ</code>; expect 400 keyed to the degree field and no database writes. The HTTP outcomes matter, but the most convincing demo also queries persistence afterward to show that each failed command left state unchanged.</p>
+
+<p>The result is a complete source record that subsequent academic slices can consume, with identity, reference data, and extension assignment enforced at the API, domain, and database boundaries.</p>
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>The next academic-lifecycle work can build profile, search, employment, and qualification operations on top of this registered record. Those slices should remain sequenced behind the explicit SQL Server and traceability evidence from EP-2-1.</p>
+
+<h2 id="feedback-loop">Feedback Loop</h2>
+
+<p>Feedback is welcome at <a href="mailto:john.miller@codemag.com">john.miller@codemag.com</a>.</p>
+
+<h2 id="disclaimer">Disclaimer</h2>
+
+<p>AI contributed to the writing of this post, but humans reviewed it, refined it, enhanced it, and gave it soul.</p>
+
+<p>Prompts:</p>
+
+<ul>
+  <li>“write a blog post explaining the #file:ep-2-1-register-academic-implementation.prompt.md, how to execute the prompt and how to verify the implementation and how to showcase the new feature.”</li>
+  <li>“add to the blog post an explaination of the implementation of slice ep-2-1-register-academic-implementation.prompt.md.”</li>
+  <li>“update this for part 12”</li>
+</ul>
+</div><div class="giscus-comments" style="margin-top: 2rem">
+    <h2>Comments</h2>
+    
+<script
+  src="https://giscus.app/client.js"
+  data-repo="JohnMichaelMiller/AI-Practitioner"
+  data-repo-id="1138527485"
+  data-category="General"
+  
+  data-mapping="pathname"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="bottom"
+  data-theme="preferred_color_scheme"
+  data-lang="en"
+  crossorigin="anonymous"
+  async
+></script>
+
+
+  </div></article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">AI Practitioner</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">John Michael Miller</li><li><a class="u-email" href="mailto:AIPractitioner@pdata.com">AIPractitioner@pdata.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>jMM&#39;s AI Practitioner Blog</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
