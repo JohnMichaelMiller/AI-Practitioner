@@ -40,10 +40,7 @@ In this post, I'll explain how the pieces fit together — submodules, GitHub Co
 
 <!--more-->
 
-<figure>
-  <img src="https://github.com/JohnMichaelMiller/AI-Practitioner/blob/main/jekyll-src/assets/images/SA-001/software-archeologist-closeup.png" alt="A host repository containing Copilot configuration with a target codebase mounted as a submodule">
-  <figcaption>The archaeologist's tools live in the host repository; the dig site is a submodule.</figcaption>
-</figure>
+<img src="https://github.com/JohnMichaelMiller/AI-Practitioner/blob/main/jekyll-src/assets/images/SA-001/software-archeologist-closeup.png" alt="A host repository containing Copilot configuration with a target codebase mounted as a submodule">
 
 ## Why Separate the Analysis Tooling from the Codebase?
 
