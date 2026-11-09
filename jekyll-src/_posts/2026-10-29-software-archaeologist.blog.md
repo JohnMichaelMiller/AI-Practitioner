@@ -31,11 +31,10 @@ task_durations:
 total_duration: "00:08:00"
 ai_log: "ai-logs/2026/10/29/6b7cf8d3-50e1-4cbd-8a7d-8974d9d64c81/conversation.md"
 source: "User prompt; repository inspection; GitHub and VS Code documentation; Copilot CLI 1.0.104-1 probes"
-image: jekyll-src/assets/images/SA-001/software-archeologist-closeup.png
+image: /assets/images/SA-001/software-archeologist-closeup.png
 ---
 
 When you inherit an unfamiliar codebase, the last thing you want is to start adding files to it just so your AI assistant knows how to investigate it. The [Software Archaeologist](https://github.com/j0hnnymiller/software-archaeologist) repository flips that around: the investigation tooling lives in one repository, and the codebase under investigation is mounted beside it as a Git submodule at `target/`.
-
 
 In this post, I'll explain how the pieces fit together — submodules, GitHub Copilot instruction files, agent skills, and custom agents — and what I observed when I tested which configuration Copilot actually loads from each side of the submodule boundary.
 
@@ -57,17 +56,17 @@ This is a workflow boundary, not a security boundary. Copilot can still read eve
 
 The repository is small. Almost everything interesting lives under `.github/`, where GitHub Copilot looks for customizations.
 
-| Path | Purpose |
-| --- | --- |
-| `.github/agents/software-archeologist.agent.md` | Custom agent that investigates code read-only and reports facts, inferences, and open questions |
-| `.github/skills/*/SKILL.md` | Eight project skills, including `inventory-technology-stack`, `analyze-test-gaps`, and `assess-architecture-risks` |
-| `.github/skills/inventory-technology-stack/scripts/` | Python scanner that counts technologies and versions, with unit tests |
-| `.github/instructions/*.instructions.md` | Path-scoped rules for TypeScript, JavaScript, Node.js, Mermaid, blog posts, and AI provenance |
-| `.github/copilot-instructions.md` | Repository-wide rule that every response ends with a **Current context** summary |
-| `.github/scripts/replace-target.ps1` | Swaps the repository mounted at `target/` |
-| `.github/scripts/tests/test-replace-target.ps1` | Offline regression tests for the replacement script |
-| `target/` | Git submodule containing the codebase under investigation (currently [sa-test](https://github.com/j0hnnymiller/sa-test), a small TypeScript calculator) |
-| `ai-logs/` | Provenance logs for AI-assisted changes |
+| Path                                                 | Purpose                                                                                                                                                 |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/agents/software-archeologist.agent.md`      | Custom agent that investigates code read-only and reports facts, inferences, and open questions                                                         |
+| `.github/skills/*/SKILL.md`                          | Eight project skills, including `inventory-technology-stack`, `analyze-test-gaps`, and `assess-architecture-risks`                                      |
+| `.github/skills/inventory-technology-stack/scripts/` | Python scanner that counts technologies and versions, with unit tests                                                                                   |
+| `.github/instructions/*.instructions.md`             | Path-scoped rules for TypeScript, JavaScript, Node.js, Mermaid, blog posts, and AI provenance                                                           |
+| `.github/copilot-instructions.md`                    | Repository-wide rule that every response ends with a **Current context** summary                                                                        |
+| `.github/scripts/replace-target.ps1`                 | Swaps the repository mounted at `target/`                                                                                                               |
+| `.github/scripts/tests/test-replace-target.ps1`      | Offline regression tests for the replacement script                                                                                                     |
+| `target/`                                            | Git submodule containing the codebase under investigation (currently [sa-test](https://github.com/j0hnnymiller/sa-test), a small TypeScript calculator) |
+| `ai-logs/`                                           | Provenance logs for AI-assisted changes                                                                                                                 |
 
 ### What the `software-archeologist` agent adds
 
@@ -123,12 +122,12 @@ Submodules check out in a detached `HEAD` state at the pinned commit. That is th
 
 GitHub Copilot discovers customizations by location, so the host repository only has to put files where Copilot looks. Each type behaves differently, and it helps to know which ones are always loaded and which load on demand.
 
-| Customization | Location | When Copilot uses it |
-| --- | --- | --- |
-| Repository instructions | `.github/copilot-instructions.md` | Added to every request |
-| Path-specific instructions | `.github/instructions/**/*.instructions.md` | Applied when the files Copilot works with match the `applyTo` glob |
-| Agent skills | `.github/skills/<name>/SKILL.md` | Names and descriptions are listed up front; the full skill and its scripts load when a task matches the description |
-| Custom agents | `.github/agents/<name>.agent.md` | Selected with `/agent`, `--agent`, the VS Code agent picker, or by inference from the description |
+| Customization              | Location                                    | When Copilot uses it                                                                                                |
+| -------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Repository instructions    | `.github/copilot-instructions.md`           | Added to every request                                                                                              |
+| Path-specific instructions | `.github/instructions/**/*.instructions.md` | Applied when the files Copilot works with match the `applyTo` glob                                                  |
+| Agent skills               | `.github/skills/<name>/SKILL.md`            | Names and descriptions are listed up front; the full skill and its scripts load when a task matches the description |
+| Custom agents              | `.github/agents/<name>.agent.md`            | Selected with `/agent`, `--agent`, the VS Code agent picker, or by inference from the description                   |
 
 For [Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-custom-instructions), instruction discovery covers "the repository root, the current working directory, intermediate directories between them, and any directories nested in the path of a file it is working on." In [VS Code](https://code.visualstudio.com/docs/agent-customization/overview), discovery covers the open workspace folders. In both cases, the practical rule for this repository is the same: **start Copilot from the top-level `software-archaeologist` folder**, not from `target/`.
 
@@ -157,11 +156,11 @@ The target repository can have its own `.github/` folder, and real-world codebas
 
 I ran three Copilot CLI probes on the same machine:
 
-| Started from | Prompt | Host instructions and skills | Target instruction (moon phase) |
-| --- | --- | --- | --- |
-| Repository root | List loaded files; answer 2+2 | Loaded | Not loaded |
-| `target/` | Same prompt | Not loaded — no project skills listed | Loaded |
-| Repository root | Read `target/src/calculator.ts` and describe it | Loaded, including `typescript.instructions.md` | Loaded |
+| Started from    | Prompt                                          | Host instructions and skills                   | Target instruction (moon phase) |
+| --------------- | ----------------------------------------------- | ---------------------------------------------- | ------------------------------- |
+| Repository root | List loaded files; answer 2+2                   | Loaded                                         | Not loaded                      |
+| `target/`       | Same prompt                                     | Not loaded — no project skills listed          | Loaded                          |
+| Repository root | Read `target/src/calculator.ts` and describe it | Loaded, including `typescript.instructions.md` | Loaded                          |
 
 Three behaviors follow from these results and the documented discovery rules:
 
