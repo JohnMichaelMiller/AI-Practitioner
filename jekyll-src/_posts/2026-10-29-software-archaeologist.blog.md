@@ -31,6 +31,7 @@ task_durations:
 total_duration: "00:08:00"
 ai_log: "ai-logs/2026/10/29/6b7cf8d3-50e1-4cbd-8a7d-8974d9d64c81/conversation.md"
 source: "User prompt; repository inspection; GitHub and VS Code documentation; Copilot CLI 1.0.104-1 probes"
+image: jekyll-src/assets/images/SA-001/software-archeologist-closeup.png
 ---
 
 When you inherit an unfamiliar codebase, the last thing you want is to start adding files to it just so your AI assistant knows how to investigate it. The [Software Archaeologist](https://github.com/j0hnnymiller/software-archaeologist) repository flips that around: the investigation tooling lives in one repository, and the codebase under investigation is mounted beside it as a Git submodule at `target/`.
