@@ -40,7 +40,8 @@ In this post, I'll explain how the pieces fit together — submodules, GitHub Co
 
 <!--more-->
 
-<img src="https://github.com/JohnMichaelMiller/AI-Practitioner/blob/main/jekyll-src/assets/images/SA-001/software-archeologist-closeup.png" alt="A host repository containing Copilot configuration with a target codebase mounted as a submodule">
+<!--img src="https://github.com/JohnMichaelMiller/AI-Practitioner/blob/main/jekyll-src/assets/images/SA-001/software-archeologist-closeup.png" alt="A host repository containing Copilot configuration with a target codebase mounted as a submodule"-->
+<a href="https://codemag.com/download/file/11b38b6f-e957-4566-a311-dd5c575056ae" alt="Olympus Image Composer design file.">point-github-agents-any-codebase.oic</a>
 
 ## Why Separate the Analysis Tooling from the Codebase?
 
